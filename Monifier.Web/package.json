@@ -1,12 +1,15 @@
 {
-  "name": "monifier.web",
+  "dependencies": {
+    "bootstrap": "4.0.0-beta.2",
+    "jquery": "^3.2.1",
+    "popper.js": "^1.12.9"
+  },
+  "name": "monifier",
   "version": "1.0.0",
-  "description": "Personal accounting ecosystem",
+  "description": "Personal accounting system",
   "main": "index.js",
   "repository": "https://github.com/Ivan-Proskurin/Monifier.git",
   "author": "Ivan-Proskurin <ivan.proskurin@gmail.com>",
   "license": "MIT",
-  "private": false,
-  "dependencies": {},
-  "devDependencies": {}
+  "private": false
 }
