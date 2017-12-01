@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Base" />
+    <Folder Include="Common" />
+    <Folder Include="Expenses" />
+    <Folder Include="Incomes" />
+    <Folder Include="Settings" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Monifier.BusinessLogic.Model\Monifier.BusinessLogic.Model.csproj">
+      <Project>{0A397923-A446-4A76-86B9-0D66E9C920EF}</Project>
+      <Name>Monifier.BusinessLogic.Model</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

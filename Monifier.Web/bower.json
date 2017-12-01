@@ -1,0 +1,25 @@
+{
+    "name": "asp.net",
+    "dependencies": {
+        "bootstrap": "4.0.0-beta.2",
+        "jquery": "^3.0.0",
+        "jquery-validation": "1.14.0",
+        "jquery-validation-unobtrusive": "3.2.6",
+        "font-awesome": "^4.7.0"
+    },
+    "authors": [
+        "ivan.proskurin@gmail.com"
+    ],
+    "description": "",
+    "main": "",
+    "license": "MIT",
+    "homepage": "",
+    "ignore": [
+        "**/.*",
+        "node_modules",
+        "bower_components",
+        "wwwroot/lib",
+        "test",
+        "tests"
+    ]
+}

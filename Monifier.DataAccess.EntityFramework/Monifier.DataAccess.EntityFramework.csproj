@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Monifier.DataAccess.Contract\Monifier.DataAccess.Contract.csproj">
+      <Project>{1D458E3A-9062-485E-BCA8-7A336AF0E58E}</Project>
+      <Name>Monifier.DataAccess.Contract</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Monifier.DataAccess.Model\Monifier.DataAccess.Model.csproj">
+      <Project>{12240751-E4BD-48C4-B46C-4BE3EF314BA5}</Project>
+      <Name>Monifier.DataAccess.Model</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.0.1" />
+    <PackageReference Include="NETStandard.Library" Version="2.0.1" />
+  </ItemGroup>
+</Project>

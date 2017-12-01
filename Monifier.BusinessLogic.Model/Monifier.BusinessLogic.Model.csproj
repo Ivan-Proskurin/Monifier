@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Agregation" />
+    <Folder Include="Base" />
+    <Folder Include="Expenses" />
+    <Folder Include="Incomes" />
+    <Folder Include="Pagination" />
+  </ItemGroup>
+</Project>
