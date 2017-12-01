@@ -1,0 +1,12 @@
+{
+  "name": "monifier.web",
+  "version": "1.0.0",
+  "description": "Personal accounting ecosystem",
+  "main": "index.js",
+  "repository": "https://github.com/Ivan-Proskurin/Monifier.git",
+  "author": "Ivan-Proskurin <ivan.proskurin@gmail.com>",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {},
+  "devDependencies": {}
+}
