@@ -1,0 +1,41 @@
+﻿.field-validation-error {
+    color: red;
+    font-size: 14px;
+}
+
+.field-validation-error::after {
+    content: "\A";
+    white-space: pre;
+}
+
+.field-validation-valid {
+    display: none;
+}
+
+.input-validation-error {
+    border: 1px solid #f00;
+    background-color: #fee;
+}
+
+.validation-summary-errors {
+    color: #f00;
+}
+
+.validation-summary-valid {
+    display: none;
+}
+
+.validation-string {
+    text-align: center;
+}
+
+.no-items-message {
+    margin-top: 0;
+    margin-bottom: 35px;
+}
+
+.validation-message-in-container {
+    margin-top: -14px;
+    margin-left: -10px;
+    margin-bottom: 15px;
+}

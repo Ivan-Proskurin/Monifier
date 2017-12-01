@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Expenses;
 using Monifier.DataAccess.Model.Incomes;
@@ -7,6 +8,10 @@ namespace Monifier.DataAccess.EntityFramework
 {
     public class MonifierDbContext : DbContext
     {
+        public MonifierDbContext(DbContextOptions options) : base(options)
+        {
+        }
+
         public DbSet<Category> Categories { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<ExpenseItem> ExpenseItems { get; set; }

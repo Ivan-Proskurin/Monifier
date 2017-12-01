@@ -1,0 +1,101 @@
+﻿.body-content {
+    margin-top: 25px;
+}
+
+.navbar-nav .nav-item {
+    font-size: 20px;
+}
+
+.navbar-brand {
+    font-size: 24px;
+}
+
+a.edit-item-link {
+    color: #444;
+}
+
+.expenses-header {
+    font-size: 20px;
+    font-weight: bold;
+    padding-top: 4px;
+}
+
+.cashed-table {
+    margin-top: 10px;
+}
+
+.form-caption {
+    margin-bottom: 25px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #909090;
+}
+
+.form-caption-bg {
+    margin-bottom: 60px;
+}
+
+.column-header-col {
+    padding-left: 0;
+}
+
+.expenses-subtotals {
+    font-size: 12px;
+}
+
+.subtotals-placeholder {
+    border-bottom: 1px dashed #909090;
+}
+
+.subtotal-expenses-table{
+    padding: 0;
+    margin-top: 10px;
+}
+
+.expenses-sum {
+    text-align: right;
+}
+
+.expenses-sum::after {
+    content: "р."
+}
+
+.expenses-totals {
+    margin-bottom: 30px;
+}
+
+.expenses-subtotals-row {
+    margin-top: 3px;
+}
+
+.totals-caption {
+    text-align: right;
+}
+
+.awesomplete-padding-fix {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.zero-paddings {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.bottom-buttons-row {
+    margin-top: 30px;
+}
+
+.filter-caption {
+    font-weight: bold;
+    padding-top: 7px;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.centered-form {
+    width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
