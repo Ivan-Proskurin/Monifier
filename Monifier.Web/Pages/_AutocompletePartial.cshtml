@@ -1,0 +1,19 @@
+@using TagHelpers
+@model AutocompleteBinding
+@{
+    var id = Model.Name.Replace(".", "_");
+    var btnId = id + "_Btn";
+    var listId = id + "_list";
+}
+<div class="input-group">
+    <input id="@id" name="@Model.Name" data-val="true" class="form-control" type="text" list="@listId" autocomplete="off" value="@Model.Value"/>
+    <span class="input-group-addon cursor-pointer" id="@btnId">
+        <i class="fa fa-chevron-down"></i>
+    </span>
+    <datalist id="@listId">
+        @foreach (var value in Model.ValueList)
+        {
+            <option>@value</option>
+        }
+    </datalist>
+</div>

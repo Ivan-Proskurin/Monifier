@@ -99,3 +99,16 @@ a.edit-item-link {
     margin-left: auto;
     margin-right: auto;
 }
+
+.money-cell {
+    text-align: right;
+}
+
+.money-input {
+    text-align: center;
+}
+
+.gapped {
+    margin-left: 10px;
+    margin-right: 10px;
+}

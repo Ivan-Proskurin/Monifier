@@ -24,9 +24,12 @@ namespace Monifier.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<MonifierDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("MonifierContext")));
+                options.UseSqlServer(Configuration.GetConnectionString("MonifierContext"),
+                    b => b.MigrationsAssembly("Monifier.Web")));
             
             services.AddMvc();
+            
+            services.AddBusinessServices();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

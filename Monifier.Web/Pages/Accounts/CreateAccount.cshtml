@@ -1,0 +1,55 @@
+@page
+@using DataAccess.Model.Base
+@model Accounts.CreateAccountModel
+
+<div class="col-md-7 centered-form">
+    <h3>Создание нового счета</h3>
+    <br/>
+
+    <form method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input asp-for="Account.Id" hidden/>
+        <div class="row">
+            <div class="col-md-3 col-sm-7 col-7">
+                <div class="form-group">
+                    <label asp-for="Account.Number" class="control-label"></label>
+                    <input asp-for="Account.Number" class="form-control" autocomplete="off"/>
+                    <span asp-validation-for="Account.Number" class="text-danget"></span>
+                </div>
+            </div>
+            <div class="col-md-9 col-sm-7 col-7">
+                <div class="form-group">
+                    <label asp-for="Account.Name" class="control-label"></label>
+                    <input asp-for="Account.Name" class="form-control" autocomplete="off"/>
+                    <span asp-validation-for="Account.Name" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-7 col-sm-7 col-7">
+                <label asp-for="Account.CreationDate" class="control-label"></label>
+                <date-time-picker asp-for="Account.CreationDate" value="@Model.Account.CreationDate"/>
+                <span asp-validation-for="Account.CreationDate" class="text-danger"></span>
+            </div>
+            <div class="col-md-5 col-sm-7 col-7">
+                <div class="form-group">
+                    <label asp-for="Account.Balance" class="control-label"></label>
+                    <input asp-for="Account.Balance" class="form-control money-input" autocomplete="off"/>
+                    <span asp-validation-for="Account.Balance" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        <div class="form-group bottom-buttons-row">
+            <input type="submit" value="Создать" class="btn btn-success btn-default"/>
+            <a asp-page="./AccountsList" class="btn btn-outline-secondary gapped">Отмена</a>
+        </div>
+    </form>
+
+</div>
+
+@section Scripts {
+    <script>
+        makeInputDatetimePicker("Account.CreationDate");
+        makeInputNumeric('Account.Balance', true);
+    </script>
+}

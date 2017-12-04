@@ -30,5 +30,10 @@ namespace Monifier.DataAccess.EntityFramework
             _dbSet.Attach(model);
             _context.Entry(model).State = EntityState.Modified;
         }
+
+        public void Detach(T model)
+        {
+            _context.Entry(model).State = EntityState.Detached;
+        }
     }
 }

@@ -1,0 +1,82 @@
+@page "{id:int}"
+@model Accounts.EditAccountModel
+
+<div class="col-md-7 centered-form">
+    <h3>@Model.Account.Name</h3>
+    <br/>
+
+    <form method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input asp-for="Account.Id" hidden/>
+        <div class="row">
+            <div class="col-md-3 col-sm-7 col-7">
+                <div class="form-group">
+                    <label asp-for="Account.Number" class="control-label"></label>
+                    <input asp-for="Account.Number" class="form-control" autocomplete="off"/>
+                    <span asp-validation-for="Account.Number" class="text-danget"></span>
+                </div>
+            </div>
+            <div class="col-md-9 col-sm-7 col-7">
+                <div class="form-group">
+                    <label asp-for="Account.Name" class="control-label"></label>
+                    <input asp-for="Account.Name" class="form-control" autocomplete="off"/>
+                    <span asp-validation-for="Account.Name" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-7 col-sm-7 col-7">
+                <label asp-for="Account.CreationDate" class="control-label"></label>
+                <date-time-picker asp-for="Account.CreationDate" value="@Model.Account.CreationDate"/>
+                <span asp-validation-for="Account.CreationDate" class="text-danger"></span>
+            </div>
+            <div class="col-md-5 col-sm-7 col-7">
+                <div class="form-group">
+                    <label asp-for="Account.Balance" class="control-label"></label>
+                    <input asp-for="Account.Balance" class="form-control money-input" autocomplete="off"/>
+                    <span asp-validation-for="Account.Balance" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row bottom-buttons-row">
+            <div class="col-md-8 col-7">
+                <input type="submit" value="Сохранить" class="btn btn-success btn-default"/>
+                <a asp-page="./AccountsList" class="btn btn-outline-secondary gapped">Отмена</a>
+            </div>
+            <div class="col-md-4 col-7" style="text-align: right;">
+                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">Удалить счет</button>
+            </div>
+        </div>
+        
+        <!-- Deletion modal -->
+        <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Удаление счета</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Удалить этот счет с сохранением расходов и доходов по нему?
+                        Или удалить его полностью? Тогда операции по нему будут удалены также.
+                    </div>
+                    <div class="modal-footer">
+                        <input type="submit" asp-page-handler="delete" asp-route-permanent="false" value="Удалить с сохранением" class="btn btn-primary"/>
+                        <input type="submit" asp-page-handler="delete" asp-route-permanent="true" value="Удалить полностью" class="btn btn-danger"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+</div>
+
+
+@section Scripts {
+    <script>
+        makeInputDatetimePicker("Account.CreationDate");
+        makeInputNumeric('Account.Balance', true);
+    </script>
+}

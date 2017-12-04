@@ -1,0 +1,69 @@
+@page
+@using Common.Extensions
+@model Accounts.AccountsListModel
+
+@{
+    ViewBag.Title = "Счета";
+    var accounts = Model.Accounts.Accounts;
+    var totals = Model.Accounts.Totals;
+    var footerClass = totals.Total >= 0 ? "table-primary" : "table-danger";
+}
+
+<table class="cashed-table table table-striped table-hover">
+    <thead class="thead-dark">
+    <tr>
+        <th>
+            Номер
+        </th>
+        <th>
+            Название
+        </th>
+        <th class="money-cell">
+            Баланс
+        </th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody id="cat-table-body">
+        
+    @for (var i = 0; i < accounts.Count; i++)
+    {
+        var account = accounts[i];
+        var rowClass = account.Balance >= 0 ? "table-default" : "table-danger";
+        
+        <tr class="@rowClass">
+            <td>@account.Number</td>
+            <td>
+                <a asp-page="./EditAccount" asp-route-id="@account.Id" class="edit-item-link">@account.Name</a>
+            </td>
+            <td class="money-cell">
+                @account.Balance.ToMoney()
+            </td>
+            <td>
+                <a asp-page="./TopupAccount" asp-route-id="@account.Id" class="btn btn-outline-secondary btn-sm">Пополнить</a>
+            </td>
+        </tr>
+    }
+
+    </tbody>
+    <tfoot class="thead-dark">
+        <tr class="@footerClass">
+            <td></td>
+            <td>@totals.Caption</td>
+            <td class="money-cell">@totals.Total.ToMoney()</td>
+            <td></td>
+        </tr>
+    </tfoot>
+</table>
+
+<!-- Adding account -->
+<div class="bottom-buttons-row">
+    <a asp-page="./CreateAccount" class="btn btn-success cursor-pointer">Добавить счет</a>
+    <a asp-page="./Transfer" class="btn btn-primary cursor-pointer">Перевод</a>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        activateLink("#accountsLink");
+    </script>
+}

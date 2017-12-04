@@ -25,6 +25,8 @@ namespace Monifier.BusinessLogic.Queries.Base
             return new AccountModel
             {
                 Id = account.Id,
+                Number = account.Number,
+                DateCreated = account.DateCreated,
                 Name = account.Name,
                 Balance = account.Balance
             };
@@ -32,7 +34,11 @@ namespace Monifier.BusinessLogic.Queries.Base
 
         public async Task<List<AccountModel>> GetAll(bool includeDeleted = false)
         {
-            var accounts = await _unitOfWork.GetQueryRepository<Account>().Query.ToListAsync();
+            var queryRep = _unitOfWork.GetQueryRepository<Account>();
+            var accounts = await queryRep.Query
+                .Where(x => !x.IsDeleted || includeDeleted)
+                .OrderBy(x => x.Number)
+                .ToListAsync();
             return accounts.Select(ToModel).ToList();
         }
 
@@ -60,6 +66,11 @@ namespace Monifier.BusinessLogic.Queries.Base
             var account = await _unitOfWork.GetNamedModelQueryRepository<Account>().GetByName(name);
             if (account == null || account.IsDeleted && !includeDeleted) return null;
             return ToModel(account);
+        }
+
+        public async Task<int> GetNextNumber()
+        {
+            return await _unitOfWork.GetQueryRepository<Account>().Query.MaxAsync(x => x.Number) + 1;
         }
     }
 }

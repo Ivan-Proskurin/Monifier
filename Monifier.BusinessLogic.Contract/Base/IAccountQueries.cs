@@ -7,5 +7,6 @@ namespace Monifier.BusinessLogic.Contract.Base
     public interface IAccountQueries : ICommonModelQueries<AccountModel>
     {
         Task<AccountList> GetList();
+        Task<int> GetNextNumber();
     }
 }

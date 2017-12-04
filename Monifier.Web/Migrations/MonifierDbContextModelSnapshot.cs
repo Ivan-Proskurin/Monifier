@@ -8,13 +8,12 @@ using Microsoft.EntityFrameworkCore.Storage.Internal;
 using Monifier.DataAccess.EntityFramework;
 using System;
 
-namespace Monifier.DataAccess.EntityFramework.Migrations
+namespace Monifier.Web.Migrations
 {
     [DbContext(typeof(MonifierDbContext))]
-    [Migration("20171128053047_Initial")]
-    partial class Initial
+    partial class MonifierDbContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,11 +27,15 @@ namespace Monifier.DataAccess.EntityFramework.Migrations
 
                     b.Property<decimal>("Balance");
 
+                    b.Property<DateTime>("DateCreated");
+
                     b.Property<bool>("IsDeleted");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50);
+
+                    b.Property<int>("Number");
 
                     b.HasKey("Id");
 

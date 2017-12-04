@@ -1,0 +1,12 @@
+@using TagHelpers
+@model FieldBinding
+@{
+    var id = Model.Name.Replace(".", "_");
+    var btnId = id + "_Btn";
+}
+<div class="input-group">
+    <input id="@id" name="@Model.Name" data-val="true" class="form-control" type="text" value="@Model.Value"/>
+    <span class="input-group-addon cursor-pointer" id="@btnId">
+        <i class="fa fa-calendar"></i>
+    </span>
+</div>

@@ -3,8 +3,8 @@
     $(linkId).addClass("active");
 }
 
-function makeInputAutocomplete(inputId, list, onSelect, containerClass) {
-
+function makeInputAutocomplete(inputId, list, onSelect) {
+    inputId = inputId.replace(".", "_");
     var input = document.getElementById(inputId);
 
     var comboplete = new Awesomplete(input, {
@@ -21,12 +21,7 @@ function makeInputAutocomplete(inputId, list, onSelect, containerClass) {
     }
 
     var cmb = $("div.awesomplete");
-    if (!containerClass) containerClass = "col-md-9";
-    cmb.addClass(containerClass);
-
-    var container = input.parentElement;
-    var validation = $("span[data-valmsg-for=" + inputId + "]");
-    validation.appendTo(container);
+    cmb.addClass("input-group");
 
     input.addEventListener("click", function () {
         if (comboplete.ul.childNodes.length === 0) {
@@ -40,37 +35,54 @@ function makeInputAutocomplete(inputId, list, onSelect, containerClass) {
             comboplete.close();
         }
     });
+    
+    $("#" + inputId + "_Btn").click(function () {
+        input.value = "";
+        input.click();
+        input.focus();
+    });
 
     return comboplete;
 }
 
 function makeInputNumeric(inputId, allowNegative = false) {
+    inputId = inputId.replace(".", "_");
     var input = document.getElementById(inputId);
     var $input = $("#" + inputId);
-    input.onkeydown = function (evt) {
-        var charCode = (evt.which) ? evt.which : event.keyCode;
-        if (charCode == 32) return false;
-        if (charCode == 8) return true;
-        var last = event.char;
-        var value = $input.val();
-        if (last == "-" && !allowNegative) return false;
-        if (last == "-" && value.length == 0) return true;
-        var start = input.selectionStart;
-        var end = input.selectionEnd;
-        value = value.slice(0, start) + last + value.slice(end);
-        value = value.replace(",", ".");
-        var num = +value;
-        return !isNaN(num);
-    };
+    input.onkeydown = function (e) {
+        // Allow: backspace, delete, tab, escape, enter and .
+        var allowCodes = [46, 8, 9, 27, 13, 110, 190, 188];
+        if (allowNegative) allowCodes.push(173);
+        if ($.inArray(e.keyCode, allowCodes) !== -1 ||
+            // Allow: Ctrl/cmd+A
+            (e.keyCode == 65 && (e.ctrlKey === true || e.metaKey === true)) ||
+            // Allow: Ctrl/cmd+C
+            (e.keyCode == 67 && (e.ctrlKey === true || e.metaKey === true)) ||
+            // Allow: Ctrl/cmd+X
+            (e.keyCode == 88 && (e.ctrlKey === true || e.metaKey === true)) ||
+            // Allow: home, end, left, right
+            (e.keyCode >= 35 && e.keyCode <= 39)) {
+            // let it happen, don't do anything
+            return;
+        }
+        // Ensure that it is a number and stop the keypress
+        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+            e.preventDefault();
+        }
+    }
 }
 
 function makeInputDatetimePicker(inputId) {
+    inputId = inputId.replace(".", "_");
     $("#" + inputId).datetimepicker({
         onSelectDate: function (dt) { propagateDateTimeToPicker(inputId, dt) },
         onSelectTime: function (dt) { propagateDateTimeToPicker(inputId, dt) },
         dayOfWeekStart: 1,
         closeOnDateSelect: true,
         format: "Y.m.d H:i"
+    });
+    $("#" + inputId + "_Btn").click(function() {
+        $("#" + inputId).focus();
     });
 }
 

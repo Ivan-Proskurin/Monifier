@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using Monifier.DataAccess.Contract.Model;
 
 namespace Monifier.DataAccess.Model.Base
@@ -6,6 +7,10 @@ namespace Monifier.DataAccess.Model.Base
     public class Account : IHasId, IHasName
     {
         public int Id { get; set; }
+        
+        public int Number { get; set; }
+        
+        public DateTime DateCreated { get; set; }
 
         [Required]
         [MaxLength(50)]

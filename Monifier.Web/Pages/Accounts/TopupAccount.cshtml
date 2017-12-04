@@ -1,0 +1,59 @@
+@page "{id:int}"
+@using System.Linq
+@model Accounts.TopupAccountModel
+
+<div class="col-md-7 centered-form">
+    <h3>Пополнение счета</h3>
+    <br/>
+    <h4>@Model.Topup.AccountName</h4>
+    <br />
+
+    <form method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input asp-for="Topup.Id" hidden/>
+        <input asp-for="Topup.AccountName" hidden/>
+        <div class="row">
+            <div class="col-md-12 col-sm-7 col-7">
+                <div class="form-group">
+                    <label asp-for="Topup.IncomeType" class="control-label"></label>
+                    <autocomplete asp-for="Topup.IncomeType" value="@Model.Topup.IncomeType"
+                                  value-list="@Model.IncomeTypes.Select(x => x.Name)"/>
+                    <span asp-validation-for="Topup.IncomeType" class="text-danger"></span>
+                    @if (Model.SuggestAddIncomeType)
+                    {
+                        <br/>
+                        <input id="suggest" asp-for="Topup.AddNonexistentIncomeType"/>
+                        <label for="suggest">Создать статью &quot;@Model.Topup.IncomeType&quot;?</label>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-7 col-sm-7 col-7">
+                <label asp-for="Topup.TopupDate" class="control-label"></label>
+                <date-time-picker asp-for="Topup.TopupDate" value="@Model.Topup.TopupDate"/>
+                <span asp-validation-for="Topup.TopupDate" class="text-danger"></span>
+            </div>
+            <div class="col-md-5 col-sm-7 col-7">
+                <div class="form-group">
+                    <label asp-for="Topup.Amount" class="control-label"></label>
+                    <input asp-for="Topup.Amount" class="form-control money-input" autocomplete="off"/>
+                    <span asp-validation-for="Topup.Amount" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        <div class="form-group bottom-buttons-row">
+            <input type="submit" value="Пополнить" class="btn btn-success btn-default"/>
+            <a asp-page="./AccountsList" class="btn btn-outline-secondary gapped">Отмена</a>
+        </div>
+    </form>
+
+</div>
+
+@section Scripts {
+    <script>
+        makeInputDatetimePicker("Topup.TopupDate");
+        makeInputAutocomplete("Topup.IncomeType");
+        makeInputNumeric('Topup.Amount', false);
+    </script>
+}
