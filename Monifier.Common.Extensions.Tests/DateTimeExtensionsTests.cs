@@ -81,5 +81,12 @@ namespace Monifier.Common.Extensions.Tests
             Assert.AreEqual(new DateTime(2017, 10, 15, 23, 59, 59),
                 new DateTime(2017, 10, 15, 23, 59, 59).EndOfTheWeek());
         }
+
+        [TestMethod]
+        public void ToMinutes_ReturnsToMinutes()
+        {
+            var value = new DateTime(2017, 10, 15, 23, 59, 34, 456);
+            Assert.AreEqual(new DateTime(2017, 10, 15, 23, 59, 0), value.ToMinutes());
+        }
     }
 }

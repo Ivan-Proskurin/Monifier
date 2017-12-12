@@ -1,12 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Monifier.Common.Extensions;
 
 namespace Monifier.BusinessLogic.Model.Expenses
 {
     public class ExpenseBillModel
     {
+        public ExpenseBillModel()
+        {
+            DateTime = DateTime.Now.ToMinutes();
+            Items = new List<ExpenseItemModel>();
+        }
+        
         public int Id { get; set; }
+        public int AccountId { get; set; }
+        public int ExpenseFlowId { get; set; }
         public DateTime DateTime { get; set; }
         public string Category { get; set; }
         public decimal Cost { get; set; }

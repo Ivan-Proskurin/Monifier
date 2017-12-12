@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Monifier.BusinessLogic.Model.Base;
 using Monifier.Common.Extensions;
@@ -10,7 +11,11 @@ namespace Monifier.Web.Models.Accounts
     {
         public int Id { get; set; }
         
+        public string OriginalName { get; set; }
+        
         [Display(Name = "Номер")]
+        [Required(ErrorMessage = "Введите номер")]
+        [Range(1, Double.MaxValue, ErrorMessage = "Номер счета должен начинаться с единицы (1)")]
         public int Number { get; set; }
         
         [Display(Name = "Дата создания")]
@@ -42,6 +47,7 @@ namespace Monifier.Web.Models.Accounts
             {
                 Id = account.Id,
                 Number = account.Number,
+                OriginalName = account.Name,
                 Name = account.Name,
                 CreationDate = account.DateCreated.ToStandardString(),
                 Balance = account.Balance.ToStandardString()

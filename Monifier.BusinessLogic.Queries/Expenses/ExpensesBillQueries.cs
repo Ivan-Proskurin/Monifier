@@ -36,7 +36,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             var billsQuery = expenseRepo.Query
                 .Where(x => x.DateTime >= dateFrom && x.DateTime < dateTo);
             var totalCount = billsQuery.Count();
-            var pagination = PaginationInfo.FromArgs(args, totalCount);
+            var pagination = new PaginationInfo(args, totalCount);
             var bills = await billsQuery
                 .OrderByDescending(x => x.DateTime)
                 .ThenByDescending(x => x.SumPrice)
@@ -100,7 +100,6 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                 {
                     Id = x.Id,
                     CategoryId = x.CategoryId,
-                    DateTime = x.DateTime,
                     Comment = x.Comment,
                     Cost = x.Price,
                     ProductId = x.ProductId,
@@ -117,10 +116,16 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             var prodRepo = _unitOfWork.GetQueryRepository<Product>();
             foreach (var item in bill.Items)
             {
-                var product = await prodRepo.GetById(item.ProductId);
-                item.Product = product.Name;
-                var category = await catRepo.GetById(item.CategoryId);
-                item.Category = category.Name;
+                if (item.ProductId != null)
+                {
+                    var product = await prodRepo.GetById(item.ProductId.Value);
+                    item.Product = product.Name;
+                }
+                if (item.CategoryId != null)
+                {
+                    var category = await catRepo.GetById(item.CategoryId.Value);
+                    item.Category = category.Name;
+                }
             }
         }
 

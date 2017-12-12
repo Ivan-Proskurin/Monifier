@@ -1,5 +1,4 @@
 @page "{id:int}"
-@using System.Linq
 @model Accounts.TopupAccountModel
 
 <div class="col-md-7 centered-form">
@@ -43,7 +42,7 @@
             </div>
         </div>
         <div class="form-group bottom-buttons-row">
-            <input type="submit" value="Пополнить" class="btn btn-success btn-default"/>
+            <input type="submit" value="Пополнить" class="btn btn-success btn-default cursor-pointer"/>
             <a asp-page="./AccountsList" class="btn btn-outline-secondary gapped">Отмена</a>
         </div>
     </form>

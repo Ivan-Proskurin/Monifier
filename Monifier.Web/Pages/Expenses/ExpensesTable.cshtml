@@ -1,0 +1,83 @@
+@page
+@using Common.Extensions
+@model Expenses.ExpensesTableModel
+@{
+    ViewBag.Title = "Расходы";
+}
+
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<div class="container">
+    <div class="row">
+        <span class="expenses-header col-sm-2">Расходы</span>
+        <div class="col-md-10">
+            <form method="post">
+                <div class="form-group row">
+                    <span class="col-md-1 filter-caption">От:</span>
+                    <div class="form-group">
+                        <date-time-picker asp-for="Filter.DateFrom" class="form-control" autocomplete="off"
+                                          value="@Model.Filter.DateFrom"/>
+                        <span asp-validation-for="Filter.DateFrom" class="text-danger"></span>
+                    </div>
+                    <span class="col-md-1 filter-caption">До:</span>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <date-time-picker asp-for="Filter.DateTo" class="form-control" autocomplete="off"
+                                              value="@Model.Filter.DateTo"/>
+                            <button type="submit" class="input-group-addon cursor-pointer" id="refresh-button">
+                                <i class="fa fa-refresh"></i>
+                            </button>
+                        </div>
+                        <span asp-validation-for="Filter.DateTo" class="text-danger"></span>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<table class="cashed-table table table-striped table-hover">
+    <thead class="thead-dark">
+    <tr>
+        <th>Дата/время</th>
+        <th>День недели</th>
+        <th>Товары</th>
+        <th>Общая сумма</th>
+    </tr>
+    </thead>
+    <tbody>
+    @for (int i = 0; i < Model.Expenses.Expenses.Count; i++)
+    {
+        var item = Model.Expenses.Expenses[i];
+
+        <tr>
+            <td class="edit-item-link">@item.DateTime.ToStandardDateStr()</td>
+            <td class="edit-item-link">@item.DateTime.GetWeekDayName()</td>
+            <td class="edit-item-link">Категории...</td>
+            <td class="edit-item-link">@item.Sum.ToMoney()</td>
+        </tr>
+    }
+    </tbody>
+@*    <tfoot>*@
+@*    <tr class="table-dark">*@
+@*        <td colspan="2" class="totals-caption">@Model.Totals.Caption</td>*@
+@*        <td>@Model.Totals.Total.ToMoney()</td>*@
+@*    </tr>*@
+@*    </tfoot>*@
+</table>
+
+@*@Html.Partial("_Pagination", Model.Pagination)*@
+
+@*@Html.ActionLink("Добавить новый", "Add", null, new { @class = "btn btn-primary" })*@
+
+
+@section Scripts
+{
+    <script type="text/javascript">
+        activateLink("#expensesLink");
+
+        makeInputDatetimePicker("Filter.DateFrom");
+        makeInputDatetimePicker("Filter.DateTo");
+
+    </script>
+}

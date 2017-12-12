@@ -20,5 +20,10 @@ namespace Monifier.DataAccess.Model.Expenses
 
         [ForeignKey("AccountId")]
         public Account Account { get; set; }
+        
+        public int ExpenseFlowId { get; set; }
+        
+        [ForeignKey("ExpenseFlowId")]
+        public ExpenseFlow ExpenseFlow { get; set; }
     }
 }

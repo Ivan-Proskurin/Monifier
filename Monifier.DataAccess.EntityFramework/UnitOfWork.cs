@@ -38,12 +38,14 @@ namespace Monifier.DataAccess.EntityFramework
 
         private readonly MonifierDbContext _context;
         private readonly Dictionary<Type, object> _queryRepositories;
+        private readonly Dictionary<Type, object> _namedQueryRepositories;
         private readonly Dictionary<Type, object> _commandRepositories;
 
         public UnitOfWork(MonifierDbContext context)
         {
             _context = context;
             _queryRepositories = new Dictionary<Type, object>();
+            _namedQueryRepositories = new Dictionary<Type, object>();
             _commandRepositories = new Dictionary<Type, object>();
         }
 
@@ -94,7 +96,7 @@ namespace Monifier.DataAccess.EntityFramework
 
         public INamedModelQueryRepository<T> GetNamedModelQueryRepository<T>() where T : class, IHasId, IHasName
         {
-            _queryRepositories.TryGetValue(typeof(T), out object repo);
+            _namedQueryRepositories.TryGetValue(typeof(T), out object repo);
             if (repo != null) return repo as INamedModelQueryRepository<T>;
             var props = _context.GetType().GetProperties();
             foreach (var p in props)
@@ -105,7 +107,7 @@ namespace Monifier.DataAccess.EntityFramework
                 {
                     var pValue = p.GetValue(_context, new object[0]);
                     var qr = new NamedModelQueryRepository<T>(pValue as DbSet<T>);
-                    _queryRepositories.Add(typeof(T), qr);
+                    _namedQueryRepositories.Add(typeof(T), qr);
                     return qr;
                 }
             }

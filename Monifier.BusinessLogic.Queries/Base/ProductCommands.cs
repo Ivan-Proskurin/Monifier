@@ -31,9 +31,23 @@ namespace Monifier.BusinessLogic.Queries.Base
             return model;
         }
 
-        public Task Delete(int id, bool onlyMark = true)
+        public async Task Delete(int id, bool onlyMark = true)
         {
-            throw new NotImplementedException();
+            var product = await _unitOfWork.GetQueryRepository<Product>().GetById(id);
+            if (product == null)
+                throw new ArgumentException($"Нет товара с идентификтором Id = {id}");
+
+            var productCommands = _unitOfWork.GetCommandRepository<Product>();
+            if (onlyMark)
+            {
+                product.IsDeleted = true;
+                productCommands.Update(product);
+            }
+            else
+            {
+                productCommands.Delete(product);
+            }
+            await _unitOfWork.SaveChangesAsync();
         }
 
         public async Task<ProductModel> AddProductToCategory(int categoryId, string productName)
@@ -41,7 +55,6 @@ namespace Monifier.BusinessLogic.Queries.Base
             var commands = _unitOfWork.GetCommandRepository<Product>();
             var model = new Product
             {
-                Id = -1,
                 CategoryId = categoryId,
                 Name = productName
             };

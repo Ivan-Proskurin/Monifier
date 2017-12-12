@@ -112,3 +112,8 @@ a.edit-item-link {
     margin-left: 10px;
     margin-right: 10px;
 }
+
+.add-bill-validation-summary {
+    text-align: right;
+    margin-right: 50px;
+}

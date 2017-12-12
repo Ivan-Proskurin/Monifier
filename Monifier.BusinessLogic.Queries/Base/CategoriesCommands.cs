@@ -46,31 +46,34 @@ namespace Monifier.BusinessLogic.Queries.Base
         public async Task<CategoryModel> Update(CategoryModel model)
         {
             var categoryCommands = _unitOfWork.GetCommandRepository<Category>();
-            var categoryRespoitory = _unitOfWork.GetCommandRepository<Category>();
             var category = new Category
             {
-                Id = model.Id,
                 Name = model.Name
             };
             var categoriesQueries = _unitOfWork.GetNamedModelQueryRepository<Category>();
             var other = await categoriesQueries.GetByName(model.Name);
-            if (other != null && other.Id != category.Id)
-                throw new ArgumentException("Категория с таким именем уже существует");
+            if (other != null)
+            {
+                if (other.Id != category.Id)
+                    throw new ArgumentException("Категория товаров с таким именем уже существует");
+                else
+                    categoryCommands.Detach(other);
+            }
 
             if (model.Id > 0)
             {
+                category.Id = model.Id;
                 categoryCommands.Update(category);
             }
             else
             {
-                categoryRespoitory.Create(category);
+                categoryCommands.Create(category);
             }
+            
             await _unitOfWork.SaveChangesAsync();
-            return new CategoryModel
-            {
-                Id = category.Id,
-                Name = category.Name
-            };
+
+            model.Id = category.Id;
+            return model;
         }
     }
 }

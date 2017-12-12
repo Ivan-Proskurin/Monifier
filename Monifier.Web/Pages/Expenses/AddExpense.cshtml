@@ -1,0 +1,72 @@
+@page "{expenseId:int}"
+@using System.Linq
+@model Expenses.AddExpenseModel
+
+@{
+    var accounts = Model.Accounts.Select(x => x.Name);
+    var categories = Model.Categories.Select(x => x.Name);
+    var products = Model.Products.Select(x => x.Name);
+}
+
+<div class="col-md-7 centered-form">
+    <h3>Добавление расхода</h3>
+    <br/>
+    <h4>@Model.Expense.ExpenseFlow</h4>
+    <br/>
+    
+    <form method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input asp-for="Expense.ExpenseFlowId" hidden/>
+        <input asp-for="Expense.ExpenseFlow" hidden/>
+        <div class="row">
+            <div class="form-group col-md-12 col-sm-7 col-7">
+                <label asp-for="Expense.Account" class="control-label"></label>
+                <autocomplete asp-for="Expense.Account" value="@Model.Expense.Account" value-list="@accounts"/>
+                <span asp-validation-for="Expense.Account" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-12 col-sm-7 col-7">
+                <label asp-for="Expense.Category" class="control-label"></label>
+                <autocomplete asp-for="Expense.Category" value="@Model.Expense.Category" value-list="@categories"/>
+                <span asp-validation-for="Expense.Category" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-12 col-sm-7 col-7">
+                <label asp-for="Expense.Product" class="control-label"></label>
+                <autocomplete asp-for="Expense.Product" value="@Model.Expense.Product" value-list="@products"/>
+                <span asp-validation-for="Expense.Product" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-7 col-sm-7 col-7">
+                <label asp-for="Expense.DateTime" class="control-label"></label>
+                <date-time-picker asp-for="Expense.DateTime" value="@Model.Expense.DateTime"/>
+                <span asp-validation-for="Expense.DateTime" class="text-danger"></span>
+            </div>
+            <div class="col-md-5 col-sm-7 col-7">
+                <div class="form-group">
+                    <label asp-for="Expense.Cost" class="control-label"></label>
+                    <input asp-for="Expense.Cost" class="form-control money-input" autocomplete="off"/>
+                    <span asp-validation-for="Expense.Cost" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-group bottom-buttons-row">
+            <input type="submit" value="Добавить" class="btn btn-success btn-default cursor-pointer"/>
+            <a asp-page="./ExpenseFlows" class="btn btn-outline-secondary gapped">Отмена</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        makeInputAutocomplete("Expense.Account");
+        makeInputAutocomplete("Expense.Category");
+        makeInputAutocomplete("Expense.Product");
+        makeInputDatetimePicker("Expense.DateTime");
+        makeInputNumeric('Expense.Cost', false);
+    </script>
+}

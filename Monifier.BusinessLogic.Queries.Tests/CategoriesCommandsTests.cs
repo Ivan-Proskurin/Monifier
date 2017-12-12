@@ -53,11 +53,11 @@ namespace Monifier.BusinessLogic.Queries.Tests
         public void UpdateWithNonUniqueName_ThrowsArgumentException()
         {
             _queriesMock.Setup(m => m.GetByName(It.IsAny<string>())).Returns<string>(
-                s => Task.FromResult(new Category()));
+                s => Task.FromResult(new Category { Id = 1, Name = "New category"}));
 
             var categoriesCommands = new CategoriesCommands(
                 _uowMock.Object, _productCommandsMock.Object, _productQueriesMock.Object);
-            var model = new CategoryModel { Id = -1, Name = "New category" };
+            var model = new CategoryModel { Name = "New category" };
             try
             {
                 categoriesCommands.Update(model).Wait();

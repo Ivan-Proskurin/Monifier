@@ -35,11 +35,11 @@ namespace Monifier.BusinessLogic.Queries.Base
         public async Task<List<AccountModel>> GetAll(bool includeDeleted = false)
         {
             var queryRep = _unitOfWork.GetQueryRepository<Account>();
-            var accounts = await queryRep.Query
+            return await queryRep.Query
                 .Where(x => !x.IsDeleted || includeDeleted)
+                .Select(x => ToModel(x))
                 .OrderBy(x => x.Number)
                 .ToListAsync();
-            return accounts.Select(ToModel).ToList();
         }
 
         public async Task<AccountList> GetList()

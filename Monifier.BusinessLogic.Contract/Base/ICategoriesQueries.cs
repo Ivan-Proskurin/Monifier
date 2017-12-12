@@ -10,5 +10,7 @@ namespace Monifier.BusinessLogic.Contract.Base
     {
         Task<List<ProductModel>> GetProductsByCategoryName(string categoryName, bool includeDeleted = false);
         Task<CategoryList> GetList(PaginationArgs args);
+        Task<List<CategoryModel>> GetFlowCategories(int flowId);
+        Task<CategoryModel> GetFlowCategoryByName(int flowId, string category);
     }
 }

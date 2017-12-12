@@ -12,7 +12,7 @@ namespace Monifier.Web.Models.Validation
                 value?.ParseMoneyInvariant();
                 return null;
             }
-            catch (FormatException exc)
+            catch (FormatException)
             {
                 return new ModelValidationResult(name, "Введите корректное число");
             }
@@ -25,7 +25,7 @@ namespace Monifier.Web.Models.Validation
                 value?.ParseDtFromStandardString();
                 return null;
             }
-            catch (FormatException exc)
+            catch (FormatException)
             {
                 return new ModelValidationResult(name, "Дата/время некорректна");
             }

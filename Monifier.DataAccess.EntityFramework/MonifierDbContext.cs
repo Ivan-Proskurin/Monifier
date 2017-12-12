@@ -19,6 +19,8 @@ namespace Monifier.DataAccess.EntityFramework
         public DbSet<IncomeType> IncomeTypes { get; set; }
         public DbSet<IncomeItem> IncomeItems { get; set; }
         public DbSet<Account> Accounts { get; set; }
+        public DbSet<ExpenseFlow> ExpenseFlows { get; set; }
+        public DbSet<ExpensesFlowProductCategory> ExpensesFlowProductCategories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

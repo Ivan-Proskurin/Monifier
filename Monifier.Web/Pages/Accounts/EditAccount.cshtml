@@ -2,12 +2,13 @@
 @model Accounts.EditAccountModel
 
 <div class="col-md-7 centered-form">
-    <h3>@Model.Account.Name</h3>
+    <h3>@Model.Account.OriginalName</h3>
     <br/>
 
     <form method="post">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <input asp-for="Account.Id" hidden/>
+        <input asp-for="Account.OriginalName" hidden/>
         <div class="row">
             <div class="col-md-3 col-sm-7 col-7">
                 <div class="form-group">
@@ -40,11 +41,11 @@
         </div>
         <div class="row bottom-buttons-row">
             <div class="col-md-8 col-7">
-                <input type="submit" value="Сохранить" class="btn btn-success btn-default"/>
+                <input type="submit" value="Сохранить" class="btn btn-success btn-default cursor-pointer"/>
                 <a asp-page="./AccountsList" class="btn btn-outline-secondary gapped">Отмена</a>
             </div>
             <div class="col-md-4 col-7" style="text-align: right;">
-                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">Удалить счет</button>
+                <button type="button" class="btn btn-danger cursor-pointer" data-toggle="modal" data-target="#deleteModal">Удалить счет</button>
             </div>
         </div>
         

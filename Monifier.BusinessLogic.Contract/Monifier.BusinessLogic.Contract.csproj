@@ -5,7 +5,6 @@
   <ItemGroup>
     <Folder Include="Base" />
     <Folder Include="Common" />
-    <Folder Include="Expenses" />
     <Folder Include="Incomes" />
     <Folder Include="Settings" />
   </ItemGroup>
@@ -14,5 +13,8 @@
       <Project>{0A397923-A446-4A76-86B9-0D66E9C920EF}</Project>
       <Name>Monifier.BusinessLogic.Model</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="NETStandard.Library" Version="2.0.1" />
   </ItemGroup>
 </Project>

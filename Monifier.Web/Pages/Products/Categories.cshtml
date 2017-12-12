@@ -1,0 +1,63 @@
+@page
+@model Products.CategoriesModel
+
+@{
+    ViewBag.Title = "Товары";
+}
+
+<h3>Категории</h3>
+
+<table class="cashed-table table table-striped table-hover">
+    <thead class="thead-dark">
+    <tr>
+        <th>
+            Номер
+        </th>
+        <th>
+            Название
+        </th>
+        <th>
+            Продуктов
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+
+    @for (int i = 0; i < Model.Categories.Count; i++)
+    {
+        var category = Model.Categories[i];
+        <tr>
+            <td>@(i + 1)</td>
+            <td>
+                <a asp-page="./EditCategory" asp-route-id="@category.Id" class="edit-item-link">@category.Name</a>
+            </td>
+            <td>
+                @category.ProductCount
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<br/>
+<form method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="row">
+        <div class="col-md-8 col-sm-12 col-12">
+            <div class="form-group">
+                <div class="input-group">
+                    <input asp-for="AddCategory.Category" placeholder="Введите название новой категории" 
+                           class="form-control" autocomplete="off"/>
+                    <input type="submit" class="input-group-addon btn btn-outline-secondary cursor-pointer" value="Добавить"/>
+                </div>
+                <span asp-validation-for="AddCategory.Category"></span>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        activateLink("#productsLink");
+    </script>
+}

@@ -8,6 +8,7 @@ using Monifier.BusinessLogic.Model.Base;
 using Monifier.BusinessLogic.Model.Pagination;
 using Monifier.DataAccess.Contract;
 using Monifier.DataAccess.Model.Base;
+using Monifier.DataAccess.Model.Expenses;
 
 namespace Monifier.BusinessLogic.Queries.Base
 {
@@ -54,8 +55,7 @@ namespace Monifier.BusinessLogic.Queries.Base
             return new CategoryModel
             {
                 Id = category.Id,
-                Name = category.Name,
-                ProductCount = category.Products.Count
+                Name = category.Name
             };
         }
 
@@ -83,7 +83,7 @@ namespace Monifier.BusinessLogic.Queries.Base
             var repo = _unitOfWork.GetQueryRepository<Category>();
             var query = args.IncludeDeleted ? repo.Query : repo.Query.Where(x => !x.IsDeleted);
             var totalCount = await query.CountAsync();
-            var pagination = PaginationInfo.FromArgs(args, totalCount);
+            var pagination = new PaginationInfo(args, totalCount);
             var models = await query
                 .OrderBy(x => x.Id)
                 .Skip(pagination.Skipped).Take(pagination.Taken)
@@ -99,6 +99,35 @@ namespace Monifier.BusinessLogic.Queries.Base
                 List = models,
                 Pagination = pagination
             };
+        }
+
+        private IQueryable<CategoryModel> CreateFlowCategoriesQuery(int flowId)
+        {
+            var expenseCategoriesQuery = _unitOfWork.GetQueryRepository<ExpensesFlowProductCategory>().Query;
+            var catQuery = _unitOfWork.GetQueryRepository<Category>().Query;
+            var query = from expenseCats in expenseCategoriesQuery
+                join cat in catQuery on expenseCats.CategoryId equals cat.Id
+                where expenseCats.ExpensesFlowId == flowId && !cat.IsDeleted
+                orderby cat.Id
+                select new CategoryModel
+                {
+                    Id = cat.Id,
+                    Name = cat.Name
+                };
+            return query;
+        }
+
+        public async Task<List<CategoryModel>> GetFlowCategories(int flowId)
+        {
+            return await CreateFlowCategoriesQuery(flowId).ToListAsync();
+        }
+
+        public async Task<CategoryModel> GetFlowCategoryByName(int flowId, string category)
+        {
+            if (string.IsNullOrEmpty(category))
+                throw new ArgumentNullException(nameof(category));
+            var query = CreateFlowCategoriesQuery(flowId);
+            return await query.Where(x => x.Name.ToLower() == category.ToLower()).FirstOrDefaultAsync();
         }
     }
 }

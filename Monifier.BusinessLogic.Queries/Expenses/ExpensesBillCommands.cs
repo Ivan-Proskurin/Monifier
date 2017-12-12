@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Monifier.BusinessLogic.Contract.Expenses;
 using Monifier.BusinessLogic.Model.Expenses;
 using Monifier.DataAccess.Contract;
+using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Expenses;
 
 namespace Monifier.BusinessLogic.Queries.Expenses
@@ -35,7 +36,6 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                         BillId = model.Id,
                         CategoryId = item.CategoryId,
                         ProductId = item.ProductId,
-                        DateTime = item.DateTime,
                         Price = item.Cost,
                         Quantity = item.Quantity,
                         Comment = item.Comment
@@ -68,33 +68,44 @@ namespace Monifier.BusinessLogic.Queries.Expenses
 
         public async Task Create(ExpenseBillModel model)
         {
-            var billRepo = _unitOfWork.GetCommandRepository<ExpenseBill>();
+            var billCommands = _unitOfWork.GetCommandRepository<ExpenseBill>();
 
             var bill = new ExpenseBill
             {
-                Id = -1,
+                ExpenseFlowId = model.ExpenseFlowId,
+                AccountId = model.AccountId,
                 DateTime = model.DateTime,
                 SumPrice = model.Cost
             };
 
-            billRepo.Create(bill);
+            billCommands.Create(bill);
 
-            var itemsRepo = _unitOfWork.GetCommandRepository<ExpenseItem>();
+            var itemsCommands = _unitOfWork.GetCommandRepository<ExpenseItem>();
 
             foreach (var item in model.Items)
             {
-                itemsRepo.Create(new ExpenseItem
+                itemsCommands.Create(new ExpenseItem
                 {
-                    Id = -1,
                     Bill = bill,
                     CategoryId = item.CategoryId,
                     ProductId = item.ProductId,
-                    DateTime = item.DateTime,
                     Price = item.Cost,
                     Quantity = item.Quantity,
                     Comment = item.Comment
                 });
             }
+
+            var accountCommands = _unitOfWork.GetCommandRepository<Account>();
+            var accountQueries = _unitOfWork.GetQueryRepository<Account>();
+            var account = await accountQueries.GetById(bill.AccountId);
+            account.Balance -= bill.SumPrice;
+            accountCommands.Update(account);
+
+            var flowQieries = _unitOfWork.GetQueryRepository<ExpenseFlow>();
+            var flowCommands = _unitOfWork.GetCommandRepository<ExpenseFlow>();
+            var flow = await flowQieries.GetById(bill.ExpenseFlowId);
+            flow.Balance -= bill.SumPrice;
+            flowCommands.Update(flow);
 
             await _unitOfWork.SaveChangesAsync();
         }

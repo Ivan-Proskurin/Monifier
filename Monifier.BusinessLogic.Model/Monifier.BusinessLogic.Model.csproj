@@ -5,8 +5,23 @@
   <ItemGroup>
     <Folder Include="Agregation" />
     <Folder Include="Base" />
-    <Folder Include="Expenses" />
     <Folder Include="Incomes" />
     <Folder Include="Pagination" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Monifier.Common.Extensions\Monifier.Common.Extensions.csproj">
+      <Project>{D2635426-B606-451E-B681-5B34C4DC5186}</Project>
+      <Name>Monifier.Common.Extensions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Monifier.DataAccess.Contract\Monifier.DataAccess.Contract.csproj">
+      <Project>{1D458E3A-9062-485E-BCA8-7A336AF0E58E}</Project>
+      <Name>Monifier.DataAccess.Contract</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Extensions\CategoryExtensions.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="NETStandard.Library" Version="2.0.1" />
   </ItemGroup>
 </Project>

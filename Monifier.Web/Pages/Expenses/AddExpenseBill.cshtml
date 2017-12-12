@@ -1,0 +1,162 @@
+@page "{expenseId:int}"
+@using System.Linq
+@model Expenses.AddExpenseBillModel
+
+@{
+    ViewBag.Title = "Расходы";
+}
+
+<h3 class="form-caption-bg">@Model.ExpenseFlow.Name</h3>
+
+
+<form method="post">
+    <input type="text" name="Good.Bill" value="@Model.Good.Bill" class="form-control"
+           style="display: none;"/>
+
+    <div asp-validation-summary="ModelOnly" class="text-danger add-bill-validation-summary"></div>
+    
+    <div class="container">
+        <div class="row">
+            <div class="form-group row col-md-7">
+                <label asp-for="Good.Account" class="col-form-label col-md-3"></label>
+                <div class="col-md-9">
+                    <autocomplete asp-for="Good.Account" class="form-control"
+                                  value="@Model.Good.Account" autocomplete="off"
+                                  value-list="@Model.Accounts.Select(x => x.Name)"/>
+                    <span asp-validation-for="Good.Account"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br/>
+    
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <input asp-for="Good.ExpenseFlowId" hidden/>
+
+                <div class="container">
+                    <div class="row">
+                        <div class="column-header-col col col-sm-8">
+                            <h5 class="form-caption">Ввод:</h5>
+                        </div>
+                        <div class="col col-sm-4">
+                            <button type="submit" asp-page-handler="add"
+                                    class="btn btn-primary btn-sm cursor-pointer">
+                                Добавить в чек
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label asp-for="Good.DateTime" class="col-form-label col-md-3"></label>
+                    <div class="col-md-9">
+                        <date-time-picker asp-for="Good.DateTime" value="@Model.Good.DateTime"
+                                          class="form-control" autocomplete="off"/>
+                        <span asp-validation-for="Good.DateTime"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label asp-for="Good.Category" class="col-form-label col-md-3"></label>
+                    <div class="col-md-9">
+                        <autocomplete asp-for="Good.Category" class="form-control"
+                                      value="@Model.Good.Category" autocomplete="off"
+                                      value-list="@Model.Categories.Select(x => x.Name)"/>
+                        <span asp-validation-for="Good.Category"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label asp-for="Good.Product" class="col-form-label col-md-3"></label>
+                    <div class="col-md-9">
+                        <autocomplete asp-for="Good.Product" class="form-control"
+                                      value-list="@Model.Products.Select(x => x.Name)"
+                                      value="@Model.Good.Product" autocomplete="off"/>
+                        <span asp-validation-for="Good.Product"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label asp-for="Good.Price" class="col-form-label col-md-3"></label>
+                    <div class="col-md-3">
+                        <input asp-for="Good.Price" class="form-control money-input" autocomplete="off"/>
+                        <span asp-validation-for="Good.Price"></span>
+                    </div>
+                    <label asp-for="Good.Quantity" class="col-form-label col-md-3"></label>
+                    <div class="col-md-3">
+                        <input asp-for="Good.Quantity" class="form-control money-input" autocomplete="off"/>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label asp-for="Good.Comment" class="col-form-label col-md-3"></label>
+                    <div class="col-md-9">
+                        <input asp-for="Good.Comment" class="form-control" autocomplete="off"/>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="container">
+                    <div class="row">
+                        <div class="column-header-col col col-sm-9">
+                            <h5 class="form-caption">Итог:</h5>
+                        </div>
+                        <div class="col col-sm-3">
+                            <button type="submit" asp-page-handler="confirm"
+                                    class="btn btn-danger btn-sm cursor-pointer">
+                                Подвердить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="container">
+                    <div class="row expenses-totals">
+                        <div class="column-header-col col col-sm-5">
+                            <span class="expenses-subtotals">Промежуточный итог:</span>
+                        </div>
+                        <div class="subtotals-placeholder col col-sm-4">
+                            <span>@Model.Bill.DateTime</span>
+                        </div>
+                        <div class="expenses-subtotals expenses-sum col col-sm-3">
+                            <span>@Model.Bill.Cost</span>
+                        </div>
+                    </div>
+                    @for (var i = 0; i < Model.Bill.Items.Count; i++)
+                    {
+                        var item = Model.Bill.Items[i];
+
+                        <div class="row expenses-subtotals-row">
+                            <div class="expenses-subtotals col col-sm-5">
+                                <span>#@(i + 1)</span>
+                            </div>
+                            <div class="expenses-subtotals col col-sm-4">
+                                <span>@item.DisplayName</span>
+                            </div>
+                            <div class="expenses-subtotals expenses-sum col col-sm-3">
+                                <span>@item.Cost</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <a asp-page="./ExpenseFlows" class="btn btn-outline-danger btn-sm">Отмена</a>
+            </div>
+            <div class="col" style="text-align: right;">
+                @*            @Html.ActionLink("Редактировать пункты", "EditItems", null, new { @class = "btn btn-outline-primary btn-sm" })*@
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        activateLink("#expensesLink");
+        makeInputDatetimePicker("Good.DateTime");
+        makeInputAutocomplete("Good.Account");
+        makeInputAutocomplete("Good.Category");
+        makeInputAutocomplete("Good.Product");
+        makeInputNumeric("Good.Price", false);
+        makeInputNumeric("Good.Quantity", false);
+    </script>
+
+}

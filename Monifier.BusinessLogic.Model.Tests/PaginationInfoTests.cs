@@ -15,7 +15,7 @@ namespace Monifier.BusinessLogic.Model.Tests
                 ItemsPerPage = 5,
                 IncludeDeleted = false
             };
-            var info = PaginationInfo.FromArgs(args, 10);
+            var info = new PaginationInfo(args, 10);
             
             Assert.AreEqual(1, info.PageNumber);
             Assert.AreEqual(5, info.ItemsPerPage);
@@ -33,7 +33,7 @@ namespace Monifier.BusinessLogic.Model.Tests
                 ItemsPerPage = 5,
                 IncludeDeleted = false
             };
-            var info = PaginationInfo.FromArgs(args, 0);
+            var info = new PaginationInfo(args, 0);
 
             Assert.AreEqual(1, info.PageNumber);
             Assert.AreEqual(5, info.ItemsPerPage);
@@ -51,7 +51,7 @@ namespace Monifier.BusinessLogic.Model.Tests
                 ItemsPerPage = 5,
                 IncludeDeleted = false
             };
-            var info = PaginationInfo.FromArgs(args, 9);
+            var info = new PaginationInfo(args, 9);
 
             Assert.AreEqual(2, info.PageNumber);
             Assert.AreEqual(5, info.ItemsPerPage);
@@ -69,7 +69,7 @@ namespace Monifier.BusinessLogic.Model.Tests
                 ItemsPerPage = 5,
                 IncludeDeleted = false
             };
-            var info = PaginationInfo.FromArgs(args, 14);
+            var info = new PaginationInfo(args, 14);
 
             Assert.AreEqual(3, info.PageNumber);
             Assert.AreEqual(5, info.ItemsPerPage);

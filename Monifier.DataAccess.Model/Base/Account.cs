@@ -8,12 +8,13 @@ namespace Monifier.DataAccess.Model.Base
     {
         public int Id { get; set; }
         
+        [Range(1, Double.MaxValue, ErrorMessage = "Номер должен начинаться с единицы (1)")]
         public int Number { get; set; }
         
         public DateTime DateCreated { get; set; }
 
         [Required]
-        [MaxLength(50)]
+        [MaxLength(50, ErrorMessage = "Название счета не должно превышать 50 символов")]
         public string Name { get; set; }
 
         public decimal Balance { get; set; }

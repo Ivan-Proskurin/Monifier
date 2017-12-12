@@ -1,0 +1,57 @@
+@page
+@model Expenses.CreateExpenseFlowModel
+
+<div class="col-md-7 centered-form">
+    <h3>Создание категории расходов</h3>
+    <br/>
+
+    <form method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input asp-for="ExpenseFlow.Id" hidden/>
+        <input asp-for="ExpenseFlow.Balance" hidden/>
+        <div class="row">
+            <div class="col-md-3 col-sm-7 col-7">
+                <div class="form-group">
+                    <label asp-for="ExpenseFlow.Number" class="control-label"></label>
+                    <input asp-for="ExpenseFlow.Number" class="form-control" autocomplete="off"/>
+                    <span asp-validation-for="ExpenseFlow.Number" class="text-danget"></span>
+                </div>
+            </div>
+            <div class="col-md-9 col-sm-7 col-7">
+                <div class="form-group">
+                    <label asp-for="ExpenseFlow.Name" class="control-label"></label>
+                    <input asp-for="ExpenseFlow.Name" class="form-control" autocomplete="off"/>
+                    <span asp-validation-for="ExpenseFlow.Name" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-7 col-sm-7 col-7">
+                <label asp-for="ExpenseFlow.CreationDate" class="control-label"></label>
+                <date-time-picker asp-for="ExpenseFlow.CreationDate" value="@Model.ExpenseFlow.CreationDate"/>
+                <span asp-validation-for="ExpenseFlow.CreationDate" class="text-danger"></span>
+            </div>
+            <div class="col-md-5 col-sm-7 col-7">
+                <div class="form-group">
+                    <label asp-for="ExpenseFlow.Balance" class="control-label"></label>
+                    <input asp-for="ExpenseFlow.Balance" class="form-control money-input" autocomplete="off" disabled="disabled"/>
+                    <span asp-validation-for="ExpenseFlow.Balance" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row bottom-buttons-row">
+            <div class="col-md-8 col-7">
+                <input type="submit" value="Сохранить" class="btn btn-success btn-default"/>
+                <a asp-page="./ExpenseFlows" class="btn btn-outline-secondary gapped">Отмена</a>
+            </div>
+        </div>
+        
+    </form>
+
+</div>
+
+@section Scripts {
+    <script>
+        makeInputDatetimePicker("ExpenseFlow.CreationDate");
+    </script>
+}

@@ -1,0 +1,61 @@
+@page
+@using Common.Extensions
+@model Expenses.ExpenseFlowsModel
+
+@{
+    ViewBag.Title = "Расходы";
+    var flows = Model.ExpenseFlows;
+}
+
+<h4>Категории расходов</h4>
+<table class="cashed-table table table-striped table-hover">
+    <thead class="thead-dark">
+    <tr>
+        <th>
+            Номер
+        </th>
+        <th>
+            Название
+        </th>
+        <th class="money-cell">
+            Баланс
+        </th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody id="cat-table-body">
+        
+    @for (var i = 0; i < flows.Count; i++)
+    {
+        var flow = flows[i];
+        var rowClass = flow.Balance >= 0 ? "table-default" : "table-danger";
+        
+        <tr class="@rowClass">
+            <td>@flow.Number</td>
+            <td>
+                <a asp-page="./EditExpenseFlow" asp-route-id="@flow.Id" class="edit-item-link">@flow.Name</a>
+            </td>
+            <td class="money-cell">
+                @flow.Balance.ToMoney()
+            </td>
+            <td>
+                <a asp-page="./AddExpense" asp-route-expenseId="@flow.Id" class="btn btn-outline-secondary btn-sm">Расход</a>
+                <a asp-page="./AddExpenseBill" asp-route-expenseId="@flow.Id" class="btn btn-outline-secondary btn-sm">Чек</a>
+            </td>
+        </tr>
+    }
+
+    </tbody>
+</table>
+
+<!-- Adding flow -->
+<div class="bottom-buttons-row">
+    <a asp-page="./CreateExpenseFlow" class="btn btn-success cursor-pointer">Добавить категорию</a>
+    <a asp-page="./ExpensesTable" class="btn btn-outline-primary cursor-pointer">Посмотреть расходы</a>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        activateLink("#expensesLink");
+    </script>
+}

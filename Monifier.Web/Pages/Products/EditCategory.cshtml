@@ -1,0 +1,102 @@
+@page "{id:int}"
+@model Products.EditCategoryModel
+
+@{
+    ViewBag.Title = "Товары";
+}
+
+<h3>Редактирование категории</h3>
+
+<form method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input asp-for="Category.Id" hidden/>
+    <div class="form-group">
+        <div class="input-group">
+            <input asp-for="Category.Category" class="form-control" autocomplete="off"/>
+            <input type="submit" asp-page-handler="edit" class="input-group-addon btn btn-success cursor-pointer" value="Сохранить"/>
+            <button type="button" class="input-group-addon btn btn-danger cursor-pointer" data-toggle="modal" data-target="#deleteModal">Удалить категорию</button>
+            <a asp-page="./Categories" class="input-group-addon btn btn-primary cursor-pointer">Назад к категориям</a>
+        </div>
+        <span asp-validation-for="Category.Category"></span>
+    </div>
+
+    @if (Model.Products.Count > 0)
+    {
+        <h5>Товары</h5>
+        <table class="cashed-table table table-striped table-hover">
+            <thead class="thead-dark">
+            <tr>
+                <th>
+                    Номер
+                </th>
+                <th>
+                    Название
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+
+            @for (int i = 0; i < Model.Products.Count; i++)
+            {
+                var product = Model.Products[i];
+                <tr>
+                    <td>@(i + 1)</td>
+                    <td>
+                        <a asp-page="./EditProduct" asp-route-id="@product.Id" asp-route-categoryId="@Model.Category.Id" 
+                           class="edit-item-link">@product.Name</a>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <br/>
+        <h5 style="margin-left: 10px;">Добавьте товары</h5>
+    }
+
+    <br/>
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="row">
+        <div class="col-md-8 col-sm-12 col-12">
+            <div class="form-group">
+                <div class="input-group">
+                    <input asp-for="Category.AddProduct" placeholder="Введите название нового товара"
+                           class="form-control" autocomplete="off"/>
+                    <input type="submit" asp-page-handler="addproduct"
+                           class="input-group-addon btn btn-outline-secondary cursor-pointer" value="Добавить"/>
+                </div>
+                <span asp-validation-for="Category.AddProduct"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deletion modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Удаление категории товаров</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Удалить категорию с сохранением расходов и доходов по ней?
+                    Или удалить ее полностью? Тогда операции по ней будут удалены также.
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" asp-page-handler="delete" asp-route-permanent="false" value="Удалить с сохранением" class="btn btn-primary"/>
+                    <input type="submit" asp-page-handler="delete" asp-route-permanent="true" value="Удалить полностью" class="btn btn-danger"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        activateLink("#productsLink");
+    </script>
+}

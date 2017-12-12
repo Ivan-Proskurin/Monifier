@@ -87,13 +87,39 @@ namespace Monifier.Web.Migrations
 
                     b.Property<DateTime>("DateTime");
 
+                    b.Property<int>("ExpenseFlowId");
+
                     b.Property<decimal>("SumPrice");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AccountId");
 
+                    b.HasIndex("ExpenseFlowId");
+
                     b.ToTable("ExpenseBills");
+                });
+
+            modelBuilder.Entity("Monifier.DataAccess.Model.Expenses.ExpenseFlow", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<decimal>("Balance");
+
+                    b.Property<DateTime>("DateCreated");
+
+                    b.Property<bool>("IsDeleted");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50);
+
+                    b.Property<int>("Number");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ExpenseFlows");
                 });
 
             modelBuilder.Entity("Monifier.DataAccess.Model.Expenses.ExpenseItem", b =>
@@ -103,25 +129,43 @@ namespace Monifier.Web.Migrations
 
                     b.Property<int>("BillId");
 
-                    b.Property<int>("CategoryId");
+                    b.Property<int?>("CategoryId");
 
                     b.Property<string>("Comment");
 
-                    b.Property<DateTime>("DateTime");
-
                     b.Property<decimal>("Price");
 
-                    b.Property<int>("ProductId");
+                    b.Property<int?>("ProductId");
 
-                    b.Property<decimal>("Quantity");
+                    b.Property<decimal?>("Quantity");
 
                     b.HasKey("Id");
 
                     b.HasIndex("BillId");
 
+                    b.HasIndex("CategoryId");
+
                     b.HasIndex("ProductId");
 
                     b.ToTable("ExpenseItems");
+                });
+
+            modelBuilder.Entity("Monifier.DataAccess.Model.Expenses.ExpensesFlowProductCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("CategoryId");
+
+                    b.Property<int>("ExpensesFlowId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("ExpensesFlowId");
+
+                    b.ToTable("ExpensesFlowProductCategories");
                 });
 
             modelBuilder.Entity("Monifier.DataAccess.Model.Incomes.IncomeItem", b =>
@@ -174,6 +218,11 @@ namespace Monifier.Web.Migrations
                         .WithMany()
                         .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Monifier.DataAccess.Model.Expenses.ExpenseFlow", "ExpenseFlow")
+                        .WithMany()
+                        .HasForeignKey("ExpenseFlowId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Monifier.DataAccess.Model.Expenses.ExpenseItem", b =>
@@ -183,10 +232,27 @@ namespace Monifier.Web.Migrations
                         .HasForeignKey("BillId")
                         .OnDelete(DeleteBehavior.Cascade);
 
+                    b.HasOne("Monifier.DataAccess.Model.Base.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId");
+
                     b.HasOne("Monifier.DataAccess.Model.Base.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Monifier.DataAccess.Model.Expenses.ExpensesFlowProductCategory", b =>
+                {
+                    b.HasOne("Monifier.DataAccess.Model.Base.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Monifier.DataAccess.Model.Expenses.ExpenseFlow", "ExpenseFlow")
+                        .WithMany()
+                        .HasForeignKey("ExpensesFlowId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Monifier.DataAccess.Model.Incomes.IncomeItem", b =>

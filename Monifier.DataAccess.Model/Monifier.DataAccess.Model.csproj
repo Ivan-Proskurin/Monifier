@@ -10,7 +10,6 @@
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.0" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Expenses" />
     <Folder Include="Incomes" />
   </ItemGroup>
 </Project>

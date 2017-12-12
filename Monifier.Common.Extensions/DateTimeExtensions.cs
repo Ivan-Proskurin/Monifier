@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Monifier.Common.Extensions
 {
@@ -46,6 +47,16 @@ namespace Monifier.Common.Extensions
         public static DateTime ParseDtFromStandardString(this string value)
         {
             return DateTime.ParseExact(value, "yyyy.MM.dd HH:mm", Culture);
+        }
+
+        public static DateTime ToMinutes(this DateTime value)
+        {
+            return new DateTime(value.Year, value.Month, value.Day, value.Hour, value.Minute, 0);
+        }
+
+        public static string GetWeekDayName(this DateTime value)
+        {
+            return value.ToString("dddd", Culture);
         }
     }
 }

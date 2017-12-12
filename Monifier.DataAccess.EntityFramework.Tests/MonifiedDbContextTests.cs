@@ -49,5 +49,15 @@ namespace Monifier.DataAccess.EntityFramework.Tests
             var r2 = _uof.GetCommandRepository<Category>();
             Assert.IsTrue(ReferenceEquals(r1, r2));
         }
+
+        [TestMethod]
+        public void QueryQueryAndThenNamedRespository_ReturnsBoth()
+        {
+            var r1 = _uof.GetQueryRepository<Category>();
+            Assert.IsNotNull(r1);
+            var r2 = _uof.GetNamedModelQueryRepository<Category>();
+            Assert.IsNotNull(r2);
+            Assert.AreNotEqual(r1, r2);
+        }
     }
 }
