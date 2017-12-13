@@ -36,14 +36,14 @@ namespace Monifier.Web.Pages.Expenses
 
         public async Task<IActionResult> OnPostAsync()
         {
-            return await ExpenseFlow.TryProcessAsync<ArgumentException>(ModelState,
+            return await ExpenseFlow.ProcessAsync(ModelState,
                 async () =>
                 {
                     var flow = await _expenseFlowCommands.Update(ExpenseFlow.ToExpenseFlowModel());
                     return RedirectToPage("./EditExpenseFlow", new { id = flow.Id });
                 },
                 
-                async () => Page()
+                async () => await Task.FromResult(Page())
             );
         }
     }

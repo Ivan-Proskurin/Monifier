@@ -7,6 +7,7 @@
     <Folder Include="Base" />
     <Folder Include="Incomes" />
     <Folder Include="Pagination" />
+    <Folder Include="Settings" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Monifier.Common.Extensions\Monifier.Common.Extensions.csproj">

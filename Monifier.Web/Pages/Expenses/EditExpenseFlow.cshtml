@@ -43,7 +43,7 @@
                 </div>
             </div>
         </div>
-      
+
         <!-- Flow categories-->
         <div class="row">
             <div class="col-md-12 col-sm-7 col-7">
@@ -78,12 +78,12 @@
         <div class="row">
             <div class="col-md-12 col-sm-7 col-7">
                 <div class="input-group">
-                    <autocomplete asp-for="ExpenseFlow.AddOrDeleteCategory" placeholder="Название категории" 
+                    <autocomplete asp-for="ExpenseFlow.AddOrDeleteCategory" placeholder="Название категории"
                                   class="form-control form-control-sm" value-list="@Model.Categories.Select(x => x.Name)"
                                   value="@Model.ExpenseFlow.AddOrDeleteCategory"/>
                     <input type="submit" value="Добавить" asp-page-handler="addcategory"
                            class="input-group-addon btn btn-outline-secondary cursor-pointer btn-sm"/>
-                    <input type="submit" value="Удалить" asp-page-handler="deletecategory" 
+                    <input type="submit" value="Удалить" asp-page-handler="deletecategory"
                            class="input-group-addon btn btn-outline-secondary cursor-pointer btn-sm"/>
                 </div>
                 <span asp-validation-for="ExpenseFlow.AddOrDeleteCategory" class="text-danger"></span>
@@ -97,31 +97,17 @@
                 <a asp-page="./ExpenseFlows" class="btn btn-outline-secondary gapped">Отмена</a>
             </div>
             <div class="col-md-4 col-sm-7 col-7" style="text-align: right;">
-                <button type="button" class="btn btn-danger cursor-pointer" data-toggle="modal" data-target="#deleteModal">Удалить категорию</button>
+                <delete-button modal-id="#deleteModal" text="Удалить категорию"></delete-button>
             </div>
         </div>
-        
+
         <!-- Deletion modal -->
-        <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Удаление категории</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        Удалить категорию с сохранением расходов и доходов по ней?
-                        Или удалить ее полностью? Тогда операции по ней будут удалены также.
-                    </div>
-                    <div class="modal-footer">
-                        <input type="submit" asp-page-handler="delete" asp-route-permanent="false" value="Удалить с сохранением" class="btn btn-primary"/>
-                        <input type="submit" asp-page-handler="delete" asp-route-permanent="true" value="Удалить полностью" class="btn btn-danger"/>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <deletion-modal modal-id="deleteModal" caption="Удаление категории"
+                        text="Удалить категорию с сохранением расходов и доходов по ней? Или удалить ее полностью? Тогда операции по ней будут удалены также."
+                        page-handler="delete"
+                        button-soft-text="Удалить с сохранением"
+                        button-tought-text="Удалить полностью">
+        </deletion-modal>
     </form>
 
 </div>

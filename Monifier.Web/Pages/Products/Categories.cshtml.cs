@@ -34,7 +34,7 @@ namespace Monifier.Web.Pages.Products
 
         public async Task<IActionResult> OnPostAsync()
         {
-            return await AddCategory.TryProcessAsync<ArgumentException>(ModelState,
+            return await AddCategory.ProcessAsync(ModelState,
                 async () =>
                 {
                     await _categoriesCommands.Update(new CategoryModel {Name = AddCategory.Category});

@@ -90,14 +90,14 @@ namespace Monifier.Web.Pages.Expenses
             await PrepareModelsAsync(Good.ExpenseFlowId);
             Bill = JsonConvert.DeserializeObject<ExpenseBillModel>(Good.Bill);
 
-            return await Good.TryProcessAsync<ArgumentException>(ModelState,
+            return await Good.ProcessAsync(ModelState,
                 async () =>
                 {
                     Bill.AddItem(await GetExpenseItem());
                     Good.Bill = JsonConvert.SerializeObject(Bill);
                     return Page();
                 },
-                async () => Page(),
+                async () => await Task.FromResult(Page()),
                 async vrList =>
                 {
                     if (!string.IsNullOrEmpty(Good.Category))

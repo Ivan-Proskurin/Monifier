@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Monifier.DataAccess.Contract.Model;
+using Monifier.DataAccess.Model.Contracts;
 
 namespace Monifier.DataAccess.Contract
 {

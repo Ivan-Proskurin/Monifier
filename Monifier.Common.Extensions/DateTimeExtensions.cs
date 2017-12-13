@@ -8,6 +8,16 @@ namespace Monifier.Common.Extensions
     {
         private static readonly CultureInfo Culture = new CultureInfo("ru-ru");
 
+        public static DateTime StartOfTheYear(this DateTime value)
+        {
+            return new DateTime(value.Year, 1, 1);
+        }
+
+        public static DateTime EndOfTheYear(this DateTime value)
+        {
+            return new DateTime(value.Year, 12, 31, 23, 59, 00);
+        }
+
         public static DateTime StartOfTheMonth(this DateTime value)
         {
             return new DateTime(value.Year, value.Month, 1);
@@ -57,6 +67,11 @@ namespace Monifier.Common.Extensions
         public static string GetWeekDayName(this DateTime value)
         {
             return value.ToString("dddd", Culture);
+        }
+
+        public static string GetMonthName(this DateTime value)
+        {
+            return value.ToString("MMMM", Culture);
         }
     }
 }

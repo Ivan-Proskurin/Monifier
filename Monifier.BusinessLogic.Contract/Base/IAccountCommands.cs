@@ -9,5 +9,6 @@ namespace Monifier.BusinessLogic.Contract.Base
     {
         Task Topup(TopupAccountModel topup);
         Task Transfer(int accountFromId, int accountToId, decimal amount);
+        Task TransferToExpenseFlow(int flowId, int fromAccountId, decimal amount);
     }
 }

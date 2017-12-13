@@ -1,0 +1,65 @@
+@using Models
+@model PaginationPartialModel
+
+@{
+    var pagination = Model.Pagination;
+}
+
+@if (pagination.TotalPageCount > 1)
+{
+    <nav aria-label="Categories page navigation">
+        <ul class="pagination justify-content-end">
+            @if (pagination.PageNumber == 1)
+            {
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1">Назад</a>
+                </li>
+            }
+            else
+            {
+                <li class="page-item">
+                    <a asp-page="@Model.Page" 
+                       asp-route-pageNumber="@(pagination.PageNumber - 1)" 
+                       asp-route-dateFrom="@Model.DateFrom"
+                       asp-route-dateTo="@Model.DateTo"
+                       class="page-link">Назад</a>
+                </li>
+            }
+            @for (var i = 1; i <= pagination.TotalPageCount; i++)
+            {
+                if (pagination.PageNumber == i)
+                {
+                    <li class="page-item active">
+                        <a class="page-link" href="#">@i</a>
+                    </li>
+                }
+                else
+                {
+                    <li class="page-item">
+                        <a asp-page="@Model.Page" 
+                           asp-route-pageNumber="@i" 
+                           asp-route-dateFrom="@Model.DateFrom"
+                           asp-route-dateTo="@Model.DateTo"
+                           class="page-link">@i</a>
+                    </li>
+                }
+            }
+            @if (pagination.PageNumber >= pagination.TotalPageCount)
+            {
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1">Далее</a>
+                </li>        
+            }
+            else
+            {
+                <li class="page-item">
+                    <a asp-page="@Model.Page" 
+                       asp-route-pageNumber="@(pagination.PageNumber + 1)" 
+                       asp-route-dateFrom="@Model.DateFrom"
+                       asp-route-dateTo="@Model.DateTo"
+                       class="page-link">Далее</a>
+                </li>
+            }
+        </ul>
+    </nav>
+}

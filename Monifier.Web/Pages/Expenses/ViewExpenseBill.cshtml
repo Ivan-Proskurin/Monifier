@@ -1,0 +1,90 @@
+@page "{billId:int}"
+@using Common.Extensions
+@model Expenses.ViewExpenseBillModel
+
+<div class="container centered-form">
+
+    <div class="container" style="margin-bottom: 40px;">
+        <div class="row">
+            <div class="col-md-10 col-sm-8 col-7" style="padding-left: 0;">
+                <table width="80%">
+                    <tr class="bottom-dashed-line">
+                        <td>
+                            <h5>Категория расходов:</h5>
+                        </td>
+                        <td class="align-right">
+                            <h5>@Model.ExpenseFlow.Name</h5>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h6>Счет списания:</h6>
+                        </td>
+                        <td class="align-right">
+                            <h6>@Model.Account.Name</h6>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-2 col-sm-8 col-7" style="padding-left: 0; margin-top: 20px;">
+                <delete-button modal-id="#deleteModal" text="Удалить счет"></delete-button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 col-sm-8 col-7">
+                <table width="100%" style="margin-bottom: 50px; padding-left: 0;">
+                    <tr class="bottom-dashed-line">
+                        <td class="align-left column-header-col">
+                            <h5>Счет за:</h5>
+                        </td>
+                        <td class="align-left">
+                            <h5>@Model.Bill.DateTime.ToStandardString()</h5>
+                        </td>
+                        <td class="align-right">
+                            <h5>@Model.Bill.Cost.ToMoney()</h5>
+                        </td>
+                    </tr>
+                    @for (var i = 0; i < Model.Bill.Items.Count; i++)
+                    {
+                        var item = Model.Bill.Items[i];
+                        <tr class="bill-items-font">
+                            <td>
+                                <span>#@(i + 1)</span>
+                            </td>
+                            <td class="align-left">
+                                <span>@item.DisplayName</span>
+                            </td>
+                            <td class="align-right">
+                                <span>@item.Cost.ToMoney()</span>
+                            </td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="row bottom-buttons-row">
+        <div class="col">
+            <a asp-page="./ExpensesForDay" asp-route-day="@Model.Day" class="btn btn-outline-danger">Назад</a>
+            <a asp-page="./ExpenseFlows" class="btn btn-outline-primary">Редактировать</a>
+        </div>
+        <div class="col" style="text-align: right;">
+            @*            @Html.ActionLink("Редактировать пункты", "EditItems", null, new { @class = "btn btn-outline-primary btn-sm" })*@
+        </div>
+    </div>
+</div>
+
+<form method="post">
+    <input asp-for="BillId" hidden/>
+    <input asp-for="Day" hidden/>
+    
+    <!-- Deletion modal -->
+    <deletion-modal modal-id="deleteModal" caption="Удаление счета"
+                    text="Удалить счет с удалением всех его пунктов? Внимание! Это действие необратимо!"
+                    page-handler="delete"
+                    button-tought-text="Да, удалить"></deletion-modal>
+</form>

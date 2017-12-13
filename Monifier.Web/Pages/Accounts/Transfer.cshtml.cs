@@ -47,12 +47,13 @@ namespace Monifier.Web.Pages.Accounts
                     return RedirectToPage("./AccountsList");
                 },
                 
-                async () => Page(),
+                async () => await Task.FromResult(Page()),
                 
                 async vrList =>
                 {
                     if (accountFrom == null) vrList.Add(new ModelValidationResult("Transfer.AccountFrom", "Такого счета нет"));
                     if (accountTo == null) vrList.Add(new ModelValidationResult("Transfer.AccountTo", "Такого счета нет"));
+                    await Task.CompletedTask;
                 });
         }
     }

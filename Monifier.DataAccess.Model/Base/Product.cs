@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Monifier.DataAccess.Contract.Model;
+using Monifier.DataAccess.Model.Contracts;
 
 namespace Monifier.DataAccess.Model.Base
 {

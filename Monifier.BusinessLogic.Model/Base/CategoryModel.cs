@@ -1,4 +1,4 @@
-﻿using Monifier.DataAccess.Contract.Model;
+﻿using Monifier.DataAccess.Model.Contracts;
 
 namespace Monifier.BusinessLogic.Model.Base
 {

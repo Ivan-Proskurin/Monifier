@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Monifier.DataAccess.Contract.Model;
+using Monifier.DataAccess.Model.Contracts;
 
 namespace Monifier.DataAccess.Model.Incomes
 {

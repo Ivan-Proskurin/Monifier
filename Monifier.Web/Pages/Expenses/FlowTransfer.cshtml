@@ -1,0 +1,48 @@
+@page "{expenseId:int}"
+@using System.Linq
+@model Expenses.FlowTransferModel
+
+@{
+    var accountNames = Model.Accounts.Select(x => x.Name).ToList();
+}
+
+<div class="col-md-7 centered-form">
+    <h4>Перевод на категорию расходов &quot;@Model.Flow.Name&quot;</h4>
+    <br/>
+ 
+    <form method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input asp-for="Transfer.FlowId" hidden/>
+        <div class="row">
+            <div class="col-md-10 col-sm-7 col-7">
+                <div class="form-group">
+                    <label asp-for="Transfer.AccountFrom" class="control-label"></label>
+                    <autocomplete asp-for="Transfer.AccountFrom" value="@Model.Transfer.AccountFrom"
+                                  value-list="@accountNames"/>
+                    <span asp-validation-for="Transfer.AccountFrom" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-5 col-sm-7 col-7">
+                <div class="form-group">
+                    <label asp-for="Transfer.Amount" class="control-label"></label>
+                    <input asp-for="Transfer.Amount" class="form-control money-input" autocomplete="off"/>
+                    <span asp-validation-for="Transfer.Amount" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        <div class="form-group bottom-buttons-row">
+            <input type="submit" value="Перевести" class="btn btn-success btn-default cursor-pointer"/>
+            <a asp-page="./ExpenseFlows" class="btn btn-outline-secondary cursor-pointer gapped">Отмена</a>
+        </div>
+    </form>
+
+</div>
+
+@section Scripts {
+    <script>
+        makeInputAutocomplete("Transfer.AccountFrom");
+        makeInputNumeric("Transfer.Amount");
+    </script>
+}

@@ -90,10 +90,12 @@ namespace Monifier.BusinessLogic.Queries.Expenses
         public async Task<ExpenseBillModel> GetById(int id)
         {
             var repo = _unitOfWork.GetQueryRepository<ExpenseBill>();
-            var bill = await repo.GetById(id);
+            var bill = await repo.Query.Include(x => x.Items).FirstOrDefaultAsync(x => x.Id == id);
             var model = new ExpenseBillModel
             {
                 Id = bill.Id,
+                ExpenseFlowId = bill.ExpenseFlowId,
+                AccountId = bill.AccountId,
                 DateTime = bill.DateTime,
                 Cost = bill.SumPrice,
                 Items = bill.Items.Select(x => new ExpenseItemModel

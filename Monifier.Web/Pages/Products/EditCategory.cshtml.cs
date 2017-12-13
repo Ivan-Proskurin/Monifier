@@ -49,7 +49,7 @@ namespace Monifier.Web.Pages.Products
 
         public async Task<IActionResult> OnPostEditAsync()
         {
-            return await Category.TryProcessAsync<ArgumentException>(ModelState,
+            return await Category.ProcessAsync(ModelState,
                 async () =>
                 {
                     await _categoriesCommands.Update(new CategoryModel
@@ -71,15 +71,16 @@ namespace Monifier.Web.Pages.Products
             const string prop = "Category.AddProduct";
             Products = await _productQueries.GetCategoryProducts(Category.Id);
             
-            return await Category.TryProcessAsync<ArgumentException>(ModelState,
+            return await Category.ProcessAsync(ModelState,
                 async () =>
                 {
                     await _productCommands.AddProductToCategory(Category.Id, Category.AddProduct);
                     return RedirectToPage("./EditCategory", new {id = Category.Id});
                 },
-                async () => Page(),
+                async () => await Task.FromResult(Page()),
                 async vrList =>
                 {
+                    await Task.CompletedTask;
                     if (string.IsNullOrEmpty(Category.AddProduct))
                     {
                         vrList.Add(new ModelValidationResult(

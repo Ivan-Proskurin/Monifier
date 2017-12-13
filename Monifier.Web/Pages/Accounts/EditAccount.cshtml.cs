@@ -30,14 +30,15 @@ namespace Monifier.Web.Pages.Accounts
 
         public async Task<IActionResult> OnPostAsync()
         {
-            return await Account.TryProcessAsync<ArgumentException>(ModelState,
+            return await Account.ProcessAsync(ModelState,
                 async () =>
                 {
                     await _accountCommands.Update(Account.ToAccountModel());
                     return RedirectToPage("./AccountsList");
                 },
-                
-                async () => Page());
+
+                async () => await Task.FromResult(Page())
+            );
         }
 
         public async Task<IActionResult> OnPostDeleteAsync(bool permanent)

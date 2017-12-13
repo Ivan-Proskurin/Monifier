@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.CodeAnalysis.Diagnostics;
 using Monifier.Web.Models.Validation;
 
 namespace Monifier.Web.Models
@@ -14,12 +13,17 @@ namespace Monifier.Web.Models
             ModelStateDictionary modelState,
             Func<Task<IActionResult>> success, 
             Func<Task<IActionResult>> failure,
-            Func<List<ModelValidationResult>, Task> validate = null)
+            Func<List<ModelValidationResult>, Task> validate = null,
+            Action<Exception> handleError = null)
         {
+            if (!modelState.IsValid) return await failure();
+            
             foreach (var vr in model.Validate())
             {
                 modelState.AddModelError(vr.PropertyName, vr.Message);
             }
+            
+            if (!modelState.IsValid) return await failure();
             
             if (validate != null)
             {
@@ -31,45 +35,26 @@ namespace Monifier.Web.Models
                 }
             }     
             
-            return modelState.IsValid ? await success() : await failure();
+            return modelState.IsValid ? await TrySuccess(modelState, success, failure, handleError) : await failure();
         }
         
-        public static async Task<IActionResult> TryProcessAsync<EFailure>(this IValidatable model, 
-            ModelStateDictionary modelState,
-            Func<Task<IActionResult>> success, 
-            Func<Task<IActionResult>> failure,
-            Func<List<ModelValidationResult>, Task> validate = null)
-        where EFailure : Exception
-        {
-            foreach (var vr in model.Validate())
-            {
-                modelState.AddModelError(vr.PropertyName, vr.Message);
-            }
-            
-            if (validate != null)
-            {
-                var vrList = new List<ModelValidationResult>();
-                await validate(vrList);
-                foreach (var vr in vrList)
-                {
-                    modelState.AddModelError(vr.PropertyName, vr.Message);
-                }
-            }     
-            
-            return modelState.IsValid ? await TrySuccess<EFailure>(modelState, success, failure) : await failure();
-        }
-
-        private static async Task<IActionResult> TrySuccess<EFailure>(ModelStateDictionary modelState,
-            Func<Task<IActionResult>> success, Func<Task<IActionResult>> failure)
-            where EFailure : Exception
+        private static async Task<IActionResult> TrySuccess(ModelStateDictionary modelState,
+            Func<Task<IActionResult>> success, Func<Task<IActionResult>> failure, Action<Exception> handleError)
         {
             try
             {
                 return await success();
             }
-            catch (EFailure exc)
+            catch (Exception exc)
             {
-                modelState.AddModelError(string.Empty, exc.Message);
+                if (handleError != null)
+                {
+                    handleError(exc);
+                }
+                else
+                {
+                    modelState.AddModelError(string.Empty, exc.Message);
+                }
                 return await failure();
             }
         }

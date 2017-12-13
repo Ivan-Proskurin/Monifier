@@ -54,7 +54,7 @@ namespace Monifier.Web.Pages.Expenses
 
         public async Task<IActionResult> OnPostCommitAsync()
         {
-            return await ExpenseFlow.TryProcessAsync<ArgumentException>(ModelState,
+            return await ExpenseFlow.ProcessAsync(ModelState,
                 async () =>
                 {
                     await _expenseFlowCommands.Update(ExpenseFlow.ToExpenseFlowModel());

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using Monifier.DataAccess.Contract.Model;
 using Monifier.DataAccess.Model.Base;
+using Monifier.DataAccess.Model.Contracts;
 
 namespace Monifier.DataAccess.Model.Incomes
 {

@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Base;
-using Monifier.BusinessLogic.Model.Base;
 using Monifier.Common.Extensions;
 using Monifier.Web.Models;
 using Monifier.Web.Models.Accounts;
@@ -36,14 +35,14 @@ namespace Monifier.Web.Pages.Accounts
 
         public async Task<IActionResult> OnPostAsync()
         {
-            return await Account.TryProcessAsync<ArgumentException>(ModelState,
+            return await Account.ProcessAsync(ModelState,
                 async () =>
                 {
                     await _accountCommands.Update(Account.ToAccountModel());
                     return RedirectToPage("./AccountsList");
                 },
 
-                async () => Page()
+                async () => await Task.FromResult(Page())
             );
         }
     }

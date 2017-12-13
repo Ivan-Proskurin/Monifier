@@ -46,6 +46,14 @@ a.edit-item-link {
     border-bottom: 1px dashed #909090;
 }
 
+.bottom-dashed-line {
+    border-bottom: 1px dashed #909090;
+}
+
+.bill-items-font {
+    font-size: 16px;
+}
+
 .subtotal-expenses-table{
     padding: 0;
     margin-top: 10px;
@@ -69,6 +77,32 @@ a.edit-item-link {
 
 .totals-caption {
     text-align: right;
+    font-weight: 600;
+}
+
+.totals-caption-left {
+    text-align: left;
+    font-weight: 600;
+}
+
+.align-right {
+    text-align: right;
+}
+
+.align-center {
+    text-align: center;
+}
+
+.align-left {
+    text-align: left;
+}
+
+.bill-expense-item {
+    margin-right: 30px;
+}
+
+.lagger-text {
+    font-size: larger;
 }
 
 .awesomplete-padding-fix {
@@ -111,6 +145,10 @@ a.edit-item-link {
 .gapped {
     margin-left: 10px;
     margin-right: 10px;
+}
+
+.gapped-left {
+    margin-left: 10px;
 }
 
 .add-bill-validation-summary {

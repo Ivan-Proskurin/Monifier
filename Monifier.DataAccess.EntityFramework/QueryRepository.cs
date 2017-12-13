@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Monifier.DataAccess.Contract;
-using Monifier.DataAccess.Contract.Model;
+using Monifier.DataAccess.Model.Contracts;
 
 namespace Monifier.DataAccess.EntityFramework
 {
@@ -15,7 +15,8 @@ namespace Monifier.DataAccess.EntityFramework
             _dbSet = dbSet;
         }
 
-        public IQueryable<T> Query => _dbSet;
+        private IQueryable<T> _query;
+        public IQueryable<T> Query => _query ?? (_query = _dbSet.AsNoTracking());
 
         public async Task<T> GetById(int id)
         {

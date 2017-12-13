@@ -11,14 +11,17 @@ namespace Monifier.Web.Pages.TagHelpers
         public string AspFor { get; set; }
         
         public string Value { get; set; }
+        
+        public string Label { get; set; }
 
         protected override void Setup()
         {
             Name = "_DatetimePickerPartial";
-            Model = new FieldBinding
+            Model = new InputModificatorDescriptor
             {
                 Name = AspFor,
-                Value = Value
+                Value = Value,
+                Label = Label
             };
         }
     }

@@ -17,9 +17,18 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             _unitOfWork = unitOfWork;
         }
 
-        public Task Delete(int id, bool onlyMark = true)
+        public async Task Delete(int id, bool onlyMark = true)
         {
-            throw new NotImplementedException();
+            if (onlyMark)
+                throw new ArgumentException("Операция не поддерживается", nameof(onlyMark));
+            
+            var bill = await _unitOfWork.GetQueryRepository<ExpenseBill>().GetById(id);
+            if (bill == null)
+                throw new ArgumentException($"Нет счета с Id = {id}");
+            
+            _unitOfWork.GetCommandRepository<ExpenseBill>().Delete(bill);
+            
+            await _unitOfWork.SaveChangesAsync();
         }
 
         public async Task<ExpenseBillModel> Update(ExpenseBillModel model)

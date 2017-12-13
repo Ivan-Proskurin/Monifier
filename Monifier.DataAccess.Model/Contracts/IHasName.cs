@@ -1,4 +1,4 @@
-﻿namespace Monifier.DataAccess.Contract.Model
+﻿namespace Monifier.DataAccess.Model.Contracts
 {
     public interface IHasName
     {

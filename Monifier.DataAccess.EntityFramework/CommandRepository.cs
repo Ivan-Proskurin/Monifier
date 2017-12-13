@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Monifier.DataAccess.Contract;
-using Monifier.DataAccess.Contract.Model;
+using Monifier.DataAccess.Model.Contracts;
 
 namespace Monifier.DataAccess.EntityFramework
 {

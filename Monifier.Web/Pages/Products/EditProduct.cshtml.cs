@@ -30,13 +30,13 @@ namespace Monifier.Web.Pages.Products
 
         public async Task<IActionResult> OnPostCommitAsync()
         {
-            return await Product.TryProcessAsync<ArgumentException>(ModelState,
+            return await Product.ProcessAsync(ModelState,
                 async () =>
                 {
                     await _productCommands.Update(Product.ToModel());
                     return RedirectToPage("./EditCategory", new {id = Product.CategoryId});
                 },
-                async () => Page(),
+                async () => await Task.FromResult(Page()),
                 async vrList =>
                 {
                     if (string.IsNullOrEmpty(Product.Name)) return;

@@ -1,12 +1,16 @@
 @using TagHelpers
-@model FieldBinding
+@model InputModificatorDescriptor
 @{
     var id = Model.Name.Replace(".", "_");
     var btnId = id + "_Btn";
 }
 <div class="input-group">
+    @if (!string.IsNullOrEmpty(Model.Label))
+    {
+        <span class="input-group-addon">@Model.Label</span>
+    }
     <input id="@id" name="@Model.Name" data-val="true" class="form-control" type="text" value="@Model.Value"/>
-    <span class="input-group-addon cursor-pointer" id="@btnId">
+    <span class="input-group-addon btn btn-secondary cursor-pointer" id="@btnId">
         <i class="fa fa-calendar"></i>
     </span>
 </div>

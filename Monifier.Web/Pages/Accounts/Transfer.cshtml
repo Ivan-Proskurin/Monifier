@@ -7,13 +7,13 @@
 }
 
 <div class="col-md-7 centered-form">
-    <h3>Перевод между счетами</h3>
+    <h4>Перевод между счетами</h4>
     <br/>
  
     <form method="post">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <div class="row">
-            <div class="col-md-12 col-sm-7 col-7">
+            <div class="col-md-10 col-sm-7 col-7">
                 <div class="form-group">
                     <label asp-for="Transfer.AccountFrom" class="control-label"></label>
                     <autocomplete asp-for="Transfer.AccountFrom" value="@Model.Transfer.AccountFrom"
@@ -23,7 +23,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md-12 col-sm-7 col-7">
+            <div class="col-md-10 col-sm-7 col-7">
                 <div class="form-group">
                     <label asp-for="Transfer.AccountTo" class="control-label"></label>
                     <autocomplete asp-for="Transfer.AccountTo" value="@Model.Transfer.AccountTo"
@@ -42,7 +42,7 @@
             </div>
         </div>
         <div class="form-group bottom-buttons-row">
-            <input type="submit" value="Перевести" class="btn btn-success btn-default"/>
+            <input type="submit" value="Перевести" class="btn btn-success btn-default cursor-pointer"/>
             <a asp-page="./AccountsList" class="btn btn-outline-secondary gapped">Отмена</a>
         </div>
     </form>

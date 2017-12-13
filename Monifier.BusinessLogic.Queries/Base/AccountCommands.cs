@@ -5,6 +5,7 @@ using Monifier.BusinessLogic.Model.Accounts;
 using Monifier.BusinessLogic.Model.Base;
 using Monifier.DataAccess.Contract;
 using Monifier.DataAccess.Model.Base;
+using Monifier.DataAccess.Model.Expenses;
 using Monifier.DataAccess.Model.Incomes;
 
 namespace Monifier.BusinessLogic.Queries.Base
@@ -100,6 +101,9 @@ namespace Monifier.BusinessLogic.Queries.Base
 
         public async Task Transfer(int accountFromId, int accountToId, decimal amount)
         {
+            if (amount < 0)
+                throw new ArgumentException("Сумма перевода не должна быть меньше нуля", nameof(amount));
+            
             var accountRepo = _unitOfWork.GetQueryRepository<Account>();
             var accountCommands = _unitOfWork.GetCommandRepository<Account>();
             var accountFrom = await accountRepo.GetById(accountFromId);
@@ -109,10 +113,42 @@ namespace Monifier.BusinessLogic.Queries.Base
             if (accountTo == null)
                 throw new ArgumentException($"Нет счета с Id = {accountToId}");
             
+            if (accountFrom.Balance < amount)
+                throw new InvalidOperationException(
+                    $"Не возможно перевести сумму {amount} со счета \"{accountFrom.Name}\", так как на его балансе не хватает средств");
+
+            
             accountFrom.Balance -= amount;
             accountTo.Balance += amount;
             accountCommands.Update(accountFrom);
             accountCommands.Update(accountTo);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task TransferToExpenseFlow(int flowId, int fromAccountId, decimal amount)
+        {
+            if (amount < 0)
+                throw new ArgumentException("Сумма перевода не должна быть меньше нуля", nameof(amount));
+            
+            var flowQueries = _unitOfWork.GetQueryRepository<ExpenseFlow>();
+            var flow = await flowQueries.GetById(flowId);
+            if (flow == null)
+                throw new ArgumentException($"Нет категории расходов с Id = {flowId}", nameof(flowId));
+
+            var accountQueries = _unitOfWork.GetQueryRepository<Account>();
+            var account = await accountQueries.GetById(fromAccountId);
+            if (account == null)
+                throw new ArgumentException($"Нет такого счета с Id = {fromAccountId}", nameof(fromAccountId));
+            
+            if (account.Balance < amount)
+                throw new InvalidOperationException(
+                    $"Не возможно перевести сумму {amount} со счета \"{account.Name}\", так как на его балансе не хватает средств");
+
+            account.Balance -= amount;
+            flow.Balance += amount;
+            _unitOfWork.GetCommandRepository<Account>().Update(account);
+            _unitOfWork.GetCommandRepository<ExpenseFlow>().Update(flow);
+
             await _unitOfWork.SaveChangesAsync();
         }
     }
