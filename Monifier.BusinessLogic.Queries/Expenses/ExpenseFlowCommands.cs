@@ -92,9 +92,6 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             var flow = await _unitOfWork.GetQueryRepository<ExpenseFlow>().GetById(expense.ExpenseFlowId);
             if (flow == null)
                 throw new ArgumentException($"Нет категории расходов с идентификатором Id = {expense.ExpenseFlowId}");
-            var account = await _unitOfWork.GetNamedModelQueryRepository<Account>().GetByName(expense.Account);
-            if (account == null)
-                throw new ArgumentException($"Нет счета с именем \"{expense.Account}\"");
             
             if (string.IsNullOrEmpty(expense.Category) && string.IsNullOrEmpty(expense.Product))
                 throw new ArgumentException("Необходимо ввести хотя бы категорию или продукт");
@@ -121,7 +118,6 @@ namespace Monifier.BusinessLogic.Queries.Expenses
 
             var bill = new ExpenseBill
             {
-                AccountId = account.Id,
                 ExpenseFlowId = expense.ExpenseFlowId,
                 DateTime = expense.DateCreated,
                 SumPrice = expense.Cost
@@ -137,9 +133,6 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                 Quantity = null,
                 ProductId = product?.Id
             };
-
-            account.Balance -= bill.SumPrice;
-            _unitOfWork.GetCommandRepository<Account>().Update(account);
 
             flow.Balance -= bill.SumPrice;
             _unitOfWork.GetCommandRepository<ExpenseFlow>().Update(flow);

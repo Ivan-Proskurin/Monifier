@@ -31,6 +31,7 @@ namespace Monifier.Web
             services.AddTransient<IExpensesBillCommands, ExpensesBillCommands>();
             services.AddTransient<IExpensesQueries, ExpensesQueries>();
             services.AddTransient<IUserSettings, UserSettings>();
+            services.AddTransient<IIncomesQueries, IncomesQueries>();
         }
     }
 }

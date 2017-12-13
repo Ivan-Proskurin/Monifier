@@ -47,17 +47,6 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             public bool IsCategory { get; set; }
         }
 
-        private static string GetLaconicGoodString(ICollection<string> goods)
-        {
-            var firstTwo = goods.Take(2);
-            var result = string.Join(", ", firstTwo);
-            if (goods.Count > 2)
-            {
-                result += $" ... ({goods.Count})";
-            }
-            return result;
-        }
-
         private class BillGoodComparison : IComparer<BillGood>
         {
             public int Compare(BillGood x, BillGood y)
@@ -208,7 +197,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                         : x.DateTime.ToStandardDateStr(),
                     
                     Caption = byMonth ? x.DateTime.GetMonthName() : x.DateTime.GetWeekDayName().Capitalize(),
-                    Goods = GetLaconicGoodString(x.Goods.Select(g => g.Name).ToList()),
+                    Goods = x.Goods.Select(g => g.Name).ToList().GetLaconicString(),
                     IsDangerExpense = x.Sum >= _userSettings.DangerExpense(byMonth)
                 }).ToList(),
                 Pagination = goodsGroupsWithPagination.Pagination
@@ -234,7 +223,9 @@ namespace Monifier.BusinessLogic.Queries.Expenses
         public async Task<ExpensesListModel> GetExpensesByMonth(DateTime dateFrom, DateTime dateTo,
             PaginationArgs paginationArgs)
         {
-            return await GetExpenses(dateFrom, dateTo, paginationArgs, byMonth: true);
+            var dateFromMonthAligned = dateFrom.StartOfTheMonth();
+            var dateToMonthAligned = dateTo.EndOfTheMonth();
+            return await GetExpenses(dateFromMonthAligned, dateToMonthAligned, paginationArgs, byMonth: true);
         }
 
         public async Task<ExpensesListModel> GetExpensesForDay(DateTime day)
@@ -267,7 +258,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                     DateTo = tomorrow.ToStandardString(),
                     Interval = string.Empty, 
                     Caption = x.DateTime.ToStandardString(),
-                    Goods = GetLaconicGoodString(x.Goods.Select(g => g.Name).ToList()),
+                    Goods = x.Goods.Select(g => g.Name).ToList().GetLaconicString(),
                     IsDangerExpense = false
                 }).ToList(),
                 Pagination = null

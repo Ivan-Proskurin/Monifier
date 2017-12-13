@@ -15,7 +15,6 @@ namespace Monifier.Web.Pages.Expenses
 {
     public class AddExpenseModel : PageModel
     {
-        private readonly IAccountQueries _accountQueries;
         private readonly IExpenseFlowQueries _expenseFlowQueries;
         private readonly IProductQueries _productQueries;
         private readonly IExpenseFlowCommands _expenseFlowCommands;
@@ -27,7 +26,6 @@ namespace Monifier.Web.Pages.Expenses
             IExpenseFlowCommands expenseFlowCommands,
             ICategoriesQueries categoriesQueries)
         {
-            _accountQueries = accountQueries;
             _expenseFlowQueries = expenseFlowQueries;
             _productQueries = productQueries;
             _expenseFlowCommands = expenseFlowCommands;
@@ -36,15 +34,12 @@ namespace Monifier.Web.Pages.Expenses
 
         private async Task PrepareModels(int expenseId)
         {
-            Accounts = await _accountQueries.GetAll();
             Categories = await _categoriesQueries.GetFlowCategories(expenseId);
             Products = await _productQueries.GetExpensesFlowProducts(expenseId);
         }
         
         [BindProperty]
         public EditExpense Expense { get; set; }
-        
-        public List<AccountModel> Accounts { get; private set; }
         
         public List<CategoryModel> Categories { get; private set; }
         
@@ -77,11 +72,6 @@ namespace Monifier.Web.Pages.Expenses
                 },
                 async vrList =>
                 {
-                    if (!string.IsNullOrEmpty(Expense.Account))
-                    {
-                        var account = await _accountQueries.GetByName(Expense.Account);
-                        if (account == null) vrList.Add(new ModelValidationResult("Expense.Account", "Нет такого счета"));
-                    }
                     if (!string.IsNullOrEmpty(Expense.Category))
                     {
                         var category = await _categoriesQueries.GetFlowCategoryByName(Expense.ExpenseFlowId, Expense.Category);

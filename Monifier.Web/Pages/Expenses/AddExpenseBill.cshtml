@@ -14,22 +14,7 @@
            style="display: none;"/>
 
     <div asp-validation-summary="ModelOnly" class="text-danger add-bill-validation-summary"></div>
-    
-    <div class="container">
-        <div class="row">
-            <div class="form-group row col-md-7">
-                <label asp-for="Good.Account" class="col-form-label col-md-3"></label>
-                <div class="col-md-9">
-                    <autocomplete asp-for="Good.Account" class="form-control"
-                                  value="@Model.Good.Account" autocomplete="off"
-                                  value-list="@Model.Accounts.Select(x => x.Name)"/>
-                    <span asp-validation-for="Good.Account"></span>
-                </div>
-            </div>
-        </div>
-    </div>
-    <br/>
-    
+      
     <div class="container">
         <div class="row">
             <div class="col-md-6">
@@ -152,7 +137,6 @@
     <script>
         activateLink("#expensesLink");
         makeInputDatetimePicker("Good.DateTime");
-        makeInputAutocomplete("Good.Account");
         makeInputAutocomplete("Good.Category");
         makeInputAutocomplete("Good.Product");
         makeInputNumeric("Good.Price", false);

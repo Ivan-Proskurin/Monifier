@@ -14,7 +14,6 @@ namespace Monifier.BusinessLogic.Model.Expenses
         }
         
         public int Id { get; set; }
-        public int AccountId { get; set; }
         public int ExpenseFlowId { get; set; }
         public DateTime DateTime { get; set; }
         public string Category { get; set; }

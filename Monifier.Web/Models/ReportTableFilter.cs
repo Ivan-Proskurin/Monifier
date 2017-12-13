@@ -4,15 +4,15 @@ using System.ComponentModel.DataAnnotations;
 using Monifier.Common.Extensions;
 using Monifier.Web.Models.Validation;
 
-namespace Monifier.Web.Models.Expenses
+namespace Monifier.Web.Models
 {
-    public class ExpensesTableFilter : IValidatable
+    public class ReportTableFilter : IValidatable
     {
-        public ExpensesTableFilter()
+        public ReportTableFilter()
         {
         }
 
-        public ExpensesTableFilter(string dateFrom, string dateTo)
+        public ReportTableFilter(string dateFrom, string dateTo)
         {
             DateFrom = dateFrom;
             DateTo = dateTo;
@@ -36,18 +36,27 @@ namespace Monifier.Web.Models.Expenses
             set => DateTo = value?.ToStandardString();
         }
 
-        public static ExpensesTableFilter CurrentWeek()
+        public static ReportTableFilter CurrentWeek()
         {
-            return new ExpensesTableFilter
+            return new ReportTableFilter
             {
                 DateFromAsDateTime = DateTime.Now.StartOfTheWeek(),
                 DateToAsDateTime = DateTime.Now.EndOfTheWeek(),
             };
         }
 
-        public static ExpensesTableFilter CurrentYear()
+        public static ReportTableFilter CurrentMonth()
         {
-            return new ExpensesTableFilter
+            return new ReportTableFilter
+            {
+                DateFromAsDateTime = DateTime.Now.StartOfTheMonth(),
+                DateToAsDateTime = DateTime.Now.EndOfTheMonth()
+            };
+        }
+
+        public static ReportTableFilter CurrentYear()
+        {
+            return new ReportTableFilter
             {
                 DateFromAsDateTime = DateTime.Now.StartOfTheYear(),
                 DateToAsDateTime = DateTime.Now.EndOfTheYear()

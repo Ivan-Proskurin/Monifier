@@ -3,7 +3,6 @@
 @model Expenses.AddExpenseModel
 
 @{
-    var accounts = Model.Accounts.Select(x => x.Name);
     var categories = Model.Categories.Select(x => x.Name);
     var products = Model.Products.Select(x => x.Name);
 }
@@ -18,13 +17,6 @@
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <input asp-for="Expense.ExpenseFlowId" hidden/>
         <input asp-for="Expense.ExpenseFlow" hidden/>
-        <div class="row">
-            <div class="form-group col-md-12 col-sm-7 col-7">
-                <label asp-for="Expense.Account" class="control-label"></label>
-                <autocomplete asp-for="Expense.Account" value="@Model.Expense.Account" value-list="@accounts"/>
-                <span asp-validation-for="Expense.Account" class="text-danger"></span>
-            </div>
-        </div>
         <div class="row">
             <div class="form-group col-md-12 col-sm-7 col-7">
                 <label asp-for="Expense.Category" class="control-label"></label>
@@ -63,7 +55,6 @@
 
 @section Scripts {
     <script>
-        makeInputAutocomplete("Expense.Account");
         makeInputAutocomplete("Expense.Category");
         makeInputAutocomplete("Expense.Product");
         makeInputDatetimePicker("Expense.DateTime");

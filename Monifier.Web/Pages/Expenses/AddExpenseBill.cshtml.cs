@@ -18,19 +18,17 @@ namespace Monifier.Web.Pages.Expenses
     public class AddExpenseBillModel : PageModel
     {
         private readonly IExpenseFlowQueries _expenseFlowQueries;
-        private readonly IAccountQueries _accountQueries;
         private readonly ICategoriesQueries _categoriesQueries;
         private readonly IProductQueries _productQueries;
         private readonly IExpensesBillCommands _expensesBillCommands;
 
-        public AddExpenseBillModel(IExpenseFlowQueries expenseFlowQueries,
-            IAccountQueries accountQueries,
+        public AddExpenseBillModel(
+            IExpenseFlowQueries expenseFlowQueries,
             ICategoriesQueries categoriesQueries,
             IProductQueries productQueries,
             IExpensesBillCommands expensesBillCommands)
         {
             _expenseFlowQueries = expenseFlowQueries;
-            _accountQueries = accountQueries;
             _categoriesQueries = categoriesQueries;
             _productQueries = productQueries;
             _expensesBillCommands = expensesBillCommands;
@@ -39,7 +37,6 @@ namespace Monifier.Web.Pages.Expenses
         private async Task PrepareModelsAsync(int expenseId)
         {
             ExpenseFlow = await _expenseFlowQueries.GetById(expenseId);
-            Accounts = await _accountQueries.GetAll();
             Categories = await _categoriesQueries.GetFlowCategories(expenseId);
             Products = await _productQueries.GetExpensesFlowProducts(expenseId);
         }
@@ -48,8 +45,6 @@ namespace Monifier.Web.Pages.Expenses
         public AddExpenseBill Good { get; set; }
 
         public ExpenseFlowModel ExpenseFlow { get; private set; }
-
-        public List<AccountModel> Accounts { get; set; }
 
         public List<CategoryModel> Categories { get; private set; }
 
@@ -113,38 +108,12 @@ namespace Monifier.Web.Pages.Expenses
                         if (product == null)
                             vrList.Add(new ModelValidationResult("Good.Product", "Нет такого товара"));
                     }
-                    if (!string.IsNullOrEmpty(Good.Account))
-                    {
-                        var account = await _accountQueries.GetByName(Good.Account);
-                        if (account == null)
-                            vrList.Add(new ModelValidationResult("Good.Account", "Нет такого счета"));
-                    }
                 });
         }
 
         public async Task<IActionResult> OnPostConfirmAsync()
         {
             Bill = JsonConvert.DeserializeObject<ExpenseBillModel>(Good.Bill);
-
-            if (string.IsNullOrEmpty(Good.Account))
-            {
-                ModelState.AddModelError("Good.Account", "Укажите счет списания");
-            }
-            
-            if (!string.IsNullOrEmpty(Good.Account))
-            {
-                var account = await _accountQueries.GetByName(Good.Account);
-                if (account == null)
-                {
-                    ModelState.AddModelError("Good.Account", "Нет такого счета");
-                    return Page();
-                }
-                else
-                {
-                    Bill.AccountId = account.Id;
-                }
-            }
-            
             if (Bill.Items.Count == 0)
             {
                 await PrepareModelsAsync(Good.ExpenseFlowId);

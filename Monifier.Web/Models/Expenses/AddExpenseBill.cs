@@ -11,10 +11,6 @@ namespace Monifier.Web.Models.Expenses
     {
         public int ExpenseFlowId { get; set; }
         
-        [Required(ErrorMessage = "Укажите счет списания")]
-        [DisplayName("Счет списания")]
-        public string Account { get; set; }
-
         public string Bill { get; set; }
 
         [Required(ErrorMessage = "Укажите дату/время")]

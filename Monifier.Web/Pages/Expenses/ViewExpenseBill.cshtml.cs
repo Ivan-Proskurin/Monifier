@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Contract.Expenses;
-using Monifier.BusinessLogic.Model.Base;
 using Monifier.BusinessLogic.Model.Expenses;
 using Monifier.Common.Extensions;
 
@@ -32,8 +31,6 @@ namespace Monifier.Web.Pages.Expenses
         
         public ExpenseFlowModel ExpenseFlow { get; private set; }
         
-        public AccountModel Account { get; private set; }
-        
         [BindProperty]
         public string Day { get; set; }
         
@@ -44,7 +41,6 @@ namespace Monifier.Web.Pages.Expenses
         {
             Bill = await _expensesBillQueries.GetById(billId);
             ExpenseFlow = await _expenseFlowQueries.GetById(Bill.ExpenseFlowId);
-            Account = await _accountQueries.GetById(Bill.AccountId);
             Day = Bill.DateTime.Date.ToStandardString();
         }
 

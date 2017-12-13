@@ -6,7 +6,6 @@ using Monifier.BusinessLogic.Contract.Settings;
 using Monifier.BusinessLogic.Model.Expenses;
 using Monifier.BusinessLogic.Model.Pagination;
 using Monifier.Web.Models;
-using Monifier.Web.Models.Expenses;
 
 namespace Monifier.Web.Pages.Expenses
 {
@@ -22,7 +21,7 @@ namespace Monifier.Web.Pages.Expenses
         }
 
         [BindProperty]
-        public ExpensesTableFilter Filter { get; set; }
+        public ReportTableFilter Filter { get; set; }
 
         public ExpensesListModel Expenses { get; private set; }
 
@@ -52,10 +51,10 @@ namespace Monifier.Web.Pages.Expenses
         public async Task OnGetAsync(string dateFrom, string dateTo, int pageNumber = 1)
         {
             if (string.IsNullOrEmpty(dateFrom) || string.IsNullOrEmpty(dateTo))
-                Filter = ExpensesTableFilter.CurrentYear();
+                Filter = ReportTableFilter.CurrentYear();
             else
             {
-                Filter = new ExpensesTableFilter(dateFrom, dateTo);
+                Filter = new ReportTableFilter(dateFrom, dateTo);
                 foreach (var error in Filter.Validate())
                 {
                     ModelState.AddModelError(error.PropertyName, error.Message);

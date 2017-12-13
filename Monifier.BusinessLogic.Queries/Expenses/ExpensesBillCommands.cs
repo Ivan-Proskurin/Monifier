@@ -21,12 +21,21 @@ namespace Monifier.BusinessLogic.Queries.Expenses
         {
             if (onlyMark)
                 throw new ArgumentException("Операция не поддерживается", nameof(onlyMark));
-            
-            var bill = await _unitOfWork.GetQueryRepository<ExpenseBill>().GetById(id);
+
+            var billQueries = _unitOfWork.GetQueryRepository<ExpenseBill>();
+            var bill = await billQueries.GetById(id);
             if (bill == null)
                 throw new ArgumentException($"Нет счета с Id = {id}");
+
+            var billCommands = _unitOfWork.GetCommandRepository<ExpenseBill>();
+            var flowQueries = _unitOfWork.GetQueryRepository<ExpenseFlow>();
+            var flowCommands = _unitOfWork.GetCommandRepository<ExpenseFlow>();
+
+            var flow = await flowQueries.GetById(bill.ExpenseFlowId);
+            flow.Balance += bill.SumPrice;
+            flowCommands.Update(flow);
             
-            _unitOfWork.GetCommandRepository<ExpenseBill>().Delete(bill);
+            billCommands.Delete(bill);
             
             await _unitOfWork.SaveChangesAsync();
         }
@@ -82,7 +91,6 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             var bill = new ExpenseBill
             {
                 ExpenseFlowId = model.ExpenseFlowId,
-                AccountId = model.AccountId,
                 DateTime = model.DateTime,
                 SumPrice = model.Cost
             };
@@ -103,12 +111,6 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                     Comment = item.Comment
                 });
             }
-
-            var accountCommands = _unitOfWork.GetCommandRepository<Account>();
-            var accountQueries = _unitOfWork.GetQueryRepository<Account>();
-            var account = await accountQueries.GetById(bill.AccountId);
-            account.Balance -= bill.SumPrice;
-            accountCommands.Update(account);
 
             var flowQieries = _unitOfWork.GetQueryRepository<ExpenseFlow>();
             var flowCommands = _unitOfWork.GetCommandRepository<ExpenseFlow>();

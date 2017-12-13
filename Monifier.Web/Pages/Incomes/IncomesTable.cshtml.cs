@@ -1,38 +1,37 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Monifier.BusinessLogic.Contract.Expenses;
+using Monifier.BusinessLogic.Contract.Incomes;
 using Monifier.BusinessLogic.Contract.Settings;
-using Monifier.BusinessLogic.Model.Expenses;
+using Monifier.BusinessLogic.Model.Incomes;
 using Monifier.BusinessLogic.Model.Pagination;
 using Monifier.Web.Models;
-using Monifier.Web.Models.Expenses;
 
-namespace Monifier.Web.Pages.Expenses
+namespace Monifier.Web.Pages.Incomes
 {
-    public class ExpensesTableModel : PageModel
+    public class IncomesTableModel : PageModel
     {
-        private readonly IExpensesQueries _expensesQueries;
+        private readonly IIncomesQueries _incomesQueries;
         private readonly IUserSettings _userSettings;
 
-        public ExpensesTableModel(IExpensesQueries expensesQueries, IUserSettings userSettings)
+        public IncomesTableModel(IIncomesQueries incomesQueries, IUserSettings userSettings)
         {
-            _expensesQueries = expensesQueries;
+            _incomesQueries = incomesQueries;
             _userSettings = userSettings;
         }
-        
+
         [BindProperty]
         public ReportTableFilter Filter { get; set; }
-        
-        public ExpensesListModel Expenses { get; private set; }
-        
+
         public bool IsDataValid { get; private set; }
 
-        private async Task<ExpensesListModel> LoadExpensesAsync(int pageNumber = 1)
+        public IncomesListModel Incomes { get; private set; }
+
+        private async Task<IncomesListModel> LoadIncomesAsync(int pageNumber = 1)
         {
             if (Filter.DateFromAsDateTime != null && Filter.DateToAsDateTime != null)
             {
-                var expenses = await _expensesQueries.GetExpensesByDay(
+                var incomes = await _incomesQueries.GetIncomesList(
                     Filter.DateFromAsDateTime.Value, Filter.DateToAsDateTime.Value, new PaginationArgs
                     {
                         IncludeDeleted = false,
@@ -40,19 +39,19 @@ namespace Monifier.Web.Pages.Expenses
                         PageNumber = pageNumber
                     });
                 IsDataValid = true;
-                return expenses;
+                return incomes;
             }
             else
             {
                 IsDataValid = false;
             }
             return null;
-        } 
+        }
 
         public async Task OnGetAsync(string dateFrom, string dateTo, int pageNumber = 1)
         {
             if (string.IsNullOrEmpty(dateFrom) || string.IsNullOrEmpty(dateTo))
-                Filter = ReportTableFilter.CurrentWeek();
+                Filter = ReportTableFilter.CurrentMonth();
             else
             {
                 Filter = new ReportTableFilter(dateFrom, dateTo);
@@ -62,7 +61,7 @@ namespace Monifier.Web.Pages.Expenses
                 }
             }
             if (ModelState.IsValid)
-                Expenses = await LoadExpensesAsync(pageNumber);
+                Incomes = await LoadIncomesAsync(pageNumber);
             else
                 IsDataValid = false;
         }
@@ -72,7 +71,7 @@ namespace Monifier.Web.Pages.Expenses
             return await Filter.ProcessAsync(ModelState,
                 async () =>
                 {
-                    Expenses = await LoadExpensesAsync();
+                    Incomes = await LoadIncomesAsync();
                     return Page();
                 },
                 async () =>

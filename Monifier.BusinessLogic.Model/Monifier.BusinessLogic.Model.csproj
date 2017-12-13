@@ -5,7 +5,6 @@
   <ItemGroup>
     <Folder Include="Agregation" />
     <Folder Include="Base" />
-    <Folder Include="Incomes" />
     <Folder Include="Pagination" />
     <Folder Include="Settings" />
   </ItemGroup>

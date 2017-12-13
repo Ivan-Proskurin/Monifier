@@ -13,11 +13,7 @@ namespace Monifier.Web.Models.Expenses
         [Display(Name = "Категория *")]
         [Required(ErrorMessage = "Укажите категорию")]
         public string ExpenseFlow { get; set; }
-        
-        [Display(Name = "Счет списания *")]
-        [Required(ErrorMessage = "Укажите счет списания")]
-        public string Account { get; set; }
-        
+             
         [Display(Name = "Дата/время *")]
         [Required(ErrorMessage = "Укажите дату/время")]
         public string DateTime { get; set; }
@@ -28,7 +24,7 @@ namespace Monifier.Web.Models.Expenses
         [Display(Name = "Товар")]
         public string Product { get; set; }
         
-        [Display(Name = "Сумма")]
+        [Display(Name = "Сумма *")]
         [Required(ErrorMessage = "Введите сумму")]
         public string Cost { get; set; }
 
@@ -51,7 +47,6 @@ namespace Monifier.Web.Models.Expenses
             return new ExpenseFlowExpense
             {
                 ExpenseFlowId = ExpenseFlowId,
-                Account = Account,
                 Category = Category,
                 Product = Product,
                 DateCreated = DateTime.ParseDtFromStandardString(),
