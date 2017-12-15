@@ -9,92 +9,119 @@
 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
 <form method="post">
-    <div class="container">
-        <div class="row">
-            <div class="form-group row col-md-2">
-                <span class="expenses-header">Расходы</span>
-            </div>
-            <div class="form-group row col-md-4 col-sm-10 col-10 gapped-left">
-                <date-time-picker asp-for="Filter.DateFrom" class="form-control" autocomplete="off"
-                                  label="От:" value="@Model.Filter.DateFrom"/>
-                <span asp-validation-for="Filter.DateFrom" class="text-danger"></span>
-            </div>
-            <div class="form-group row col-md-6 col-sm-10 col-10 gapped-left">
-                <div class="input-group">
-                    <date-time-picker asp-for="Filter.DateTo" class="form-control"
-                                      autocomplete="off" label="До:"
-                                      value="@Model.Filter.DateTo"/>
-                    <button type="submit" asp-page-handler="refresh"
-                            class="input-group-addon btn btn-secondary cursor-pointer gapped-left" id="refresh-button">
-                        <i class="fa fa-refresh"></i>
-                    </button>
-                    <a asp-page="./IncomesByMonth"
-                       class="input-group-addon btn btn-secondary cursor-pointer">
-                        По месяцам
-                    </a>
-                </div>
-                <span asp-validation-for="Filter.DateTo" class="text-danger"></span>
-            </div>
+    <div class="input-group">
+        <div class="input-group-addon addon-caption-container">
+            Расходы
+        </div>
+        <div class="input-group-addon addon-label-container">
+            От:
+        </div>
+        <div class="input-group-addon addon-dtpicker-container">
+            <date-time-picker asp-for="Filter.DateFrom" class="form-control" autocomplete="off"
+                              value="@Model.Filter.DateFrom"/>
+        </div>
+        <div class="input-group-addon addon-label-container">
+            До:
+        </div>
+        <div class="input-group-addon addon-dtpicker-container">
+            <date-time-picker asp-for="Filter.DateTo" class="form-control"
+                              autocomplete="off" value="@Model.Filter.DateTo"/>
+        </div>
+        <div class="input-group-addon addon-button-container">
+            <button type="submit" asp-page-handler="refresh"
+                    class="btn btn-outline-secondary cursor-pointer" id="refresh-button">
+                <i class="fa fa-refresh"></i>
+            </button>
+        </div>
+        <div class="input-group-addon addon-button-container">
+            @if (Model.IsDataValid)
+            {
+                <a asp-page="./IncomesByMonth"
+                   asp-route-dateFrom="@Model.Filter.DateFromAsDateTime.Value.StartOfTheYear().ToStandardString()"
+                   asp-route-dateTo="@Model.Filter.DateToAsDateTime.Value.EndOfTheYear().ToStandardString()"
+                   asp-route-pageNumber="1"
+                   class="btn btn-outline-secondary cursor-pointer">
+                    По месяцам
+                </a>
+            }
+        </div>
+        <div class="input-group-addon addon-terminator-container">
+            &nbsp;
         </div>
     </div>
 </form>
 
-@if (Model.IsDataValid)
+@if (!Model.IsDataValid)
 {
-    <table class="cashed-table table table-striped table-hover">
-        <thead class="thead-dark">
-        <tr>
-            <th>Дата/время</th>
-            <th>Статья дохода</th>
-            <th>Счет зачисления</th>
-            <th class="align-right">Сумма</th>
-        </tr>
-        </thead>
-        <tbody>
+    <div class="text-danger larger-text align-center validation-summary-errors">Введите корректные даты!</div>
+}
+
+<table class="cashed-table table table-striped table-hover">
+    <thead class="thead-dark">
+    <tr>
+        <th>Дата/время</th>
+        <th>Статья дохода</th>
+        <th>Счет зачисления</th>
+        <th class="align-right">Сумма</th>
+    </tr>
+    </thead>
+    <tbody>
+    @if (Model.IsDataValid)
+    {
         @for (int i = 0; i < Model.Incomes.Incomes.Count; i++)
-        {
-            var item = Model.Incomes.Incomes[i];
+         {
+             var item = Model.Incomes.Incomes[i];
 //            var trClass = item.IsDangerExpense ? "table-danger" : "table-default";
 
 @*            <tr class="@trClass">*@
-            <tr>
-                <td>@item.Interval
-@*                    <a asp-page="./ExpensesTable" class="edit-item-link"*@
-@*                       asp-route-dateFrom="@item.DateFrom"*@
-@*                       asp-route-dateTo="@item.DateTo">*@
-@*                        @item.Interval</a>*@
-                </td>
-                <td>@item.Types
-@*                    <a asp-page="./ExpensesTable" class="edit-item-link"*@
-@*                       asp-route-dateFrom="@item.DateFrom"*@
-@*                       asp-route-dateTo="@item.DateTo">*@
-@*                        @item.Caption</a>*@
-                </td>
-                <td>@item.Caption
-@*                    <a asp-page="./ExpensesTable" class="edit-item-link"*@
-@*                       asp-route-dateFrom="@item.DateFrom"*@
-@*                       asp-route-dateTo="@item.DateTo">*@
-@*                        @item.Goods</a>*@
-                </td>
-                <td class="align-right">@item.Sum.ToMoney()</td>
-            </tr>
-        }
-        </tbody>
-        <tfoot>
-        <tr class="table-info">
+             <tr>
+                 <td>
+                     @item.Interval
+                     @*                    <a asp-page="./ExpensesTable" class="edit-item-link"*@
+                     @*                       asp-route-dateFrom="@item.DateFrom"*@
+                     @*                       asp-route-dateTo="@item.DateTo">*@
+                     @*                        @item.Interval</a>*@
+                 </td>
+                 <td>
+                     @item.Types
+                     @*                    <a asp-page="./ExpensesTable" class="edit-item-link"*@
+                     @*                       asp-route-dateFrom="@item.DateFrom"*@
+                     @*                       asp-route-dateTo="@item.DateTo">*@
+                     @*                        @item.Caption</a>*@
+                 </td>
+                 <td>
+                     @item.Caption
+                     @*                    <a asp-page="./ExpensesTable" class="edit-item-link"*@
+                     @*                       asp-route-dateFrom="@item.DateFrom"*@
+                     @*                       asp-route-dateTo="@item.DateTo">*@
+                     @*                        @item.Goods</a>*@
+                 </td>
+                 <td class="align-right">@item.Sum.ToMoney()</td>
+             </tr>
+         }
+    }
+    </tbody>
+    <tfoot>
+    <tr class="table-info">
+        @if (Model.IsDataValid)
+        {
             <td colspan="3" class="totals-caption-left">@Model.Incomes.Totals.Caption</td>
             <td class="totals-caption">@Model.Incomes.Totals.Total.ToMoney()</td>
-        </tr>
-        </tfoot>
-    </table>
+        }
+        else
+        {
+            <td colspan="3" class="totals-caption-left">Итого за выбранный период:</td>
+            <td class="totals-caption">-</td>
+        }
+    </tr>
+    </tfoot>
+</table>
 
+@if (Model.IsDataValid)
+{
     <pagination asp-page="./IncomesTable" date-from="@Model.Filter.DateFrom" date-to="@Model.Filter.DateTo"
                 pagination="@Model.Incomes.Pagination">
     </pagination>
-}
-else
-{
-    <div class="text-danger larger-text align-center">Введите корректные даты!</div>
 }
 
 @section Scripts
@@ -102,8 +129,12 @@ else
     <script type="text/javascript">
         activateLink("#incomesLink");
 
-        makeInputDatetimePicker("Filter.DateFrom");
-        makeInputDatetimePicker("Filter.DateTo");
+        makeInputDatetimePicker("Filter.DateFrom", refresh);
+        makeInputDatetimePicker("Filter.DateTo", refresh);
+
+        function refresh() {
+            document.getElementById("refresh-button").click();
+        }
 
     </script>
 }

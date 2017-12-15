@@ -37,8 +37,8 @@
             @if (Model.IsDataValid)
             {
                 <a asp-page="./ExpensesByMonth"
-                   asp-route-dateFrom="@Model.Filter.DateFromAsDateTime.Value.StartOfTheMonth().ToStandardString()"
-                   asp-route-dateTo="@Model.Filter.DateToAsDateTime.Value.EndOfTheMonth().ToStandardString()"
+                   asp-route-dateFrom="@Model.Filter.DateFromAsDateTime.Value.StartOfTheYear().ToStandardString()"
+                   asp-route-dateTo="@Model.Filter.DateToAsDateTime.Value.EndOfTheYear().ToStandardString()"
                    asp-route-pageNumber="1"
                    class="btn btn-outline-secondary cursor-pointer">
                     По месяцам
