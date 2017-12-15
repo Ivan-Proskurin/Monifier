@@ -28,6 +28,7 @@ namespace Monifier.Web
                     b => b.MigrationsAssembly("Monifier.Web")));
             
             services.AddMvc();
+            services.AddAntiforgery(o => o.HeaderName = "XSRF-TOKEN");
             
             services.AddBusinessServices();
         }

@@ -1,5 +1,6 @@
 @page "{expenseId:int}"
 @using System.Linq
+@using Models.Accounts
 @model Expenses.FlowTransferModel
 
 @{
@@ -7,14 +8,16 @@
 }
 
 <div class="col-md-7 centered-form">
-    <h4>Перевод на категорию расходов &quot;@Model.Flow.Name&quot;</h4>
-    <br/>
- 
     <form method="post">
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <input asp-for="Transfer.FlowId" hidden/>
         <div class="row">
-            <div class="col-md-10 col-sm-7 col-7">
+            <div class="col-md-12 col-sm-7 col-7">
+                <h4 class="form-caption-sm">Перевод на категорию расходов &quot;@Model.Flow.Name&quot;</h4>
+            </div>
+        </div>
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="row">
+            <div class="col-md-12 col-sm-7 col-7">
                 <div class="form-group">
                     <label asp-for="Transfer.AccountFrom" class="control-label"></label>
                     <autocomplete asp-for="Transfer.AccountFrom" value="@Model.Transfer.AccountFrom"
@@ -24,7 +27,14 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md-5 col-sm-7 col-7">
+            <div class="col-md-6 col-sm-7 col-7">
+                <div class="form-group">
+                    <label class="control-label">Доступно:</label>
+                    <input id="avail-balance" class="form-control money-input" autocomplete="off" 
+                           value="@Model.AvailableBalance" disabled/>
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-7 col-7">
                 <div class="form-group">
                     <label asp-for="Transfer.Amount" class="control-label"></label>
                     <input asp-for="Transfer.Amount" class="form-control money-input" autocomplete="off"/>
@@ -33,8 +43,8 @@
             </div>
         </div>
         <div class="form-group bottom-buttons-row">
-            <input type="submit" value="Перевести" class="btn btn-success btn-default cursor-pointer"/>
-            <a asp-page="./ExpenseFlows" class="btn btn-outline-secondary cursor-pointer gapped">Отмена</a>
+            <input type="submit" value="Перевести" class="btn btn-outline-danger cursor-pointer"/>
+            <a asp-page="./ExpenseFlows" class="btn btn-outline-primary cursor-pointer gapped">Отмена</a>
         </div>
     </form>
 
@@ -42,7 +52,18 @@
 
 @section Scripts {
     <script>
-        makeInputAutocomplete("Transfer.AccountFrom");
+        makeInputAutocomplete("Transfer.AccountFrom", null, updateAvailableBalance);
         makeInputNumeric("Transfer.Amount");
+
+        var flowId = "@Model.Flow.Id";
+        
+        function updateAvailableBalance() {
+            $("#avail-balance").val("-");
+            sendAjax("/Expenses/FlowTransfer/"+flowId+"/?handler=accountbalance",
+                $("#Transfer_AccountFrom").val(),
+                function(result) {
+                    $('#avail-balance').val(result);
+                });
+        }
     </script>
 }

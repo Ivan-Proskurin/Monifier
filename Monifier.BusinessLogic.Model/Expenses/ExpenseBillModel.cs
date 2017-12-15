@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Monifier.Common.Extensions;
 
@@ -26,13 +27,21 @@ namespace Monifier.BusinessLogic.Model.Expenses
         {
             if (Items == null) Items = new List<ExpenseItemModel>();
             Items.Add(item);
-            UpdateProperties();
+            UpdateState();
+        }
+        
+        public bool RemoveLastAddedItem()
+        {
+            if (Items == null || Items.Count == 0) return false;
+            var lastItem = Items.LastOrDefault();
+            var result = lastItem != null && Items.Remove(lastItem);
+            if (result) UpdateState();
+            return result;
         }
 
-        private void UpdateProperties()
+        private void UpdateState()
         {
             var items = GetItems();
-            DateTime = items.Count > 0 ? items.Min(x => x.DateTime) : DateTime.Today;
             Cost = items.Sum(x => x.Cost);
         }
 
@@ -67,7 +76,7 @@ namespace Monifier.BusinessLogic.Model.Expenses
                         i++;
                 }
             }
-            UpdateProperties();
+            UpdateState();
         }
 
         public List<ExpenseItemModel> GetItems()
@@ -92,7 +101,6 @@ namespace Monifier.BusinessLogic.Model.Expenses
                 clone.Items.Add(new ExpenseItemModel
                 {
                     Id = item.Id,
-                    DateTime = item.DateTime,
                     Category = item.Category,
                     CategoryId = item.CategoryId,
                     ProductId = item.ProductId,
@@ -118,7 +126,13 @@ namespace Monifier.BusinessLogic.Model.Expenses
             var index = Items.FindIndex(x => x.Id == item.Id);
             if (index < 0) return;
             Items[index] = item;
-            UpdateProperties();
+            UpdateState();
+        }
+
+        public void Validate()
+        {
+            if (Cost != Items.Sum(x => x.Cost))
+                throw new ValidationException("Сумма чека должна равняться сумме всех входящих в него позиций");
         }
     }
 }

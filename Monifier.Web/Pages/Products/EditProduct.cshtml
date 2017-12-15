@@ -3,43 +3,35 @@
 
 <div class="row">
     <div class="col-md-8 centered-form">
-        <h4>@Model.Product.OriginalName</h4>
-        <br/>
+        <h4 class="form-caption-sm">@Model.Product.OriginalName</h4>
         <form method="post">
             <input asp-for="Product.CategoryId" hidden/>
             <input asp-for="Product.Id" hidden/>
             <input asp-for="Product.OriginalName" hidden/>
-            <div class="form-group">
-                <input asp-for="Product.Name" class="form-control" autocomplete="off"/>
-                <span asp-validation-for="Product.Name"></span>
+            <div class="row">
+                <div class="form-group col-md-12 col-sm-12">
+                    <input asp-for="Product.Name" class="form-control" autocomplete="off"/>
+                    <span asp-validation-for="Product.Name"></span>
+                </div>
             </div>
-            <div class="bottom-buttons-row">
-                <input type="submit" asp-page-handler="commit" class="btn btn-success cursor-pointer" value="Сохранить"/>
-                <a asp-page="./EditCategory" asp-route-id="@Model.Product.CategoryId" class="btn btn-secondary">Отмена</a>
-                <button type="button" class="btn btn-danger cursor-pointer" data-toggle="modal" data-target="#deleteModal">Удалить товар</button>
+            <div class="row">
+                <div class="col-md-8 col-sm-8 col-9">
+                    <div class="form-group">
+                        <input type="submit" asp-page-handler="commit" class="btn btn-outline-danger cursor-pointer" value="Сохранить"/>
+                        <a asp-page="./EditCategory" asp-route-id="@Model.Product.CategoryId" class="btn btn-outline-primary">Отмена</a>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-4 col-3 align-right">
+                    <delete-button modal-id="#deleteModal" text="Удалить товар"/>
+                </div>
             </div>
             
             <!-- Deletion modal -->
-            <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Удаление товара</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            Удалить товар с сохранением статистики расходов по нему?
-                            Или удалить его полностью? Тогда статистика по расходам будет удалена также.
-                        </div>
-                        <div class="modal-footer">
-                            <input type="submit" asp-page-handler="delete" asp-route-permanent="false" value="Удалить с сохранением" class="btn btn-primary"/>
-                            <input type="submit" asp-page-handler="delete" asp-route-permanent="true" value="Удалить полностью" class="btn btn-danger"/>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <deletion-modal modal-id="deleteModal" caption="Удаление товара"
+                            text="Удалить товар с сохранением статистики расходов по нему?
+                                  Или удалить его полностью? Тогда статистика по расходам будет удалена также."
+                            button-soft-text="Удалить с сохранением"
+                            button-tought-text="Удалить полностью"/>
         </form>
     </div>
 </div>

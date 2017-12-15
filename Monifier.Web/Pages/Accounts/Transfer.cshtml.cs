@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Model.Base;
 using Monifier.Common.Extensions;
+using Monifier.Web.Extensions;
 using Monifier.Web.Models;
 using Monifier.Web.Models.Accounts;
 using Monifier.Web.Models.Validation;
@@ -26,35 +27,68 @@ namespace Monifier.Web.Pages.Accounts
         [BindProperty]
         public Transfer Transfer { get; set; }
         
-        public List<AccountModel> Accounts { get; set; }
+        public List<AccountModel> Accounts { get; private set; }
+        
+        public string AvailableBalance { get; private set; }
 
-        public async Task OnGetAsync()
+        public async Task OnGetAsync(int? fromId = null, int? toId = null)
         {
-            Transfer = new Transfer();
             Accounts = await _accountQueries.GetAll();
+            Transfer = new Transfer();
+            if (fromId != null)
+            {
+                var account = Accounts.SingleOrDefault(x => x.Id == fromId.Value);
+                Transfer.AccountFrom = account?.Name;
+                AvailableBalance = account?.Balance.ToMoney();
+            }
+            else
+            {
+                AvailableBalance = "-";
+            }
+            
+            if (toId != null)
+            {
+                Transfer.AccountTo = Accounts.SingleOrDefault(x => x.Id == toId.Value)?.Name;
+            }
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
             Accounts = await _accountQueries.GetAll();
-            var accountFrom = Accounts.SingleOrDefault(x => x.Name == Transfer.AccountFrom);
-            var accountTo = Accounts.SingleOrDefault(x => x.Name == Transfer.AccountTo);
             
             return await Transfer.ProcessAsync(ModelState,
                 async () =>
                 {
+                    var accountFrom = _accountQueries.GetByName(Transfer.AccountFrom);
+                    var accountTo = _accountQueries.GetByName(Transfer.AccountTo);
                     await _accountCommands.Transfer(accountFrom.Id, accountTo.Id, Transfer.Amount.ParseMoneyInvariant());
                     return RedirectToPage("./AccountsList");
                 },
                 
-                async () => await Task.FromResult(Page()),
+                async () =>
+                {
+                    var account = await _accountQueries.GetByName(Transfer.AccountFrom);
+                    AvailableBalance = account != null ? account?.Balance.ToMoney() : "-";
+                    return await Task.FromResult(Page());
+                },
                 
                 async vrList =>
                 {
+                    var accountFrom = _accountQueries.GetByName(Transfer.AccountFrom);
+                    var accountTo = _accountQueries.GetByName(Transfer.AccountTo);
                     if (accountFrom == null) vrList.Add(new ModelValidationResult("Transfer.AccountFrom", "Такого счета нет"));
                     if (accountTo == null) vrList.Add(new ModelValidationResult("Transfer.AccountTo", "Такого счета нет"));
                     await Task.CompletedTask;
                 });
+        }
+
+        public async Task<JsonResult> OnPostAccountBalanceAsync()
+        {
+            return await this.ProcessAjaxPostRequestAsync(async name =>
+            {
+                var account = await _accountQueries.GetByName(name);
+                return account == null ? "-" : account.Balance.ToMoney();
+            });
         }
     }
 }

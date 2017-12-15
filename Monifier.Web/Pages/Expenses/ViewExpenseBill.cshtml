@@ -6,39 +6,19 @@
 
     <div class="container" style="margin-bottom: 40px;">
         <div class="row">
-            <div class="col-md-10 col-sm-8 col-7" style="padding-left: 0;">
-                <table width="80%">
-                    <tr class="bottom-dashed-line">
-                        <td>
-                            <h5>Категория расходов:</h5>
-                        </td>
-                        <td class="align-right">
-                            <h5>@Model.ExpenseFlow.Name</h5>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <h6>Счет списания:</h6>
-                        </td>
-                        <td class="align-right">
-                            <h6>@Model.Account.Name</h6>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-            <div class="col-md-2 col-sm-8 col-7" style="padding-left: 0; margin-top: 20px;">
-                <delete-button modal-id="#deleteModal" text="Удалить счет"></delete-button>
+            <div class="col-md-12 col-sm-11 col-7">
+                <h3 class="bottom-dashed-line">@Model.ExpenseFlow.Name</h3>
             </div>
         </div>
     </div>
 
     <div class="container">
         <div class="row">
-            <div class="col-md-12 col-sm-8 col-7">
+            <div class="col-md-12 col-sm-11 col-7">
                 <table width="100%" style="margin-bottom: 50px; padding-left: 0;">
                     <tr class="bottom-dashed-line">
                         <td class="align-left column-header-col">
-                            <h5>Счет за:</h5>
+                            <h5>Чек #@Model.Bill.Id за:</h5>
                         </td>
                         <td class="align-left">
                             <h5>@Model.Bill.DateTime.ToStandardString()</h5>
@@ -67,13 +47,20 @@
         </div>
     </div>
 
-    <div class="row bottom-buttons-row">
-        <div class="col">
-            <a asp-page="./ExpensesForDay" asp-route-day="@Model.Day" class="btn btn-outline-danger">Назад</a>
-            <a asp-page="./ExpenseFlows" class="btn btn-outline-primary">Редактировать</a>
-        </div>
-        <div class="col" style="text-align: right;">
-            @*            @Html.ActionLink("Редактировать пункты", "EditItems", null, new { @class = "btn btn-outline-primary btn-sm" })*@
+    <div class="container">
+        <div class="row bottom-buttons-row">
+            <div class="col-md-6 col-sm-6 col-4">
+                <a asp-page="./ExpensesForDay" asp-route-day="@Model.Day" class="btn btn-outline-danger">Назад</a>
+                <a asp-page="./AddExpenseBill"
+                   asp-route-expenseId="@Model.ExpenseFlow.Id"
+                   asp-route-billId="@Model.Bill.Id"
+                   class="btn btn-outline-primary">
+                    Редактировать
+                </a>
+            </div>
+            <div class="col-md-6 col-sm-5 col-3" style="text-align: right;">
+                <delete-button modal-id="#deleteModal" text="Удалить счет"></delete-button>
+            </div>
         </div>
     </div>
 </div>
@@ -81,10 +68,11 @@
 <form method="post">
     <input asp-for="BillId" hidden/>
     <input asp-for="Day" hidden/>
-    
+
     <!-- Deletion modal -->
     <deletion-modal modal-id="deleteModal" caption="Удаление счета"
                     text="Удалить счет с удалением всех его пунктов? Внимание! Это действие необратимо!"
                     page-handler="delete"
-                    button-tought-text="Да, удалить"></deletion-modal>
+                    button-tought-text="Да, удалить">
+    </deletion-modal>
 </form>

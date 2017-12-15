@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -52,11 +51,15 @@ namespace Monifier.Web.Pages.Products
             return await Category.ProcessAsync(ModelState,
                 async () =>
                 {
-                    await _categoriesCommands.Update(new CategoryModel
+                    var category = await _categoriesQueries.GetByName(Category.Category);
+                    if (category == null)
                     {
-                        Id = Category.Id,
-                        Name = Category.Category
-                    });
+                        await _categoriesCommands.Update(new CategoryModel
+                        {
+                            Id = Category.Id,
+                            Name = Category.Category
+                        });
+                    }
                     return RedirectToPage("./Categories");
                 },
                 async () =>

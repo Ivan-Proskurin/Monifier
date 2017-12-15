@@ -1,5 +1,6 @@
 @page
 @using System.Linq
+@using Microsoft.CodeAnalysis.CSharp.Syntax
 @model Accounts.TransferModel
 
 @{
@@ -35,6 +36,13 @@
         <div class="row">
             <div class="col-md-5 col-sm-7 col-7">
                 <div class="form-group">
+                    <label class="control-label">Доступно:</label>
+                    <input id="avail-balance" class="form-control money-input" autocomplete="off" 
+                           value="@Model.AvailableBalance" disabled/>
+                </div>
+            </div>
+            <div class="col-md-5 col-sm-7 col-7">
+                <div class="form-group">
                     <label asp-for="Transfer.Amount" class="control-label"></label>
                     <input asp-for="Transfer.Amount" class="form-control money-input" autocomplete="off"/>
                     <span asp-validation-for="Transfer.Amount" class="text-danger"></span>
@@ -42,8 +50,8 @@
             </div>
         </div>
         <div class="form-group bottom-buttons-row">
-            <input type="submit" value="Перевести" class="btn btn-success btn-default cursor-pointer"/>
-            <a asp-page="./AccountsList" class="btn btn-outline-secondary gapped">Отмена</a>
+            <input type="submit" value="Выполнить перевод" class="btn btn-outline-danger cursor-pointer"/>
+            <a asp-page="./AccountsList" class="btn btn-outline-primary gapped">Отмена</a>
         </div>
     </form>
 
@@ -51,8 +59,18 @@
 
 @section Scripts {
     <script>
-        makeInputAutocomplete("Transfer.AccountFrom");
+        makeInputAutocomplete("Transfer.AccountFrom", null, updateAvailableBalance);
         makeInputAutocomplete("Transfer.AccountTo");
         makeInputNumeric("Transfer.Amount");
+        
+        function updateAvailableBalance() {
+            $("#avail-balance").val("-");
+            sendAjax("Transfer?handler=accountbalance",
+                $("#Transfer_AccountFrom").val(),
+                function(result) {
+                    $('#avail-balance').val(result);
+                });
+        }
+        
     </script>
 }

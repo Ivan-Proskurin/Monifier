@@ -34,6 +34,11 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             public List<BillGood> Goods { get; set; }
         }
 
+        private class FlowBillGoodsGroup : BillGoodsGroup
+        {
+            public string FlowName { get; set; }
+        }
+
         private class BillGoodsGroupWithPagination
         {
             public List<BillGoodsGroup> GoodsGrops { get; set; }
@@ -113,7 +118,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             };
         }
 
-        private async Task GroupAndSortBillsGoodsAsync(List<BillGoodsGroup> goodsGroups)
+        private async Task GroupAndSortBillsGoodsAsync(IEnumerable<BillGoodsGroup> goodsGroups)
         {
             // ищем категории, принадлежащие отобранным счетам и группируем их
             var billItemsQuery = _unitOfWork.GetQueryRepository<ExpenseItem>();
@@ -232,16 +237,20 @@ namespace Monifier.BusinessLogic.Queries.Expenses
         {
             // отбираем нужные счета          
             var expensesQueries = _unitOfWork.GetQueryRepository<ExpenseBill>();
+            var flowQueries = _unitOfWork.GetQueryRepository<ExpenseFlow>();
+            
             var today = day.Date;
             var tomorrow = today.AddDays(1);
+
             var goodsGroups = await expensesQueries.Query
                 .Where(x => x.DateTime >= today && x.DateTime < tomorrow)
                 .OrderBy(x => x.DateTime)
-                .Select(x => new BillGoodsGroup
+                .Select(x => new FlowBillGoodsGroup
                 {
                     BillIds = new List<int> { x.Id },
                     DateTime = x.DateTime,
-                    Sum = x.SumPrice
+                    Sum = x.SumPrice,
+                    FlowName = x.ExpenseFlow.Name
                 }).ToListAsync();
 
             // группируем категории и товары с сортировкой
@@ -256,7 +265,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                     Sum = x.Sum,
                     DateFrom = today.ToStandardString(),
                     DateTo = tomorrow.ToStandardString(),
-                    Interval = string.Empty, 
+                    Interval = x.FlowName, 
                     Caption = x.DateTime.ToStandardString(),
                     Goods = x.Goods.Select(g => g.Name).ToList().GetLaconicString(),
                     IsDangerExpense = false

@@ -127,7 +127,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             var item = new ExpenseItem
             {
                 Bill = bill,
-                CategoryId = product?.CategoryId ?? category.Id,
+                CategoryId = category?.Id,
                 Comment = null,
                 Price = expense.Cost,
                 Quantity = null,

@@ -5,7 +5,6 @@ namespace Monifier.BusinessLogic.Model.Expenses
     public class ExpenseItemModel
     {
         public int Id { get; set; }
-        public DateTime DateTime { get; set; }
         public int? CategoryId { get; set; }
         public string Category { get; set; }
         public int? ProductId { get; set; }

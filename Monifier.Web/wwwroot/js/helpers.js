@@ -35,11 +35,18 @@ function makeInputAutocomplete(inputId, list, onSelect) {
             comboplete.close();
         }
     });
-    
+
     $("#" + inputId + "_Btn").click(function () {
-        input.value = "";
-        input.click();
-        input.focus();
+        if (comboplete.ul.childNodes.length === 0) {
+            comboplete.minChars = 0;
+            comboplete.evaluate();
+        }
+        else if (comboplete.ul.hasAttribute('hidden')) {
+            comboplete.open();
+        }
+        else {
+            comboplete.close();
+        }
     });
 
     return comboplete;
@@ -72,11 +79,11 @@ function makeInputNumeric(inputId, allowNegative = false) {
     }
 }
 
-function makeInputDatetimePicker(inputId) {
+function makeInputDatetimePicker(inputId, select) {
     inputId = inputId.replace(".", "_");
     $("#" + inputId).datetimepicker({
-        onSelectDate: function (dt) { propagateDateTimeToPicker(inputId, dt) },
-        onSelectTime: function (dt) { propagateDateTimeToPicker(inputId, dt) },
+        onSelectDate: function (dt) { propagateDateTimeToPicker(inputId, dt, select) },
+        onSelectTime: function (dt) { propagateDateTimeToPicker(inputId, dt, select) },
         dayOfWeekStart: 1,
         closeOnDateSelect: true,
         format: "Y.m.d H:i"
@@ -86,8 +93,9 @@ function makeInputDatetimePicker(inputId) {
     });
 }
 
-function propagateDateTimeToPicker(inputId, dt) {
+function propagateDateTimeToPicker(inputId, dt, select) {
     $("#" + inputId).val(formatDateTime(dt));
+    if (select) select();
 }
 
 function formatDateTime(dt) {
@@ -100,4 +108,22 @@ function formatDateTime(dt) {
     if (hours == 0) hours = "00";
     else if (hours < 0) hours = "0" + hours;
     return year + "." + month + "." + day + " " + hours + ":00";
+}
+
+function sendAjax(url, args, success) {
+    $.ajax({
+        type: "POST",
+        url: url,
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader("XSRF-TOKEN",
+                $('input:hidden[name="__RequestVerificationToken"]').val());
+        },
+        data: args,
+        contentType: "application/json",
+        dataType: "json",
+        success: success,
+        failure: function(response) {
+            console.log(response);
+        }
+    });
 }

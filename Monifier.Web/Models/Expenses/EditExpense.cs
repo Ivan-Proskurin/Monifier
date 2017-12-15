@@ -10,9 +10,7 @@ namespace Monifier.Web.Models.Expenses
     {
         public int ExpenseFlowId { get; set; }
         
-        [Display(Name = "Категория *")]
-        [Required(ErrorMessage = "Укажите категорию")]
-        public string ExpenseFlow { get; set; }
+        public string FlowName { get; set; }
              
         [Display(Name = "Дата/время *")]
         [Required(ErrorMessage = "Укажите дату/время")]
@@ -21,8 +19,12 @@ namespace Monifier.Web.Models.Expenses
         [Display(Name = "Категория")]
         public string Category { get; set; }
         
+        public string CategoryToAdd { get; set; }
+        
         [Display(Name = "Товар")]
         public string Product { get; set; }
+        
+        public string ProductToAdd { get; set; }
         
         [Display(Name = "Сумма *")]
         [Required(ErrorMessage = "Введите сумму")]

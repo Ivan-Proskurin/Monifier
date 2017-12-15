@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -8,6 +7,7 @@ using Monifier.BusinessLogic.Contract.Expenses;
 using Monifier.BusinessLogic.Model.Base;
 using Monifier.BusinessLogic.Model.Expenses;
 using Monifier.Common.Extensions;
+using Monifier.Web.Extensions;
 using Monifier.Web.Models;
 using Monifier.Web.Models.Expenses;
 using Monifier.Web.Models.Validation;
@@ -35,11 +35,21 @@ namespace Monifier.Web.Pages.Expenses
         public ExpenseFlowModel Flow { get; set; }
 
         public List<AccountModel> Accounts { get; set; }
-
+        
+        public string AvailableBalance { get; private set; }
+        
         private async Task LoadModelsAsync(int expenseId)
         {
             Flow = await _expenseFlowQueries.GetById(expenseId);
             Accounts = await _accountQueries.GetAll();
+        }
+
+        private async Task<string> GetAvailableBalanceAsync()
+        {
+            const string unknownBalance = "-";
+            if (string.IsNullOrEmpty(Transfer?.AccountFrom)) return unknownBalance;
+            var account = await _accountQueries.GetByName(Transfer.AccountFrom);
+            return account == null ? unknownBalance : account.Balance.ToMoney();
         }
 
         public async Task OnGetAsync(int expenseId)
@@ -49,6 +59,7 @@ namespace Monifier.Web.Pages.Expenses
             {
                 FlowId = expenseId
             };
+            AvailableBalance = "-";
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -64,6 +75,7 @@ namespace Monifier.Web.Pages.Expenses
                 async () =>
                 {
                     await LoadModelsAsync(Transfer.FlowId);
+                    AvailableBalance = await GetAvailableBalanceAsync();
                     return Page();
                 },
                 async vrList =>
@@ -73,6 +85,15 @@ namespace Monifier.Web.Pages.Expenses
                     await Task.CompletedTask;
                 }
             );
+        }
+
+        public async Task<JsonResult> OnPostAccountBalanceAsync()
+        {
+            return await this.ProcessAjaxPostRequestAsync(async name =>
+            {
+                var account = await _accountQueries.GetByName(name);
+                return account == null ? "-" : account.Balance.ToMoney();
+            });
         }
     }
 }

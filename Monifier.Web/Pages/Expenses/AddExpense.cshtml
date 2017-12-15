@@ -8,26 +8,29 @@
 }
 
 <div class="col-md-7 centered-form">
-    <h3>Добавление расхода</h3>
-    <br/>
-    <h4>@Model.Expense.ExpenseFlow</h4>
-    <br/>
+    <h3 class="form-caption-sm">Добавление расхода</h3>
+    
+    <h4 class="form-caption-sm">@Model.Expense.FlowName</h4>
     
     <form method="post">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <input asp-for="Expense.ExpenseFlowId" hidden/>
-        <input asp-for="Expense.ExpenseFlow" hidden/>
+        <input asp-for="Expense.FlowName" hidden/>
         <div class="row">
             <div class="form-group col-md-12 col-sm-7 col-7">
                 <label asp-for="Expense.Category" class="control-label"></label>
-                <autocomplete asp-for="Expense.Category" value="@Model.Expense.Category" value-list="@categories"/>
+                <autocomplete asp-for="Expense.Category" value="@Model.Expense.Category" value-list="@categories"
+                              autocomplete="off"/>
+                <input type="text" name="Expense.CategoryToAdd" value="@Model.Expense.CategoryToAdd" style="display: none;"/>
                 <span asp-validation-for="Expense.Category" class="text-danger"></span>
             </div>
         </div>
         <div class="row">
             <div class="form-group col-md-12 col-sm-7 col-7">
                 <label asp-for="Expense.Product" class="control-label"></label>
-                <autocomplete asp-for="Expense.Product" value="@Model.Expense.Product" value-list="@products"/>
+                <autocomplete asp-for="Expense.Product" value="@Model.Expense.Product" value-list="@products"
+                              autocomplete="off"/>
+                <input type="text" name="Expense.ProductToAdd" value="@Model.Expense.ProductToAdd" style="display: none;"/>
                 <span asp-validation-for="Expense.Product" class="text-danger"></span>
             </div>
         </div>
@@ -40,24 +43,74 @@
             <div class="col-md-5 col-sm-7 col-7">
                 <div class="form-group">
                     <label asp-for="Expense.Cost" class="control-label"></label>
-                    <input asp-for="Expense.Cost" class="form-control money-input" autocomplete="off"/>
+                    <input asp-for="Expense.Cost" class="form-control money-input" autocomplete="off"
+                           value="@Model.Expense.Cost"/>
                     <span asp-validation-for="Expense.Cost" class="text-danger"></span>
                 </div>
             </div>
         </div>
         
         <div class="form-group bottom-buttons-row">
-            <input type="submit" value="Добавить" class="btn btn-success btn-default cursor-pointer"/>
-            <a asp-page="./ExpenseFlows" class="btn btn-outline-secondary gapped">Отмена</a>
+            <input type="submit" value="Добавить расход" class="btn btn-outline-danger cursor-pointer"/>
+            <a asp-page="./ExpenseFlows" class="btn btn-outline-primary gapped">Отменить и завершить ввод</a>
         </div>
     </form>
 </div>
 
 @section Scripts {
     <script>
-        makeInputAutocomplete("Expense.Category");
-        makeInputAutocomplete("Expense.Product");
+        var categoryAutocomplete = makeInputAutocomplete("Expense.Category", null, updateProductsList);
+        var productsAutocomplete = makeInputAutocomplete("Expense.Product", null, selectCategoryByProduct);
         makeInputDatetimePicker("Expense.DateTime");
         makeInputNumeric('Expense.Cost', false);
+
+        var flowId = "@Model.Expense.ExpenseFlowId";
+        
+        function updateProductsList() {
+            var url = "/Expenses/AddExpense/" + flowId + "?handler=getcategoryproducts";
+            var productVal = $("#Expense_Product").val();
+            sendAjax(url,
+                $("#Expense_Category").val(),
+                function(response) {
+                    console.log(response);
+                    productsAutocomplete.destroy();
+                    productsAutocomplete = makeInputAutocomplete("Expense.Product", response, selectCategoryByProduct);
+                    if (response.indexOf(productVal) >= 0) {
+                        console.log("setting old value: [" + productVal + "]");
+                        $("#Expense_Product").val(productVal);
+                    }
+                    else
+                        $("#Expense_Product").val("");
+                });
+        }
+
+        function selectCategoryByProduct() {
+            var url = "/Expenses/AddExpense/" + flowId + "?handler=getcategorybyproduct";
+            var args = { 
+                flowId: +flowId, 
+                product: $("#Expense_Product").val()
+            };
+
+            console.log(args);
+            sendAjax(url,
+                JSON.stringify(args),
+                function(response) {
+                    console.log("response: [" + response + "]");
+                    $("#Expense_Category").val(response);
+                });
+        }
+
+        $("#Expense_Category").keyup(function() {
+            if (!($("#Expense_Category")).val()) {
+                console.log("category is empty");
+                var url = "/Expenses/AddExpense/" + flowId + "?handler=getflowproducts";
+                sendAjax(url, flowId,
+                    function(response) {
+                        console.log(response);
+                        productsAutocomplete.destroy();
+                        productsAutocomplete = makeInputAutocomplete("Expense.Product", response, selectCategoryByProduct);
+                    });
+            }
+        });
     </script>
 }

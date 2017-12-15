@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Monifier.BusinessLogic.Contract.Expenses;
 using Monifier.BusinessLogic.Model.Expenses;
 using Monifier.DataAccess.Contract;
-using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Expenses;
 
 namespace Monifier.BusinessLogic.Queries.Expenses
@@ -46,11 +45,10 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             foreach (var item in model.Items)
             {
                 if (item.Id > 0 && !item.IsModified && !item.IsDeleted) continue;
-                if (item.Id < 0 || item.IsModified)
+                if (item.Id <= 0 || item.IsModified)
                 {
                     var itemModel = new ExpenseItem
                     {
-                        Id = item.Id,
                         BillId = model.Id,
                         CategoryId = item.CategoryId,
                         ProductId = item.ProductId,
@@ -58,10 +56,13 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                         Quantity = item.Quantity,
                         Comment = item.Comment
                     };
-                    if (item.Id < 0)
+                    if (item.Id <= 0)
                         commands.Create(itemModel);
                     else
+                    {
+                        itemModel.Id = item.Id;
                         commands.Update(itemModel);
+                    }
                 }
                 else if (item.IsDeleted)
                 {
@@ -76,7 +77,8 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             {
                 Id = model.Id,
                 DateTime = model.DateTime,
-                SumPrice = model.Cost
+                SumPrice = model.Cost,
+                ExpenseFlowId = model.ExpenseFlowId
             });
 
             await _unitOfWork.SaveChangesAsync();
@@ -86,6 +88,8 @@ namespace Monifier.BusinessLogic.Queries.Expenses
 
         public async Task Create(ExpenseBillModel model)
         {
+            model.Validate();
+            
             var billCommands = _unitOfWork.GetCommandRepository<ExpenseBill>();
 
             var bill = new ExpenseBill

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -7,9 +8,12 @@ using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Contract.Expenses;
 using Monifier.BusinessLogic.Model.Base;
 using Monifier.Common.Extensions;
+using Monifier.Web.Api.Models;
+using Monifier.Web.Extensions;
 using Monifier.Web.Models;
 using Monifier.Web.Models.Expenses;
 using Monifier.Web.Models.Validation;
+using Newtonsoft.Json;
 
 namespace Monifier.Web.Pages.Expenses
 {
@@ -19,17 +23,23 @@ namespace Monifier.Web.Pages.Expenses
         private readonly IProductQueries _productQueries;
         private readonly IExpenseFlowCommands _expenseFlowCommands;
         private readonly ICategoriesQueries _categoriesQueries;
+        private readonly ICategoriesCommands _categoriesCommands;
+        private readonly IProductCommands _productCommands;
 
-        public AddExpenseModel(IAccountQueries accountQueries, 
+        public AddExpenseModel(
             IExpenseFlowQueries expenseFlowQueries,
             IProductQueries productQueries,
             IExpenseFlowCommands expenseFlowCommands,
-            ICategoriesQueries categoriesQueries)
+            ICategoriesQueries categoriesQueries,
+            ICategoriesCommands categoriesCommands,
+            IProductCommands productCommands)
         {
             _expenseFlowQueries = expenseFlowQueries;
             _productQueries = productQueries;
             _expenseFlowCommands = expenseFlowCommands;
             _categoriesQueries = categoriesQueries;
+            _categoriesCommands = categoriesCommands;
+            _productCommands = productCommands;
         }
 
         private async Task PrepareModels(int expenseId)
@@ -45,16 +55,22 @@ namespace Monifier.Web.Pages.Expenses
         
         public List<ProductModel> Products { get; private set; }
 
-        public async Task OnGetAsync(int expenseId)
+        private async Task PrepareToInputNewExpense(int flowId)
         {
-            await PrepareModels(expenseId);
-            var flow = await _expenseFlowQueries.GetById(expenseId);
+            await PrepareModels(flowId);
+            var flow = await _expenseFlowQueries.GetById(flowId);
             Expense = new EditExpense
             {
-                ExpenseFlowId = expenseId,
-                ExpenseFlow = flow.Name,
-                DateTime = DateTime.Now.ToStandardString()
+                ExpenseFlowId = flowId,
+                FlowName = flow.Name,
+                DateTime = DateTime.Now.ToStandardString(),
+                Cost = string.Empty,
             };
+        }
+
+        public async Task OnGetAsync(int expenseId)
+        {
+            await PrepareToInputNewExpense(expenseId);
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -63,7 +79,8 @@ namespace Monifier.Web.Pages.Expenses
                 async () =>
                 {
                     await _expenseFlowCommands.AddExpense(Expense.ToModel());
-                    return RedirectToPage("./ExpenseFlows");
+                    await PrepareToInputNewExpense(Expense.ExpenseFlowId);
+                    return Page();
                 },
                 async () =>
                 {
@@ -72,17 +89,73 @@ namespace Monifier.Web.Pages.Expenses
                 },
                 async vrList =>
                 {
+                    CategoryModel category = null;
                     if (!string.IsNullOrEmpty(Expense.Category))
                     {
-                        var category = await _categoriesQueries.GetFlowCategoryByName(Expense.ExpenseFlowId, Expense.Category);
-                        if (category == null) vrList.Add(new ModelValidationResult("Expense.Category", "Нет такой категории"));
+                        category = await _categoriesQueries.GetFlowCategoryByName(Expense.ExpenseFlowId, Expense.Category);
+                        if (category == null)
+                        {
+                            if (Expense.Category == Expense.CategoryToAdd)
+                            {
+                                category = await _categoriesCommands.CreateNewOrBind(
+                                    Expense.ExpenseFlowId, Expense.Category);
+                                Expense.CategoryToAdd = null;
+                            }
+                            else
+                            {
+                                vrList.Add(new ModelValidationResult("Expense.Category", 
+                                    "Нет такой категории, добавить ее?"));
+                                Expense.CategoryToAdd = Expense.Category;
+                            }
+                        }
                     }
                     if (!string.IsNullOrEmpty(Expense.Product))
                     {
                         var product = await _productQueries.GetFlowProductByName(Expense.ExpenseFlowId, Expense.Product);
-                        if (product == null) vrList.Add(new ModelValidationResult("Expense.Product", "Нет такого продукта"));
+                        if (product == null)
+                        {
+                            if (Expense.Product == Expense.ProductToAdd && category != null)
+                            {
+                                await _productCommands.AddProductToCategory(category.Id, Expense.Product);
+                                Expense.ProductToAdd = null;
+                            }
+                            else
+                            {
+                                vrList.Add(new ModelValidationResult("Expense.Product", 
+                                    "Нет такого товара, добавить его?"));
+                                Expense.ProductToAdd = Expense.Product;
+                            }
+                        }
                     }
                 });
+        }
+
+        public async Task<JsonResult> OnPostGetCategoryProductsAsync()
+        {
+            return await this.ProcessAjaxPostRequestAsync(async name =>
+            {
+                var products = await _categoriesQueries.GetProductsByCategoryName(name);
+                return products.Select(x => x.Name).ToList();
+            });
+        }
+
+        public async Task<JsonResult> OnPostGetCategoryByProductAsync()
+        {
+            return await this.ProcessAjaxPostRequestAsync(async rspargs =>
+                {
+                    var args = JsonConvert.DeserializeObject<GetCategoryArgs>(rspargs);
+                    return (await _categoriesQueries.GetFlowCategoryByProductName(args.FlowId, args.Product))?.Name;
+                }
+            );
+        }
+
+        public async Task<JsonResult> OnPostGetFlowProducts()
+        {
+            return await this.ProcessAjaxPostRequestAsync(async args =>
+            {
+                var products = await _productQueries.GetExpensesFlowProducts(int.Parse(args));
+                return products.Select(x => x.Name).ToList();
+            });
         }
     }
 }

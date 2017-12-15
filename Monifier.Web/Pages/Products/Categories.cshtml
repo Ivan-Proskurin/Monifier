@@ -5,7 +5,7 @@
     ViewBag.Title = "Товары";
 }
 
-<h3>Категории</h3>
+<h4 class="form-caption-sm">Категории</h4>
 
 <table class="cashed-table table table-striped table-hover">
     <thead class="thead-dark">
@@ -48,7 +48,7 @@
                 <div class="input-group">
                     <input asp-for="AddCategory.Category" placeholder="Введите название новой категории" 
                            class="form-control" autocomplete="off"/>
-                    <input type="submit" class="input-group-addon btn btn-outline-secondary cursor-pointer" value="Добавить"/>
+                    <input type="submit" class="input-group-addon btn btn-outline-danger cursor-pointer" value="Добавить"/>
                 </div>
                 <span asp-validation-for="AddCategory.Category"></span>
             </div>

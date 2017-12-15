@@ -129,5 +129,24 @@ namespace Monifier.BusinessLogic.Queries.Base
             var query = CreateFlowCategoriesQuery(flowId);
             return await query.Where(x => x.Name.ToLower() == category.ToLower()).FirstOrDefaultAsync();
         }
+
+        public async Task<CategoryModel> GetFlowCategoryByProductName(int flowId, string product)
+        {
+            var categoriesQuery = _unitOfWork.GetQueryRepository<Category>();
+            var flowCategoriesQuery = _unitOfWork.GetQueryRepository<ExpensesFlowProductCategory>();
+            var productsQuery = _unitOfWork.GetQueryRepository<Product>();
+            var query =
+                from cat in categoriesQuery.Query
+                join catFlow in flowCategoriesQuery.Query on cat.Id equals catFlow.CategoryId
+                join prod in productsQuery.Query on catFlow.CategoryId equals prod.CategoryId
+                where catFlow.ExpensesFlowId == flowId
+                      && string.Equals(prod.Name, product, StringComparison.CurrentCultureIgnoreCase)
+                select new CategoryModel
+                {
+                    Id = cat.Id,
+                    Name = cat.Name
+                };
+            return await query.FirstOrDefaultAsync();
+        }
     }
 }

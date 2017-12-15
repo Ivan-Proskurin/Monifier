@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Contract.Expenses;
 using Monifier.BusinessLogic.Model.Expenses;
 using Monifier.Common.Extensions;
@@ -12,18 +11,15 @@ namespace Monifier.Web.Pages.Expenses
     {
         private readonly IExpensesBillQueries _expensesBillQueries;
         private readonly IExpenseFlowQueries _expenseFlowQueries;
-        private readonly IAccountQueries _accountQueries;
         private readonly IExpensesBillCommands _expensesBillCommands;
 
         public ViewExpenseBillModel(
             IExpensesBillQueries expensesBillQueries,
             IExpenseFlowQueries expenseFlowQueries,
-            IAccountQueries accountQueries,
             IExpensesBillCommands expensesBillCommands)
         {
             _expensesBillQueries = expensesBillQueries;
             _expenseFlowQueries = expenseFlowQueries;
-            _accountQueries = accountQueries;
             _expensesBillCommands = expensesBillCommands;
         }
         
@@ -42,6 +38,7 @@ namespace Monifier.Web.Pages.Expenses
             Bill = await _expensesBillQueries.GetById(billId);
             ExpenseFlow = await _expenseFlowQueries.GetById(Bill.ExpenseFlowId);
             Day = Bill.DateTime.Date.ToStandardString();
+            BillId = Bill.Id;
         }
 
         public async Task<IActionResult> OnPostDeleteAsync()

@@ -9,20 +9,21 @@
     var footerClass = totals.Total >= 0 ? "table-primary" : "table-danger";
 }
 
-<h4>Счета</h4>
+<h4 class="form-caption-xs">Счета</h4>
+
 <table class="cashed-table table table-striped table-hover">
     <thead class="thead-dark">
     <tr>
-        <th>
+        <th width="30%">
             Номер
         </th>
-        <th>
+        <th width="50%">
             Название
         </th>
-        <th class="money-cell">
+        <th width="50%" class="money-cell">
             Баланс
         </th>
-        <th></th>
+        <th width="10%"></th>
     </tr>
     </thead>
     <tbody id="cat-table-body">
@@ -41,7 +42,17 @@
                 @account.Balance.ToMoney()
             </td>
             <td>
-                <a asp-page="./TopupAccount" asp-route-id="@account.Id" class="btn btn-outline-secondary btn-sm">Пополнить</a>
+                <div class="dropdown show">
+                    <a class="btn btn-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Действия
+                    </a>
+
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuLink">
+                        <a asp-page="./TopupAccount" asp-route-id="@account.Id" class="dropdown-item btn btn-outline-secondary btn-sm">Пополнить счет</a>
+                        <a asp-page="./Transfer" asp-route-fromId="@account.Id" class="dropdown-item btn btn-outline-secondary btn-sm">Перевести с этого счета</a>
+                        <a asp-page="./Transfer" asp-route-toId="@account.Id" class="dropdown-item btn btn-outline-secondary btn-sm">Перевести на этот счет</a>
+                    </div>
+                </div>
             </td>
         </tr>
     }
@@ -59,8 +70,7 @@
 
 <!-- Adding account -->
 <div class="bottom-buttons-row">
-    <a asp-page="./CreateAccount" class="btn btn-success cursor-pointer">Добавить счет</a>
-    <a asp-page="./Transfer" class="btn btn-primary cursor-pointer">Перевод</a>
+    <a asp-page="./CreateAccount" class="btn btn-outline-danger cursor-pointer">Добавить счет</a>
 </div>
 
 @section Scripts {

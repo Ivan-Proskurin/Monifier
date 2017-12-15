@@ -5,6 +5,7 @@ using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Model.Base;
 using Monifier.DataAccess.Contract;
 using Monifier.DataAccess.Model.Base;
+using Monifier.DataAccess.Model.Expenses;
 
 namespace Monifier.BusinessLogic.Queries.Base
 {
@@ -14,7 +15,9 @@ namespace Monifier.BusinessLogic.Queries.Base
         private readonly IProductCommands _productCommands;
         private readonly IProductQueries _productQueries;
 
-        public CategoriesCommands(IUnitOfWork unitOfWork, IProductCommands productCommands, IProductQueries productQueries)
+        public CategoriesCommands(IUnitOfWork unitOfWork, 
+            IProductCommands productCommands, 
+            IProductQueries productQueries)
         {
             _unitOfWork = unitOfWork;
             _productCommands = productCommands;
@@ -75,5 +78,37 @@ namespace Monifier.BusinessLogic.Queries.Base
             model.Id = category.Id;
             return model;
         }
+
+        public async Task<CategoryModel> CreateNewOrBind(int flowId, string categoryName)
+        {
+            var categoryQueries = _unitOfWork.GetNamedModelQueryRepository<Category>();
+            var categoryCommands = _unitOfWork.GetCommandRepository<Category>();
+            
+            var category = await categoryQueries.GetByName(categoryName);
+            if (category == null)
+            {
+                category = new Category
+                {
+                    Name = categoryName
+                };
+                categoryCommands.Create(category);
+                await _unitOfWork.SaveChangesAsync();
+            }
+
+            var catFlowsCommands = _unitOfWork.GetCommandRepository<ExpensesFlowProductCategory>();
+            catFlowsCommands.Create(new ExpensesFlowProductCategory
+            {
+                CategoryId = category.Id,
+                ExpensesFlowId = flowId
+            });
+            await _unitOfWork.SaveChangesAsync();
+            
+            return new CategoryModel
+            {
+                Id = category.Id,
+                Name = category.Name
+            };
+        }
+        
     }
 }

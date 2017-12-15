@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Expenses;
 using Monifier.BusinessLogic.Model.Expenses;
 using Monifier.Common.Extensions;
+using Monifier.Web.Models;
 using Monifier.Web.Models.Validation;
 
 namespace Monifier.Web.Pages.Expenses
@@ -17,7 +19,8 @@ namespace Monifier.Web.Pages.Expenses
             _expensesQueries = expensesQueries;
         }
         
-        public string Day { get; private set; }
+        [BindProperty]
+        public string Day { get; set; }
         
         public ExpensesListModel Expenses { get; private set; }
         
@@ -30,9 +33,30 @@ namespace Monifier.Web.Pages.Expenses
             if (IsDataValid)
             {
                 var dateTime = day.ParseDtFromStandardString();
-                Day = dateTime.Date.ToStandardDateStr();
+                Day = dateTime.Date.ToStandardString();
                 Expenses = await _expensesQueries.GetExpensesForDay(dateTime);
             }
+        }
+
+        public async Task<IActionResult> OnPostRefreshAsync()
+        {
+            if (string.IsNullOrEmpty(Day))
+            {
+                ModelState.AddModelError(string.Empty, "Не введена дата!");
+            }
+            var dayResult = Day.ValidateDateTime("Day");
+            if (dayResult != null)
+                ModelState.AddModelError(string.Empty, dayResult.Message);
+            
+            IsDataValid = ModelState.IsValid;
+
+            if (IsDataValid)
+            {
+                var dateTime = Day.ParseDtFromStandardString();
+                Expenses = await _expensesQueries.GetExpensesForDay(dateTime);
+            }
+
+            return Page();
         }
     }
 }

@@ -1,12 +1,30 @@
-@page "{expenseId:int}"
+@page "{expenseId:int}/{billId:int?}"
 @using System.Linq
+@using Common.Extensions
+@using Microsoft.CodeAnalysis.CSharp.Syntax
 @model Expenses.AddExpenseBillModel
 
 @{
     ViewBag.Title = "Расходы";
 }
 
-<h3 class="form-caption-bg">@Model.ExpenseFlow.Name</h3>
+<div class="container form-caption-bg bottom-dashed-line">
+    <div class="row">
+        <div class="col">
+            @if (Model.Bill.IsNew)
+            {
+                <h3>Добавление чека</h3>
+            }
+            else
+            {
+                <h3>Редактирование чека #@Model.Bill.Id</h3>
+            }
+        </div>
+        <div class="col">
+            <h3>@Model.ExpenseFlow.Name</h3>
+        </div>
+    </div>
+</div>
 
 
 <form method="post">
@@ -17,28 +35,20 @@
       
     <div class="container">
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-6 col-sm-6">
                 <input asp-for="Good.ExpenseFlowId" hidden/>
 
                 <div class="container">
                     <div class="row">
-                        <div class="column-header-col col col-sm-8">
+                        <div class="column-header-col col col-md-7 col-sm-3 col-8">
                             <h5 class="form-caption">Ввод:</h5>
                         </div>
-                        <div class="col col-sm-4">
-                            <button type="submit" asp-page-handler="add"
+                        <div class="col col-md-5 col-sm-9 col-4">
+                            <button type="submit" asp-page-handler="removeLast"
                                     class="btn btn-primary btn-sm cursor-pointer">
-                                Добавить в чек
+                                Отменить последнее
                             </button>
                         </div>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label asp-for="Good.DateTime" class="col-form-label col-md-3"></label>
-                    <div class="col-md-9">
-                        <date-time-picker asp-for="Good.DateTime" value="@Model.Good.DateTime"
-                                          class="form-control" autocomplete="off"/>
-                        <span asp-validation-for="Good.DateTime"></span>
                     </div>
                 </div>
                 <div class="form-group row">
@@ -47,6 +57,8 @@
                         <autocomplete asp-for="Good.Category" class="form-control"
                                       value="@Model.Good.Category" autocomplete="off"
                                       value-list="@Model.Categories.Select(x => x.Name)"/>
+                        <input type="text" name="Good.CategoryToAdd" value="@Model.Good.CategoryToAdd" 
+                               style="display: none;"/>
                         <span asp-validation-for="Good.Category"></span>
                     </div>
                 </div>
@@ -56,34 +68,39 @@
                         <autocomplete asp-for="Good.Product" class="form-control"
                                       value-list="@Model.Products.Select(x => x.Name)"
                                       value="@Model.Good.Product" autocomplete="off"/>
+                        <input type="text" name="Good.ProductToAdd" value="@Model.Good.ProductToAdd" 
+                               style="display: none;"/>
                         <span asp-validation-for="Good.Product"></span>
                     </div>
                 </div>
                 <div class="form-group row">
                     <label asp-for="Good.Price" class="col-form-label col-md-3"></label>
-                    <div class="col-md-3">
-                        <input asp-for="Good.Price" class="form-control money-input" autocomplete="off"/>
+                    <div class="col-md-4">
+                        <input asp-for="Good.Price" class="form-control money-input" autocomplete="off"
+                               value="@Model.Good.Price"/>
                         <span asp-validation-for="Good.Price"></span>
                     </div>
                     <label asp-for="Good.Quantity" class="col-form-label col-md-3"></label>
-                    <div class="col-md-3">
-                        <input asp-for="Good.Quantity" class="form-control money-input" autocomplete="off"/>
+                    <div class="col-md-2">
+                        <input asp-for="Good.Quantity" class="form-control money-input" autocomplete="off"
+                               value="@Model.Good.Quantity"/>
                     </div>
                 </div>
                 <div class="form-group row">
                     <label asp-for="Good.Comment" class="col-form-label col-md-3"></label>
                     <div class="col-md-9">
-                        <input asp-for="Good.Comment" class="form-control" autocomplete="off"/>
+                        <input asp-for="Good.Comment" class="form-control" autocomplete="off"
+                               value="@Model.Good.Comment"/>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-6 col-sm-6">
                 <div class="container">
                     <div class="row">
-                        <div class="column-header-col col col-sm-9">
+                        <div class="column-header-col col-md-9 col-sm-7 col-9">
                             <h5 class="form-caption">Итог:</h5>
                         </div>
-                        <div class="col col-sm-3">
+                        <div class="col col-md-3 col-sm-5 col-3">
                             <button type="submit" asp-page-handler="confirm"
                                     class="btn btn-danger btn-sm cursor-pointer">
                                 Подвердить
@@ -93,13 +110,13 @@
                 </div>
                 <div class="container">
                     <div class="row expenses-totals">
-                        <div class="column-header-col col col-sm-5">
-                            <span class="expenses-subtotals">Промежуточный итог:</span>
+                        <div class="column-header-col col col-sm-4">
+                            <span>Сумма по чеку:</span>
                         </div>
-                        <div class="subtotals-placeholder col col-sm-4">
-                            <span>@Model.Bill.DateTime</span>
+                        <div class="subtotals-placeholder col col-sm-5">
+                            <span>@Model.Bill.DateTime.ToStandardString()</span>
                         </div>
-                        <div class="expenses-subtotals expenses-sum col col-sm-3">
+                        <div class="expenses-sum col col-sm-3">
                             <span>@Model.Bill.Cost</span>
                         </div>
                     </div>
@@ -108,10 +125,10 @@
                         var item = Model.Bill.Items[i];
 
                         <div class="row expenses-subtotals-row">
-                            <div class="expenses-subtotals col col-sm-5">
+                            <div class="expenses-subtotals col col-sm-4">
                                 <span>#@(i + 1)</span>
                             </div>
-                            <div class="expenses-subtotals col col-sm-4">
+                            <div class="expenses-subtotals col col-sm-5">
                                 <span>@item.DisplayName</span>
                             </div>
                             <div class="expenses-subtotals expenses-sum col col-sm-3">
@@ -122,12 +139,16 @@
                 </div>
             </div>
         </div>
-        <div class="row">
+        <div class="row" style="margin-top: 15px;">
             <div class="col">
-                <a asp-page="./ExpenseFlows" class="btn btn-outline-danger btn-sm">Отмена</a>
+                <button type="submit" asp-page-handler="add" class="btn btn-outline-danger btn-sm cursor-pointer">
+                    Добавить в чек
+                </button>
             </div>
             <div class="col" style="text-align: right;">
-                @*            @Html.ActionLink("Редактировать пункты", "EditItems", null, new { @class = "btn btn-outline-primary btn-sm" })*@
+                <a asp-page="./ExpenseFlows" class="btn btn-outline-danger btn-sm cursor-pointer">
+                    Отменить и завершить ввод
+                </a>
             </div>
         </div>
     </div>
@@ -136,11 +157,64 @@
 @section Scripts {
     <script>
         activateLink("#expensesLink");
-        makeInputDatetimePicker("Good.DateTime");
-        makeInputAutocomplete("Good.Category");
-        makeInputAutocomplete("Good.Product");
+        var categoryAutocomplete = makeInputAutocomplete("Good.Category", null, updateProductsList);
+        var productsAutocomplete = makeInputAutocomplete("Good.Product", null, selectCategoryByProduct);
         makeInputNumeric("Good.Price", false);
         makeInputNumeric("Good.Quantity", false);
+        
+        var flowId = "@Model.ExpenseFlow.Id";
+        var billId = "@Model.Bill.Id";
+        var urlPrefix = "/Expenses/AddExpenseBill/" + flowId;
+        if (billId !== "0") urlPrefix += "/" + billId;
+        
+        function updateProductsList() {
+            var url = urlPrefix + "?handler=getcategoryproducts";
+            var productVal = $("#Good_Product").val();
+            sendAjax(url,
+                $("#Good_Category").val(),
+                function(response) {
+                    console.log(response);
+                    productsAutocomplete.destroy();
+                    productsAutocomplete = makeInputAutocomplete("Good.Product", response, selectCategoryByProduct);
+                    if (response.indexOf(productVal) >= 0) {
+                        console.log("setting old value: [" + productVal + "]");
+                        $("#Good_Product").val(productVal);
+                    }
+                    else
+                        $("#Good_Product").val("");
+                });
+        }
+
+        function selectCategoryByProduct() {
+            var url = urlPrefix + "?handler=getcategorybyproduct";
+            var args = { 
+                flowId: +flowId, 
+                product: $("#Good_Product").val()
+            };
+
+            console.log(args);
+            sendAjax(url,
+                JSON.stringify(args),
+                function(response) {
+                    console.log("response: [" + response + "]");
+                    $("#Good_Category").val(response);
+                });
+        }
+
+        $("#Good_Category").keyup(function() {
+            if (!($("#Good_Category")).val()) {
+                console.log("category is empty");
+                var url = urlPrefix + "?handler=getflowproducts";
+                sendAjax(url, flowId,
+                    function(response) {
+                        console.log(response);
+                        productsAutocomplete.destroy();
+                        productsAutocomplete = makeInputAutocomplete("Good.Product", response, selectCategoryByProduct);
+                    });
+            }
+        });
+
+        
     </script>
 
 }

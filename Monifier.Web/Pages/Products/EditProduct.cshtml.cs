@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Base;
@@ -23,7 +22,7 @@ namespace Monifier.Web.Pages.Products
         [BindProperty]
         public EditProduct Product { get; set; }
 
-        public async Task OnGetAsync(int id, int categoryId)
+        public async Task OnGetAsync(int id)
         {
             Product = (await _productQueries.GetById(id)).ToEditProduct();
         }

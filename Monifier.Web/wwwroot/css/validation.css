@@ -19,6 +19,13 @@
 
 .validation-summary-errors {
     color: #f00;
+    margin-bottom: 30px;
+}
+
+.validation-summary-errors ul {
+    list-style-type: none;
+    margin-left: 20px;
+    padding: 0;
 }
 
 .validation-summary-valid {

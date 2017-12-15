@@ -13,17 +13,15 @@ namespace Monifier.Web.Models.Expenses
         
         public string Bill { get; set; }
 
-        [Required(ErrorMessage = "Укажите дату/время")]
-        [DisplayName("Дата/время*")]
-        public string DateTime { get; set; }
-
-//        [Required(ErrorMessage = "Укажите категорию товаров")]
         [DisplayName("Категория")]
         public string Category { get; set; }
+        
+        public string CategoryToAdd { get; set; }
 
-//        [Required(ErrorMessage = "Укажите товар")]
         [DisplayName("Товар")]
         public string Product { get; set; }
+        
+        public string ProductToAdd { get; set; }
 
         [Required(ErrorMessage = "Укажите сумму")]
         [DisplayName("Сумма*")]
@@ -41,8 +39,6 @@ namespace Monifier.Web.Models.Expenses
 
         public IEnumerable<ModelValidationResult> Validate()
         {
-            var dateResult = DateTime.ValidateDateTime("Good.DateTime");
-            if (dateResult != null) yield return dateResult;
             var priceResult = Price.ValidateMoney("Good.Price");
             if (priceResult != null) yield return priceResult;
             if (Category == null && Product == null)
@@ -50,6 +46,15 @@ namespace Monifier.Web.Models.Expenses
                 yield return new ModelValidationResult("Good.Category", "Укажите категорию или товар");
                 yield return new ModelValidationResult("Good.Product", "Укажите категорию или товар");
             }
+        }
+
+        public void ClearInput()
+        {
+            Category = null;
+            Product = null;
+            Price = null;
+            Quantity = null;
+            Comment = null;
         }
     }
 
@@ -62,7 +67,6 @@ namespace Monifier.Web.Models.Expenses
                 Category = model.Category,
                 Comment = model.Comment,
                 Cost = model.Price.ParseMoneyInvariant(),
-                DateTime = model.DateTime.ParseDtFromStandardString(),
                 Product = model.Product,
                 Quantity = model.Quantity?.ParseMoneyInvariant()
             };

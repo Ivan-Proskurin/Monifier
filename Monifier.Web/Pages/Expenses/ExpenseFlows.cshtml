@@ -7,20 +7,20 @@
     var flows = Model.ExpenseFlows;
 }
 
-<h4>Категории расходов</h4>
+<h4 class="form-caption-xs">Категории расходов</h4>
 <table class="cashed-table table table-striped table-hover">
     <thead class="thead-dark">
     <tr>
-        <th>
+        <th width="30%">
             Номер
         </th>
-        <th>
+        <th width="50%">
             Название
         </th>
-        <th class="money-cell">
+        <th width="50%" class="money-cell">
             Баланс
         </th>
-        <th></th>
+        <th width="10%></th>
     </tr>
     </thead>
     <tbody id="cat-table-body">
@@ -29,6 +29,7 @@
     {
         var flow = flows[i];
         var rowClass = flow.Balance >= 0 ? "table-default" : "table-danger";
+        var moneyRowClass = "money-cell " + rowClass;
         
         <tr class="@rowClass">
             <td>@flow.Number</td>
@@ -39,9 +40,17 @@
                 @flow.Balance.ToMoney()
             </td>
             <td>
-                <a asp-page="./AddExpense" asp-route-expenseId="@flow.Id" class="btn btn-outline-secondary btn-sm">Расход</a>
-                <a asp-page="./AddExpenseBill" asp-route-expenseId="@flow.Id" class="btn btn-outline-secondary btn-sm">Чек</a>
-                <a asp-page="./FlowTransfer" asp-route-expenseId="@flow.Id" class="btn btn-outline-secondary btn-sm">Перевод</a>
+                <div class="dropdown show">
+                    <a class="btn btn-secondary btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Действия
+                    </a>
+
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuLink">
+                        <a asp-page="./AddExpense" asp-route-expenseId="@flow.Id" class="dropdown-item btn btn-outline-secondary btn-sm">Добавить расход</a>
+                        <a asp-page="./AddExpenseBill" asp-route-expenseId="@flow.Id" class="dropdown-item btn btn-outline-secondary btn-sm">Ввести чек</a>
+                        <a asp-page="./FlowTransfer" asp-route-expenseId="@flow.Id" class="dropdown-item btn btn-outline-secondary btn-sm">Перевод со счета</a>
+                    </div>
+                </div>
             </td>
         </tr>
     }
@@ -51,8 +60,8 @@
 
 <!-- Adding flow -->
 <div class="bottom-buttons-row">
-    <a asp-page="./CreateExpenseFlow" class="btn btn-success cursor-pointer">Добавить категорию</a>
-    <a asp-page="./ExpensesTable" class="btn btn-outline-primary cursor-pointer">Посмотреть расходы</a>
+    <a asp-page="./CreateExpenseFlow" class="btn btn-outline-danger cursor-pointer">Добавить категорию</a>
+    <a asp-page="./ExpensesTable" class="btn btn-outline-info cursor-pointer">Посмотреть расходы</a>
 </div>
 
 @section Scripts {

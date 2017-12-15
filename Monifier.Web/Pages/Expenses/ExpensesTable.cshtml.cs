@@ -6,7 +6,6 @@ using Monifier.BusinessLogic.Contract.Settings;
 using Monifier.BusinessLogic.Model.Expenses;
 using Monifier.BusinessLogic.Model.Pagination;
 using Monifier.Web.Models;
-using Monifier.Web.Models.Expenses;
 
 namespace Monifier.Web.Pages.Expenses
 {

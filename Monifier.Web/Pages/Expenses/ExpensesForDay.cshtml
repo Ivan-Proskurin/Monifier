@@ -6,73 +6,111 @@
     ViewBag.Title = "Расходы";
 }
 
-<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+@*<div asp-validation-summary="ModelOnly" class="text-danger"></div>*@
 
-<form method="post">
+<form id="navForm" method="post">
     <div class="container">
         <div class="row">
             <div class="form-group row col-md-12 col-sm-10 col-10">
                 <div class="input-group">
-                    <span class="expenses-header input-group-addon">Расходы&nbsp;за&nbsp;&nbsp;@Model.Day</span>
+                    <span class="input-group-addon" style="font-size: 18px;">Расходы&nbsp;за</span>
+                    <div class="form-group input-group-addon">
+                        <date-time-picker asp-for="Day" value="@Model.Day"/>
+                    </div>
                     <button type="submit" asp-page-handler="refresh"
                             class="input-group-addon btn btn-secondary cursor-pointer" id="refresh-button">
-                        <i class="fa fa-refresh"></i>
+                        <i class="fa fa-refresh gapped"></i>
                     </button>
-                    <a asp-page="./ExpensesTable"
-                       class="input-group-addon btn btn-secondary cursor-pointer">Назад</a>
+                    @if (Model.IsDataValid)
+                    {
+                        <a asp-page="./ExpensesTable"
+                           asp-route-dateFrom="@Model.Day.ParseDtFromStandardString().StartOfTheWeek().ToStandardString()"
+                           asp-route-dateTo="@Model.Day.ParseDtFromStandardString().EndOfTheWeek().ToStandardString()"
+                           asp-route-pageNumber="1"
+                           class="input-group-addon btn btn-secondary cursor-pointer">
+                            По дням
+                        </a>
+                    }
                 </div>
             </div>
         </div>
     </div>
 </form>
 
-@if (Model.IsDataValid)
+@if (!Model.IsDataValid)
 {
-    <table class="cashed-table table table-striped table-hover">
-        <thead class="thead-dark">
-        <tr>
-            <th>Счет №</th>
-            <th>Дата/время счета</th>
-            <th>Товары</th>
-            <th class="align-right">Сумма</th>
-        </tr>
-        </thead>
-        <tbody>
-        @for (int i = 0; i < Model.Expenses.Expenses.Count; i++)
-        {
-            var item = Model.Expenses.Expenses[i];
-            var trClass = item.IsDangerExpense ? "table-danger" : "table-default";
-            var billId = @item.BillIds.FirstOrDefault(); 
+    <div class="text-danger larger-text align-center validation-summary-errors">Переданная дата некорректна!</div>
+}
 
-            <tr class="@trClass">
-                <td><a asp-page="./ViewExpenseBill" asp-route-billId="@billId" 
-                       class="edit-item-link">@billId</a></td>
-                <td><a asp-page="./ViewExpenseBill" asp-route-billId="@billId" 
-                       class="edit-item-link">@item.Caption</a></td>
-                <td><a asp-page="./ViewExpenseBill" asp-route-billId="@billId" 
-                       class="edit-item-link">@item.Goods</a></td>
-                <td><a asp-page="./ViewExpenseBill" asp-route-billId="@billId" 
-                       class="edit-item-link">@item.Sum.ToMoney()</a></td>
-            </tr>
-        }
-        </tbody>
-        <tfoot>
-        <tr class="table-info">
-            <td></td><td></td>
+<table class="cashed-table table table-striped table-hover">
+    <thead class="thead-dark">
+    <tr>
+        <th>Категория</th>
+        <th>Счет</th>
+        <th>Дата/время счета</th>
+        <th>Товары</th>
+        <th class="align-right">Сумма</th>
+    </tr>
+    </thead>
+    <tbody>
+    @if (Model.IsDataValid)
+    {
+        @for (int i = 0; i < Model.Expenses.Expenses.Count; i++)
+         {
+             var item = Model.Expenses.Expenses[i];
+             var trClass = item.IsDangerExpense ? "table-danger" : "table-default";
+             var billId = @item.BillIds.FirstOrDefault();
+
+             <tr class="@trClass">
+                 <td>@item.Interval</td>
+                 <td>
+                     <a asp-page="./ViewExpenseBill" asp-route-billId="@billId"
+                        class="edit-item-link">
+                         #@billId</a>
+                 </td>
+                 <td>
+                     <a asp-page="./ViewExpenseBill" asp-route-billId="@billId"
+                        class="edit-item-link">
+                         @item.Caption</a>
+                 </td>
+                 <td>
+                     <a asp-page="./ViewExpenseBill" asp-route-billId="@billId"
+                        class="edit-item-link">
+                         @item.Goods</a>
+                 </td>
+                 <td class="align-right">
+                     <a asp-page="./ViewExpenseBill" asp-route-billId="@billId"
+                        class="edit-item-link">
+                         @item.Sum.ToMoney()</a>
+                 </td>
+             </tr>
+         }
+    }
+    </tbody>
+    <tfoot>
+    <tr class="table-info">
+        <td></td><td></td><td></td>
+        @if (Model.IsDataValid)
+        {
             <td class="totals-caption-left">@Model.Expenses.Totals.Caption</td>
             <td class="totals-caption">@Model.Expenses.Totals.Total.ToMoney()</td>
-        </tr>
-        </tfoot>
-    </table>
-}
-else
-{
-    <div class="text-danger larger-text align-center">Переданная дата некорректна!</div>
-}
+        }
+        else
+        {
+            <td class="totals-caption-left">Итого за день:</td>
+            <td class="totals-caption">-</td>
+        }
+    </tr>
+    </tfoot>
+</table>
 
 @section Scripts
 {
     <script type="text/javascript">
         activateLink("#expensesLink");
+        makeInputDatetimePicker("Day",
+            function() {
+                document.getElementById("refresh-button").click();
+            });
     </script>
 }
