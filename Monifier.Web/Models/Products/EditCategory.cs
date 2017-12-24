@@ -13,6 +13,8 @@ namespace Monifier.Web.Models.Products
         public string Category { get; set; }
         
         public string AddProduct { get; set; }
+        
+        public int PageNumber { get; set; }
 
         public IEnumerable<ModelValidationResult> Validate()
         {

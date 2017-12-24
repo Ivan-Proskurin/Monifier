@@ -114,8 +114,6 @@ a.edit-item-link {
     font-size: lager;
 }
 
-
-
 .awesomplete-padding-fix {
     padding-left: 0;
     padding-right: 0;
@@ -193,4 +191,8 @@ a.edit-item-link {
 
 .addon-terminator-container {
     border-left: none;
+}
+
+.hidden {
+    display: none;
 }

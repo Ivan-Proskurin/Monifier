@@ -29,6 +29,9 @@ namespace Monifier.Web.Models.Expenses
         [Display(Name = "Сумма *")]
         [Required(ErrorMessage = "Введите сумму")]
         public string Cost { get; set; }
+        
+        [Display(Name = "Продолжить ввод расходов после ввода этого")]
+        public bool ContinueInput { get; set; }
 
         public IEnumerable<ModelValidationResult> Validate()
         {

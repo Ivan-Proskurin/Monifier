@@ -65,7 +65,12 @@ namespace Monifier.Web.Pages.Expenses
                 FlowName = flow.Name,
                 DateTime = DateTime.Now.ToStandardString(),
                 Cost = string.Empty,
+                ContinueInput = true,
             };
+            if (Categories.Count == 1)
+            {
+                Expense.Category = Categories.First().Name;
+            }
         }
 
         public async Task OnGetAsync(int expenseId)
@@ -79,6 +84,7 @@ namespace Monifier.Web.Pages.Expenses
                 async () =>
                 {
                     await _expenseFlowCommands.AddExpense(Expense.ToModel());
+                    if (!Expense.ContinueInput) return RedirectToPage("./ExpenseFlows");
                     await PrepareToInputNewExpense(Expense.ExpenseFlowId);
                     return Page();
                 },

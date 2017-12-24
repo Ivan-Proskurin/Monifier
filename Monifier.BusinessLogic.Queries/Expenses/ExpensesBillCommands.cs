@@ -41,7 +41,24 @@ namespace Monifier.BusinessLogic.Queries.Expenses
 
         public async Task<ExpenseBillModel> Update(ExpenseBillModel model)
         {
-            var commands = _unitOfWork.GetCommandRepository<ExpenseItem>();
+            if (model == null)
+                throw new ArgumentNullException(nameof(model));
+            model.Validate();
+            
+            var billQueries = _unitOfWork.GetQueryRepository<ExpenseBill>();
+            var billCommands = _unitOfWork.GetCommandRepository<ExpenseBill>();
+            
+            var bill = await billQueries.GetById(model.Id);
+            if (bill == null)
+                throw new ArgumentException($"Нет счета с Id = {model.Id}");
+            
+            var oldsum = bill.SumPrice;
+            bill.DateTime = model.DateTime;
+            bill.SumPrice = model.Cost;
+            bill.ExpenseFlowId = model.ExpenseFlowId;
+
+            var itemQueries = _unitOfWork.GetQueryRepository<ExpenseItem>();
+            var itemCommands = _unitOfWork.GetCommandRepository<ExpenseItem>();
             foreach (var item in model.Items)
             {
                 if (item.Id > 0 && !item.IsModified && !item.IsDeleted) continue;
@@ -57,29 +74,28 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                         Comment = item.Comment
                     };
                     if (item.Id <= 0)
-                        commands.Create(itemModel);
+                        itemCommands.Create(itemModel);
                     else
                     {
                         itemModel.Id = item.Id;
-                        commands.Update(itemModel);
+                        itemCommands.Update(itemModel);
                     }
                 }
                 else if (item.IsDeleted)
                 {
-                    var itemModel = await _unitOfWork.GetQueryRepository<ExpenseItem>().GetById(item.Id);
+                    var itemModel = await itemQueries.GetById(item.Id);
                     if (itemModel == null) continue;
-                    commands.Delete(itemModel);
+                    itemCommands.Delete(itemModel);
                 }
             }
+            
+            billCommands.Update(bill);
 
-            var billCommands = _unitOfWork.GetCommandRepository<ExpenseBill>();
-            billCommands.Update(new ExpenseBill
-            {
-                Id = model.Id,
-                DateTime = model.DateTime,
-                SumPrice = model.Cost,
-                ExpenseFlowId = model.ExpenseFlowId
-            });
+            var flowQueries = _unitOfWork.GetQueryRepository<ExpenseFlow>();
+            var flowCommands = _unitOfWork.GetCommandRepository<ExpenseFlow>();
+            var flow = await flowQueries.GetById(bill.ExpenseFlowId);
+            flow.Balance = flow.Balance + oldsum - model.Cost;
+            flowCommands.Update(flow);
 
             await _unitOfWork.SaveChangesAsync();
 
@@ -88,6 +104,9 @@ namespace Monifier.BusinessLogic.Queries.Expenses
 
         public async Task Create(ExpenseBillModel model)
         {
+            if (model == null)
+                throw new ArgumentNullException(nameof(model));
+            
             model.Validate();
             
             var billCommands = _unitOfWork.GetCommandRepository<ExpenseBill>();

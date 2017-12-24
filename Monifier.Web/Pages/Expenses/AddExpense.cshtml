@@ -49,10 +49,16 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="form-group col-md-12 col-sm-12 col-12" style="margin: 10px 0 25px 0;">
+                <input asp-for="Expense.ContinueInput"/>
+                <label asp-for="Expense.ContinueInput"></label>
+            </div>
+        </div>
         
-        <div class="form-group bottom-buttons-row">
+        <div class="form-group">
             <input type="submit" value="Добавить расход" class="btn btn-outline-danger cursor-pointer"/>
-            <a asp-page="./ExpenseFlows" class="btn btn-outline-primary gapped">Отменить и завершить ввод</a>
+            <a asp-page="./ExpenseFlows" class="btn btn-outline-primary gapped">Отмена</a>
         </div>
     </form>
 </div>
@@ -112,5 +118,11 @@
                     });
             }
         });
+
+        if ($("#Expense_Category").val())
+            $("#Expense_Product").focus();
+        else
+            $("#Expense_Category").focus();
+        
     </script>
 }

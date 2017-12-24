@@ -105,9 +105,9 @@
 
 @if (Model.IsDataValid)
 {
-    <pagination asp-page="./IncomesByMonth" date-from="@Model.Filter.DateFrom" date-to="@Model.Filter.DateTo"
-                pagination="@Model.Incomes.Pagination">
-    </pagination>
+    <report-pagination asp-page="./IncomesByMonth" date-from="@Model.Filter.DateFrom" date-to="@Model.Filter.DateTo"
+                       pagination="@Model.Incomes.Pagination">
+    </report-pagination>
 }
 
 @section Scripts

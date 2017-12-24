@@ -16,14 +16,14 @@
                 @if (!string.IsNullOrEmpty(Model.ButtonSoftText))
                 {
                     <input type="submit" asp-page-handler="@Model.PageHandler" asp-route-permanent="false"
-                           value="@Model.ButtonSoftText" class="btn btn-primary"/>
+                           value="@Model.ButtonSoftText" class="btn btn-primary cursor-pointer"/>
                     <input type="submit" asp-page-handler="@Model.PageHandler" asp-route-permanent="true"
-                           value="@Model.ButtonToughtText" class="btn btn-danger"/>
+                           value="@Model.ButtonToughtText" class="btn btn-danger cursor-pointer"/>
                 }
                 else
                 {
                     <input type="submit" asp-page-handler="@Model.PageHandler"
-                           value="@Model.ButtonToughtText" class="btn btn-danger"/>
+                           value="@Model.ButtonToughtText" class="btn btn-danger cursor-pointer"/>
                 }
             </div>
         </div>

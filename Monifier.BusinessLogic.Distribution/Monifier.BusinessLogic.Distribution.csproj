@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Monifier.BusinessLogic.Contract\Monifier.BusinessLogic.Contract.csproj">
+      <Project>{5550E45D-562B-4B99-A2CF-89AC666B1845}</Project>
+      <Name>Monifier.BusinessLogic.Contract</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="NETStandard.Library" Version="2.0.1" />
+  </ItemGroup>
+</Project>

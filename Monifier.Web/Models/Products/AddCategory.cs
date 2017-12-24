@@ -9,6 +9,8 @@ namespace Monifier.Web.Models.Products
         [Required(ErrorMessage = "Введите название категории товаров")]
         [StringLength(50, ErrorMessage = "Название не должно превышать 50 символов")]
         public string Category { get; set; }
+        
+        public int PageNumber { get; set; }
 
         public IEnumerable<ModelValidationResult> Validate()
         {

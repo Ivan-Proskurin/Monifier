@@ -50,7 +50,6 @@ namespace Monifier.Web.Models.Expenses
 
         public void ClearInput()
         {
-            Category = null;
             Product = null;
             Price = null;
             Quantity = null;

@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +20,10 @@ namespace Monifier.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<MonifierDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("MonifierContext"),
+                options.UseSqlServer(
+                        Configuration.GetConnectionString("MoneyflowContext"
+//                        Configuration.GetConnectionString("MonifierContext"
+                    ),
                     b => b.MigrationsAssembly("Monifier.Web")));
             
             services.AddMvc();

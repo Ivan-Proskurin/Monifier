@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Model.Base;
-using Monifier.BusinessLogic.Model.Extensions;
+using Monifier.BusinessLogic.Model.Pagination;
+using Monifier.Common.Extensions;
 using Monifier.Web.Models;
 using Monifier.Web.Models.Products;
 using Monifier.Web.Models.Validation;
@@ -32,9 +32,19 @@ namespace Monifier.Web.Pages.Products
         [BindProperty]
         public EditCategory Category { get; set; }
 
-        public List<ProductModel> Products { get; private set; }
+        public ProductList Products { get; private set; }
 
-        public async Task OnGetAsync(int id)
+        private async Task<ProductList> LoadProductsAsync(int categoryId, int pageNumber)
+        {
+            return await _productQueries.GetList(categoryId, new PaginationArgs
+            {
+                IncludeDeleted = false,
+                ItemsPerPage = 5,
+                PageNumber = pageNumber
+            });
+        }
+
+        public async Task OnGetAsync(int id, int pageNumber = 1)
         {
             var category = await _categoriesQueries.GetById(id);
             Category = new EditCategory
@@ -43,7 +53,9 @@ namespace Monifier.Web.Pages.Products
                 Category = category.Name
             };
 
-            Products = await _productQueries.GetCategoryProducts(id);
+            Products = await LoadProductsAsync(id, pageNumber);
+
+            Category.PageNumber = Products.Pagination.PageNumber;
         }
 
         public async Task<IActionResult> OnPostEditAsync()
@@ -60,11 +72,11 @@ namespace Monifier.Web.Pages.Products
                             Name = Category.Category
                         });
                     }
-                    return RedirectToPage("./Categories");
+                    return RedirectToPage("./Categories", new {pageNumber = 1});
                 },
                 async () =>
                 {
-                    Products = await _productQueries.GetCategoryProducts(Category.Id);
+                    Products = await LoadProductsAsync(Category.Id, Category.PageNumber);
                     return Page();
                 });
         }
@@ -72,19 +84,21 @@ namespace Monifier.Web.Pages.Products
         public async Task<IActionResult> OnPostAddProductAsync()
         {
             const string prop = "Category.AddProduct";
-            Products = await _productQueries.GetCategoryProducts(Category.Id);
             
             return await Category.ProcessAsync(ModelState,
                 async () =>
                 {
                     await _productCommands.AddProductToCategory(Category.Id, Category.AddProduct);
-                    return RedirectToPage("./EditCategory", new {id = Category.Id});
+                    return RedirectToPage("./EditCategory", new {id = Category.Id, pageNumber = -1});
                 },
-                async () => await Task.FromResult(Page()),
+                async () =>
+                {
+                    Products = await LoadProductsAsync(Category.Id, Category.PageNumber);
+                    return Page();
+                },
                 async vrList =>
                 {
-                    await Task.CompletedTask;
-                    if (string.IsNullOrEmpty(Category.AddProduct))
+                    if (Category.AddProduct.IsNullOrEmpty())
                     {
                         vrList.Add(new ModelValidationResult(
                             prop, "Введите название товара"
@@ -98,7 +112,8 @@ namespace Monifier.Web.Pages.Products
                         ));
                         return;
                     }
-                    if (Products.FindByName(Category.AddProduct) != null)
+                    var product = await _productQueries.GetByName(Category.AddProduct); 
+                    if (product != null)
                     {
                         vrList.Add(new ModelValidationResult(
                             prop, "Товар с таким именем уже есть"

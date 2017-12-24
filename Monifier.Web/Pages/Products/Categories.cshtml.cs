@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Model.Base;
+using Monifier.BusinessLogic.Model.Pagination;
 using Monifier.Web.Models;
 using Monifier.Web.Models.Products;
 using Monifier.Web.Models.Validation;
@@ -22,14 +21,29 @@ namespace Monifier.Web.Pages.Products
             _categoriesCommands = categoriesCommands;
         }
         
-        public List<CategoryModel> Categories { get; private set; }
+        public CategoryList Categories { get; private set; }
         
         [BindProperty]
         public AddCategory AddCategory { get; set; }
 
-        public async Task OnGetAsync()
+        private async Task LoadCategoriesAsync(int pageNumber)
         {
-            Categories = await _categoriesQueries.GetAll();
+            Categories = await _categoriesQueries.GetList(new PaginationArgs
+            {
+                IncludeDeleted = false,
+                ItemsPerPage = 6,
+                PageNumber = pageNumber
+            });
+            
+            AddCategory = new AddCategory
+            {
+                PageNumber = Categories.Pagination.PageNumber,
+            };
+        }
+
+        public async Task OnGetAsync(int pageNumber = 1)
+        {
+            await LoadCategoriesAsync(pageNumber);
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -38,16 +52,15 @@ namespace Monifier.Web.Pages.Products
                 async () =>
                 {
                     await _categoriesCommands.Update(new CategoryModel {Name = AddCategory.Category});
-                    return RedirectToPage("./Categories");
+                    return RedirectToPage("./Categories", new { pageNumber = -1 });
                 },
                 async () =>
                 {
-                    Categories = await _categoriesQueries.GetAll();
+                    await LoadCategoriesAsync(AddCategory.PageNumber);
                     return Page();
                 },
                 async vrList =>
                 {
-                    if (string.IsNullOrEmpty(AddCategory.Category)) return;
                     var category = await _categoriesQueries.GetByName(AddCategory.Category);
                     if (category != null) vrList.Add(new ModelValidationResult("AddCategory.Category", 
                         "Категория товаров с таким именем уже есть"));

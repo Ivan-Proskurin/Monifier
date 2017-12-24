@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Model.Base;
+using Monifier.BusinessLogic.Model.Pagination;
 using Monifier.DataAccess.Contract;
 using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Expenses;
@@ -59,6 +60,25 @@ namespace Monifier.BusinessLogic.Queries.Base
             return await query
                 .Where(x => x.CategoryId == categoryId)
                 .Select(x => ToModel(x)).ToListAsync();
+        }
+
+        public async Task<ProductList> GetList(int categoryId, PaginationArgs args)
+        {
+            var productRepo = _unitOfWork.GetQueryRepository<Product>();
+            var query = productRepo.Query.Where(x => !x.IsDeleted)
+                .Where(x => x.CategoryId == categoryId);
+            var totalCount = await query.CountAsync();
+            var pagination = new PaginationInfo(args, totalCount);
+            var models = await query
+                .OrderBy(x => x.Id)
+                .Skip(pagination.Skipped).Take(pagination.Taken)
+                .Select(x => ToModel(x))
+                .ToListAsync();
+            return new ProductList
+            {
+                Products = models,
+                Pagination = pagination
+            };
         }
 
         private IQueryable<ProductModel> CreateFlowProductsQuery(int flowId, bool includeDeleted = false)

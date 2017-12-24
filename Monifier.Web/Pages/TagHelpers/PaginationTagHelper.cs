@@ -11,8 +11,6 @@ namespace Monifier.Web.Pages.TagHelpers
         }
         
         public string AspPage { get; set; }
-        public string DateFrom { get; set; }
-        public string DateTo { get; set; }
         
         public PaginationInfo Pagination { get; set; }
 
@@ -22,9 +20,7 @@ namespace Monifier.Web.Pages.TagHelpers
             Model = new PaginationPartialModel
             {
                 Page = AspPage,
-                Pagination = Pagination,
-                DateFrom = DateFrom,
-                DateTo = DateTo
+                Pagination = Pagination
             };
         }
     }

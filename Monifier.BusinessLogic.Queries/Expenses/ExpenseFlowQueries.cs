@@ -72,7 +72,9 @@ namespace Monifier.BusinessLogic.Queries.Expenses
 
         public async Task<int> GetNextNumber()
         {
-            return await _unitOfWork.GetQueryRepository<ExpenseFlow>().Query.MaxAsync(x => x.Number) + 1;
+            var flowQuery = _unitOfWork.GetQueryRepository<ExpenseFlow>().Query;
+            var count = await flowQuery.CountAsync();
+            return count == 0 ? 1 : await flowQuery.MaxAsync(x => x.Number) + 1;
         }
     }
 }

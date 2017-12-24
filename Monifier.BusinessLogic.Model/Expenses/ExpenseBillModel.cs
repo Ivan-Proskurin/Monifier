@@ -30,13 +30,22 @@ namespace Monifier.BusinessLogic.Model.Expenses
             UpdateState();
         }
         
-        public bool RemoveLastAddedItem()
+        public void RemoveLastAddedItem()
         {
-            if (Items == null || Items.Count == 0) return false;
+            if (Items == null || Items.Count == 0) return;
             var lastItem = Items.LastOrDefault();
-            var result = lastItem != null && Items.Remove(lastItem);
-            if (result) UpdateState();
-            return result;
+            if (lastItem == null) return;
+            
+            if (IsNew || lastItem.Id <= 0)
+            {
+                Items.Remove(lastItem);
+            }
+            else
+            {
+                lastItem.IsDeleted = true;
+            }
+            
+            UpdateState();
         }
 
         private void UpdateState()

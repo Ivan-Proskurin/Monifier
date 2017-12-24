@@ -59,8 +59,8 @@ namespace Monifier.Web.Pages.Accounts
             return await Transfer.ProcessAsync(ModelState,
                 async () =>
                 {
-                    var accountFrom = _accountQueries.GetByName(Transfer.AccountFrom);
-                    var accountTo = _accountQueries.GetByName(Transfer.AccountTo);
+                    var accountFrom = await _accountQueries.GetByName(Transfer.AccountFrom);
+                    var accountTo = await _accountQueries.GetByName(Transfer.AccountTo);
                     await _accountCommands.Transfer(accountFrom.Id, accountTo.Id, Transfer.Amount.ParseMoneyInvariant());
                     return RedirectToPage("./AccountsList");
                 },
@@ -69,16 +69,15 @@ namespace Monifier.Web.Pages.Accounts
                 {
                     var account = await _accountQueries.GetByName(Transfer.AccountFrom);
                     AvailableBalance = account != null ? account?.Balance.ToMoney() : "-";
-                    return await Task.FromResult(Page());
+                    return Page();
                 },
                 
                 async vrList =>
                 {
-                    var accountFrom = _accountQueries.GetByName(Transfer.AccountFrom);
-                    var accountTo = _accountQueries.GetByName(Transfer.AccountTo);
+                    var accountFrom = await _accountQueries.GetByName(Transfer.AccountFrom);
+                    var accountTo = await _accountQueries.GetByName(Transfer.AccountTo);
                     if (accountFrom == null) vrList.Add(new ModelValidationResult("Transfer.AccountFrom", "Такого счета нет"));
                     if (accountTo == null) vrList.Add(new ModelValidationResult("Transfer.AccountTo", "Такого счета нет"));
-                    await Task.CompletedTask;
                 });
         }
 

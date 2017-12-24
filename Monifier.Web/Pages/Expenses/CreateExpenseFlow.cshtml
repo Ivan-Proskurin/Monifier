@@ -41,8 +41,8 @@
         </div>
         <div class="row bottom-buttons-row">
             <div class="col-md-8 col-7">
-                <input type="submit" value="Сохранить" class="btn btn-success btn-default"/>
-                <a asp-page="./ExpenseFlows" class="btn btn-outline-secondary gapped">Отмена</a>
+                <input type="submit" value="Сохранить" class="btn btn-outline-danger cursor-pointer"/>
+                <a asp-page="./ExpenseFlows" class="btn btn-outline-primary gapped">Отмена</a>
             </div>
         </div>
         
@@ -53,5 +53,6 @@
 @section Scripts {
     <script>
         makeInputDatetimePicker("ExpenseFlow.CreationDate");
+        $("#ExpenseFlow_Name").focus();
     </script>
 }

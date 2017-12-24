@@ -70,7 +70,9 @@ namespace Monifier.BusinessLogic.Queries.Base
 
         public async Task<int> GetNextNumber()
         {
-            return await _unitOfWork.GetQueryRepository<Account>().Query.MaxAsync(x => x.Number) + 1;
+            var accountQuery = _unitOfWork.GetQueryRepository<Account>().Query;
+            var count = await accountQuery.CountAsync();
+            return count == 0 ? 1 : await accountQuery.MaxAsync(x => x.Number) + 1;
         }
     }
 }

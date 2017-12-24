@@ -6,6 +6,7 @@
 
 @{
     ViewBag.Title = "Расходы";
+    var billItems = @Model.Bill.GetItems();
 }
 
 <div class="container form-caption-bg bottom-dashed-line">
@@ -28,10 +29,11 @@
 
 
 <form method="post">
-    <input type="text" name="Good.Bill" value="@Model.Good.Bill" class="form-control"
+    <input type="text" id="Good_Bill" name="Good.Bill" value="@Model.Good.Bill" class="form-control"
            style="display: none;"/>
 
     <div asp-validation-summary="ModelOnly" class="text-danger add-bill-validation-summary"></div>
+    <div id="error" class="text-danger add-bill-validation-summary hidden"></div>
       
     <div class="container">
         <div class="row">
@@ -40,13 +42,13 @@
 
                 <div class="container">
                     <div class="row">
-                        <div class="column-header-col col col-md-7 col-sm-3 col-8">
+                        <div class="column-header-col col col-md-8 col-sm-4 col-8">
                             <h5 class="form-caption">Ввод:</h5>
                         </div>
-                        <div class="col col-md-5 col-sm-9 col-4">
-                            <button type="submit" asp-page-handler="removeLast"
+                        <div class="col col-md-4 col-sm-8 col-4">
+                            <button type="submit" asp-page-handler="add" style="margin-left: 12px;"
                                     class="btn btn-primary btn-sm cursor-pointer">
-                                Отменить последнее
+                                Добавить в чек
                             </button>
                         </div>
                     </div>
@@ -101,8 +103,7 @@
                             <h5 class="form-caption">Итог:</h5>
                         </div>
                         <div class="col col-md-3 col-sm-5 col-3">
-                            <button type="submit" asp-page-handler="confirm"
-                                    class="btn btn-danger btn-sm cursor-pointer">
+                            <button id="confirmButton" type="button" class="btn btn-danger btn-sm cursor-pointer">
                                 Подвердить
                             </button>
                         </div>
@@ -120,7 +121,7 @@
                             <span>@Model.Bill.Cost</span>
                         </div>
                     </div>
-                    @for (var i = 0; i < Model.Bill.Items.Count; i++)
+                    @for (var i = 0; i < billItems.Count; i++)
                     {
                         var item = Model.Bill.Items[i];
 
@@ -141,8 +142,8 @@
         </div>
         <div class="row" style="margin-top: 15px;">
             <div class="col">
-                <button type="submit" asp-page-handler="add" class="btn btn-outline-danger btn-sm cursor-pointer">
-                    Добавить в чек
+                <button type="submit" asp-page-handler="removeLast" class="btn btn-outline-danger btn-sm cursor-pointer">
+                    Отменить последнее
                 </button>
             </div>
             <div class="col" style="text-align: right;">
@@ -161,60 +162,74 @@
         var productsAutocomplete = makeInputAutocomplete("Good.Product", null, selectCategoryByProduct);
         makeInputNumeric("Good.Price", false);
         makeInputNumeric("Good.Quantity", false);
-        
+
         var flowId = "@Model.ExpenseFlow.Id";
         var billId = "@Model.Bill.Id";
         var urlPrefix = "/Expenses/AddExpenseBill/" + flowId;
         if (billId !== "0") urlPrefix += "/" + billId;
-        
+
+        $("#confirmButton").click(function() {
+            var url = urlPrefix + "?handler=confirm";
+            sendAjax(url,
+                $("#Good_Bill").val(),
+                function(response) {
+                    if (!response.success) {
+                        var error = $("#error");
+                        error.html(response.error);
+                        error.toggleClass("hidden");
+                        return;
+                    }
+                    window.location.replace("/Expenses/ExpenseFlows");
+                });
+        });
+
         function updateProductsList() {
             var url = urlPrefix + "?handler=getcategoryproducts";
             var productVal = $("#Good_Product").val();
             sendAjax(url,
                 $("#Good_Category").val(),
                 function(response) {
-                    console.log(response);
                     productsAutocomplete.destroy();
                     productsAutocomplete = makeInputAutocomplete("Good.Product", response, selectCategoryByProduct);
                     if (response.indexOf(productVal) >= 0) {
-                        console.log("setting old value: [" + productVal + "]");
                         $("#Good_Product").val(productVal);
-                    }
-                    else
+                    } else
                         $("#Good_Product").val("");
                 });
         }
 
         function selectCategoryByProduct() {
             var url = urlPrefix + "?handler=getcategorybyproduct";
-            var args = { 
-                flowId: +flowId, 
+            var args = {
+                flowId: +flowId,
                 product: $("#Good_Product").val()
             };
 
-            console.log(args);
             sendAjax(url,
                 JSON.stringify(args),
                 function(response) {
-                    console.log("response: [" + response + "]");
                     $("#Good_Category").val(response);
                 });
         }
 
         $("#Good_Category").keyup(function() {
             if (!($("#Good_Category")).val()) {
-                console.log("category is empty");
                 var url = urlPrefix + "?handler=getflowproducts";
-                sendAjax(url, flowId,
+                sendAjax(url,
+                    flowId,
                     function(response) {
-                        console.log(response);
                         productsAutocomplete.destroy();
                         productsAutocomplete = makeInputAutocomplete("Good.Product", response, selectCategoryByProduct);
                     });
             }
         });
 
-        
+        if ($("#Good_Category").val())
+            $("#Good_Product").focus();
+        else
+            $("#Good_Category").focus();
+
+
     </script>
 
 }

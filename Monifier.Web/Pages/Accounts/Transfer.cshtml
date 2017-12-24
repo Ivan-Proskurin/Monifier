@@ -71,6 +71,11 @@
                     $('#avail-balance').val(result);
                 });
         }
+
+        if ($("#Transfer_AccountFrom").val())
+            $("#Transfer_AccountTo").focus();
+        else
+            $("#Transfer_AccountFrom").focus();
         
     </script>
 }

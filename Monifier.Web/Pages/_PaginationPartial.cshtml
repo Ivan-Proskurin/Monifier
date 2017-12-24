@@ -19,9 +19,7 @@
             {
                 <li class="page-item">
                     <a asp-page="@Model.Page" 
-                       asp-route-pageNumber="@(pagination.PageNumber - 1)" 
-                       asp-route-dateFrom="@Model.DateFrom"
-                       asp-route-dateTo="@Model.DateTo"
+                       asp-route-pageNumber="@(pagination.PageNumber - 1)"
                        class="page-link">Назад</a>
                 </li>
             }
@@ -37,9 +35,7 @@
                 {
                     <li class="page-item">
                         <a asp-page="@Model.Page" 
-                           asp-route-pageNumber="@i" 
-                           asp-route-dateFrom="@Model.DateFrom"
-                           asp-route-dateTo="@Model.DateTo"
+                           asp-route-pageNumber="@i"
                            class="page-link">@i</a>
                     </li>
                 }
@@ -54,9 +50,7 @@
             {
                 <li class="page-item">
                     <a asp-page="@Model.Page" 
-                       asp-route-pageNumber="@(pagination.PageNumber + 1)" 
-                       asp-route-dateFrom="@Model.DateFrom"
-                       asp-route-dateTo="@Model.DateTo"
+                       asp-route-pageNumber="@(pagination.PageNumber + 1)"
                        class="page-link">Далее</a>
                 </li>
             }
