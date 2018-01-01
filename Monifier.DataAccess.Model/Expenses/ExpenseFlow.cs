@@ -20,5 +20,7 @@ namespace Monifier.DataAccess.Model.Expenses
         public decimal Balance { get; set; }
         
         public bool IsDeleted { get; set; }
+        
+        public int Version { get; set; }
     }
 }

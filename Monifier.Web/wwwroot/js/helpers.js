@@ -20,8 +20,8 @@ function makeInputAutocomplete(inputId, list, onSelect) {
         input.addEventListener("awesomplete-selectcomplete", onSelect);
     }
 
-    var cmb = $("div.awesomplete");
-    cmb.addClass("input-group");
+    $("div.awesomplete").addClass("input-group");
+    comboplete.ul.setAttribute("style", "margin-top: 45px;");
 
     input.addEventListener("click", function () {
         if (comboplete.ul.childNodes.length === 0) {

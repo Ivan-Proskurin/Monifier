@@ -140,7 +140,7 @@ namespace Monifier.BusinessLogic.Model.Expenses
 
         public void Validate()
         {
-            if (Cost != Items.Sum(x => x.Cost))
+            if (Cost != GetItems().Sum(x => x.Cost))
                 throw new ValidationException("Сумма чека должна равняться сумме всех входящих в него позиций");
         }
     }
