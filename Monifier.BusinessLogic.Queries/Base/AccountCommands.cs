@@ -115,7 +115,7 @@ namespace Monifier.BusinessLogic.Queries.Base
             
             if (accountFrom.Balance < amount)
                 throw new InvalidOperationException(
-                    $"Не возможно перевести сумму {amount} со счета \"{accountFrom.Name}\", так как на его балансе не хватает средств");
+                    $"Невозможно перевести сумму {amount} со счета \"{accountFrom.Name}\", так как на его балансе не хватает средств");
 
             
             accountFrom.Balance -= amount;
