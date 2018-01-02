@@ -200,14 +200,8 @@ namespace Monifier.Web.Pages.Expenses
                 try
                 {
                     var bill = JsonConvert.DeserializeObject<ExpenseBillModel>(jsonBill);
-
                     if (bill.Items.Count == 0) return AjaxResponse.ErrorResponse("Добавьте в чек хотя бы один товар");
-                
-                    if (bill.IsNew)
-                        await _expensesBillCommands.Create(bill);
-                    else
-                        await _expensesBillCommands.Update(bill);
-                
+                    await _expensesBillCommands.Save(bill);
                     return AjaxResponse.SuccessResponse();
                 }
                 catch (Exception exc)

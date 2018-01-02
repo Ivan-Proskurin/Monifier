@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Monifier.BusinessLogic.Contract.Expenses;
 using Monifier.BusinessLogic.Model.Expenses;
+using Monifier.BusinessLogic.Model.Pagination;
 using Monifier.DataAccess.Contract;
 using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Expenses;
@@ -13,19 +14,6 @@ namespace Monifier.BusinessLogic.Queries.Expenses
     public class ExpenseFlowQueries : IExpenseFlowQueries
     {
         private readonly IUnitOfWork _unitOfWork;
-
-        private static ExpenseFlowModel ToModel(ExpenseFlow entity)
-        {
-            if (entity == null) return null;
-            return new ExpenseFlowModel
-            {
-                Id = entity.Id,
-                Number = entity.Number,
-                Name = entity.Name,
-                DateCreated = entity.DateCreated,
-                Balance = entity.Balance,
-            };
-        }
 
         public ExpenseFlowQueries(IUnitOfWork unitOfWork)
         {
@@ -37,19 +25,42 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             var queries = _unitOfWork.GetQueryRepository<ExpenseFlow>();
             return await queries.Query
                 .Where(x => !x.IsDeleted || includeDeleted)
-                .Select(x => ToModel(x))
+                .Select(x => x.ToModel())
                 .OrderBy(x => x.Number)
                 .ToListAsync();
         }
 
+        public async Task<ExpenseFlowList> GetList(PaginationArgs args)
+        {
+            var flowQueries = _unitOfWork.GetQueryRepository<ExpenseFlow>();
+            var query = flowQueries.Query
+                .Where(x => !x.IsDeleted || args.IncludeDeleted)
+                .OrderByDescending(x => x.Version)
+                .ThenBy(x => x.Id);
+            
+            var totalCount = await query.CountAsync();
+            var pagination = new PaginationInfo(args, totalCount);
+            var flows = await query
+                .Skip(pagination.Skipped)
+                .Take(pagination.Taken)
+                .Select(x => x.ToModel())
+                .ToListAsync();
+            
+            return new ExpenseFlowList
+            {
+                ExpenseFlows = flows,
+                Pagination = pagination
+            };
+        }
+
         public async Task<ExpenseFlowModel> GetById(int id)
         {
-            return ToModel(await _unitOfWork.GetQueryRepository<ExpenseFlow>().GetById(id));
+            return (await _unitOfWork.GetQueryRepository<ExpenseFlow>().GetById(id)).ToModel();
         }
 
         public async Task<ExpenseFlowModel> GetWithCategories(int id)
         {
-            var flow = ToModel(await _unitOfWork.GetQueryRepository<ExpenseFlow>().GetById(id));
+            var flow = (await _unitOfWork.GetQueryRepository<ExpenseFlow>().GetById(id)).ToModel();
             if (flow == null) return null;
             
             var expenseCategoriesQuery = _unitOfWork.GetQueryRepository<ExpensesFlowProductCategory>().Query;

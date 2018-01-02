@@ -1,13 +1,21 @@
-@page
+@page "{pageNumber:int?}"
 @using Common.Extensions
 @model Expenses.ExpenseFlowsModel
 
 @{
     ViewBag.Title = "Расходы";
-    var flows = Model.ExpenseFlows;
+    var flows = Model.ExpenseFlows.ExpenseFlows;
 }
 
-<h4 class="form-caption-xs">Категории расходов</h4>
+@section Styles {
+    <link rel="stylesheet" href="~/css/expense.flows.css"/>
+}
+
+<div class="header">
+    <h4 class="form-caption-xs">Статьи расходов</h4>
+    <a asp-page="./CreateExpenseFlow" class="btn btn-outline-danger cursor-pointer header-button">Добавить статью</a>
+</div>
+
 <table class="cashed-table table table-striped table-hover">
     <thead class="thead-dark">
     <tr>
@@ -32,7 +40,7 @@
         var moneyRowClass = "money-cell " + rowClass;
         
         <tr class="@rowClass">
-            <td>@flow.Number</td>
+            <td>@(i + 1)</td>
             <td>
                 <a asp-page="./EditExpenseFlow" asp-route-id="@flow.Id" class="edit-item-link">@flow.Name</a>
             </td>
@@ -58,10 +66,8 @@
     </tbody>
 </table>
 
-<!-- Adding flow -->
-<div class="bottom-buttons-row">
-    <a asp-page="./CreateExpenseFlow" class="btn btn-outline-danger cursor-pointer">Добавить категорию</a>
-</div>
+<!-- Pagination -->
+<pagination asp-page="./ExpenseFlows" pagination="@Model.ExpenseFlows.Pagination"/>
 
 @section Scripts {
     <script type="text/javascript">

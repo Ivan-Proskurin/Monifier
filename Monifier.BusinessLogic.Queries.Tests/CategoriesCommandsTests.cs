@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Model.Base;
 using Monifier.BusinessLogic.Queries.Base;
 using Monifier.DataAccess.Contract;
 using Monifier.DataAccess.Model.Base;
 using Moq;
+using Xunit;
 
 namespace Monifier.BusinessLogic.Queries.Tests
 {
-    [TestClass]
     public class CategoriesCommandsTests
     {
         private readonly Mock<INamedModelQueryRepository<Category>> _queriesMock;
@@ -34,7 +33,7 @@ namespace Monifier.BusinessLogic.Queries.Tests
             _uowMock.Setup(m => m.SaveChangesAsync()).Returns(Task.Run(() => { }));
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateWithUniqueName_UpdatesNormal()
         {
 
@@ -48,9 +47,8 @@ namespace Monifier.BusinessLogic.Queries.Tests
             _uowMock.Verify(m => m.SaveChangesAsync());
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void UpdateWithNonUniqueName_ThrowsArgumentException()
+        [Fact]
+        public async Task UpdateWithNonUniqueName_ThrowsArgumentException()
         {
             _queriesMock.Setup(m => m.GetByName(It.IsAny<string>())).Returns<string>(
                 s => Task.FromResult(new Category { Id = 1, Name = "New category"}));
@@ -58,16 +56,7 @@ namespace Monifier.BusinessLogic.Queries.Tests
             var categoriesCommands = new CategoriesCommands(
                 _uowMock.Object, _productCommandsMock.Object, _productQueriesMock.Object);
             var model = new CategoryModel { Name = "New category" };
-            try
-            {
-                categoriesCommands.Update(model).Wait();
-            }
-            catch (AggregateException ex)
-            {
-                if (ex.InnerExceptions != null)
-                    throw ex.InnerException;
-                throw;
-            }
+            await Assert.ThrowsAsync<ArgumentException>(async () => await categoriesCommands.Update(model));
         }
     }
 }

@@ -10,5 +10,6 @@ namespace Monifier.DataAccess.Contract
         INamedModelQueryRepository<T> GetNamedModelQueryRepository<T>() where T : class, IHasId, IHasName;
         ICommandRepository<T> GetCommandRepository<T>() where T : class, IHasId;
         Task SaveChangesAsync();
+        void SaveChanges();
     }
 }

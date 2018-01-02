@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Monifier.BusinessLogic.Contract.Expenses;
@@ -39,34 +40,44 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                 IsDeleted = false
             };
             if (model.Id < 0)
+            {
+                flow.Version = 1;
                 commands.Create(flow);
+            }
             else
             {
                 flow.Id = model.Id;
+                flow.Version = model.Version + 1;
                 commands.Update(flow);
-                
-                var flowcatsQueries = _unitOfWork.GetQueryRepository<ExpensesFlowProductCategory>();
-                var flowcatsCommands = _unitOfWork.GetCommandRepository<ExpensesFlowProductCategory>();
-                foreach (var flowcat in flowcatsQueries.Query.Where(x => x.ExpensesFlowId == flow.Id))
-                {
-                    flowcatsCommands.Delete(flowcat);
-                }
-                foreach (var catId in model.Categories)
-                {
-                    var flowcat = new ExpensesFlowProductCategory
-                    {
-                        ExpensesFlowId = flow.Id,
-                        CategoryId = catId
-                    };
-                    flowcatsCommands.Create(flowcat);
-                }
+                if (model.Categories != null)
+                    UpdateFlowCategories(flow.Id, model.Categories);
             }
             
             await _unitOfWork.SaveChangesAsync();
 
             model.Id = flow.Id;
+            model.Version = flow.Version;
             return model;
         }
+
+        private void UpdateFlowCategories(int flowId, IEnumerable<int> categoriesId)
+        {
+            var flowcatsQueries = _unitOfWork.GetQueryRepository<ExpensesFlowProductCategory>();
+            var flowcatsCommands = _unitOfWork.GetCommandRepository<ExpensesFlowProductCategory>();
+            foreach (var flowcat in flowcatsQueries.Query.Where(x => x.ExpensesFlowId == flowId))
+            {
+                flowcatsCommands.Delete(flowcat);
+            }
+            foreach (var catId in categoriesId)
+            {
+                var flowcat = new ExpensesFlowProductCategory
+                {
+                    ExpensesFlowId = flowId,
+                    CategoryId = catId
+                };
+                flowcatsCommands.Create(flowcat);
+            }
+        } 
 
         public async Task Delete(int id, bool onlyMark = true)
         {
@@ -91,7 +102,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
         {
             var flow = await _unitOfWork.GetQueryRepository<ExpenseFlow>().GetById(expense.ExpenseFlowId);
             if (flow == null)
-                throw new ArgumentException($"Нет категории расходов с идентификатором Id = {expense.ExpenseFlowId}");
+                throw new ArgumentException($"Нет статьи расходов с идентификатором Id = {expense.ExpenseFlowId}");
             
             if (string.IsNullOrEmpty(expense.Category) && string.IsNullOrEmpty(expense.Product))
                 throw new ArgumentException("Необходимо ввести хотя бы категорию или продукт");
@@ -115,31 +126,26 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             
             if (product == null && category == null)
                 throw new ArgumentException("Были введены или категория или продукт, но ни один из них не найден");
-
-            var bill = new ExpenseBill
+            
+            var billModel = new ExpenseBillModel
             {
                 ExpenseFlowId = expense.ExpenseFlowId,
                 DateTime = expense.DateCreated,
-                SumPrice = expense.Cost
-            };
-            _unitOfWork.GetCommandRepository<ExpenseBill>().Create(bill);
-            
-            var item = new ExpenseItem
-            {
-                Bill = bill,
-                CategoryId = category?.Id,
-                Comment = null,
-                Price = expense.Cost,
-                Quantity = null,
-                ProductId = product?.Id
+                Cost = expense.Cost,
+                Items = new List<ExpenseItemModel>
+                {
+                    new ExpenseItemModel
+                    {
+                        CategoryId = category?.Id,
+                        ProductId = product?.Id,
+                        Comment = null,
+                        Quantity = null,
+                        Cost = expense.Cost,
+                    }
+                }
             };
 
-            flow.Balance -= bill.SumPrice;
-            _unitOfWork.GetCommandRepository<ExpenseFlow>().Update(flow);
-            
-            _unitOfWork.GetCommandRepository<ExpenseItem>().Create(item);
-
-            await _unitOfWork.SaveChangesAsync();
+            await billModel.Create(_unitOfWork);
         }
     }
 }

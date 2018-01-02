@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Monifier.BusinessLogic.Contract.Common;
 using Monifier.BusinessLogic.Model.Expenses;
+using Monifier.BusinessLogic.Model.Pagination;
 
 namespace Monifier.BusinessLogic.Contract.Expenses
 {
@@ -8,5 +9,6 @@ namespace Monifier.BusinessLogic.Contract.Expenses
     {
         Task<int> GetNextNumber();
         Task<ExpenseFlowModel> GetWithCategories(int id);
+        Task<ExpenseFlowList> GetList(PaginationArgs args);
     }
 }

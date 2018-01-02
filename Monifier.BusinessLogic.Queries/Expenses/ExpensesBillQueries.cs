@@ -24,7 +24,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
 
         public Task<List<ExpenseBillModel>> GetAll(bool includeDeleted = false)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public async Task<ExpenseBillList> GetFiltered(DateTime dateFrom, DateTime dateTo, PaginationArgs args)
@@ -132,7 +132,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
 
         public Task<ExpenseBillModel> GetByName(string name, bool includeDeleted = false)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public TotalsInfoModel GetTotals(List<ExpenseBillModel> bills)

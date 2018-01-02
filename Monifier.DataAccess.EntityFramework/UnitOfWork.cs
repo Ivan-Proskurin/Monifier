@@ -54,6 +54,11 @@ namespace Monifier.DataAccess.EntityFramework
             await _context.SaveChangesAsync();
         }
 
+        public void SaveChanges()
+        {
+            _context.SaveChanges();
+        }
+
         public ICommandRepository<T> GetCommandRepository<T>() where T : class, IHasId
         {
             _commandRepositories.TryGetValue(typeof(T), out object repo);

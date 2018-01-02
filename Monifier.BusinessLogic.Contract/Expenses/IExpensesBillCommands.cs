@@ -6,6 +6,6 @@ namespace Monifier.BusinessLogic.Contract.Expenses
 {
     public interface IExpensesBillCommands : ICommonModelCommands<ExpenseBillModel>
     {
-        Task Create(ExpenseBillModel model);
+        Task Save(ExpenseBillModel model);
     }
 }

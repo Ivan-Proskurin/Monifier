@@ -11,7 +11,7 @@ using System;
 namespace Monifier.Web.Migrations
 {
     [DbContext(typeof(MonifierDbContext))]
-    [Migration("20180101093401_ExpenseFlowVersion")]
+    [Migration("20180102083141_ExpenseFlowVersion")]
     partial class ExpenseFlowVersion
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

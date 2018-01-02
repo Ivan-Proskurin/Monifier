@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Expenses;
 using Monifier.BusinessLogic.Model.Expenses;
+using Monifier.BusinessLogic.Model.Pagination;
 
 namespace Monifier.Web.Pages.Expenses
 {
@@ -15,11 +15,16 @@ namespace Monifier.Web.Pages.Expenses
             _expenseFlowQueries = expenseFlowQueries;
         }
         
-        public List<ExpenseFlowModel> ExpenseFlows { get; private set; }
+        public ExpenseFlowList ExpenseFlows { get; private set; }
 
-        public async Task OnGetAsync()
+        public async Task OnGetAsync(int pageNumber = 1)
         {
-            ExpenseFlows = await _expenseFlowQueries.GetAll();
+            ExpenseFlows = await _expenseFlowQueries.GetList(new PaginationArgs
+            {
+                IncludeDeleted = false,
+                ItemsPerPage = 7,
+                PageNumber = pageNumber
+            });
         }
     }
 }
