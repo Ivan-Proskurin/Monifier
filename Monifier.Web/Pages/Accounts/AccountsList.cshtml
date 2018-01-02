@@ -9,7 +9,14 @@
     var footerClass = totals.Total >= 0 ? "table-primary" : "table-danger";
 }
 
-<h4 class="form-caption-xs">Счета</h4>
+@section Styles {
+    <link rel="stylesheet" href="~/css/accounts.list.css"/>
+}
+
+<div class="header">
+    <h4 class="form-caption-xs">Счета</h4>
+    <a asp-page="./CreateAccount" class="btn btn-outline-danger cursor-pointer header-button">Добавить счет</a>
+</div>
 
 <table class="cashed-table table table-striped table-hover">
     <thead class="thead-dark">
@@ -67,11 +74,6 @@
         </tr>
     </tfoot>
 </table>
-
-<!-- Adding account -->
-<div class="bottom-buttons-row">
-    <a asp-page="./CreateAccount" class="btn btn-outline-danger cursor-pointer">Добавить счет</a>
-</div>
 
 @section Scripts {
     <script type="text/javascript">
