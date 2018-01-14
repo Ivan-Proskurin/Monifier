@@ -18,6 +18,10 @@ namespace Monifier.DataAccess.Model.Base
         public string Name { get; set; }
 
         public decimal Balance { get; set; }
+        
+        public decimal AvailBalance { get; set; }
+        
+        public DateTime? LastWithdraw { get; set; }
 
         public bool IsDeleted { get; set; }
     }

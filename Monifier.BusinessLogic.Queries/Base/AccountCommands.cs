@@ -74,10 +74,9 @@ namespace Monifier.BusinessLogic.Queries.Base
 
         public async Task Topup(TopupAccountModel topup)
         {
-            var accountRepo = _unitOfWork.GetQueryRepository<Account>();
-            var accountCommands = _unitOfWork.GetCommandRepository<Account>();
+            var accountQueries = _unitOfWork.GetQueryRepository<Account>();
             var incomeCommands = _unitOfWork.GetCommandRepository<IncomeItem>();
-            var account = await accountRepo.GetById(topup.AccountId);
+            var account = await accountQueries.GetById(topup.AccountId);
             var incomeTypeId = topup.IncomeTypeId;
             if (incomeTypeId == null)
             {
@@ -94,8 +93,7 @@ namespace Monifier.BusinessLogic.Queries.Base
                 IncomeTypeId = incomeTypeId.Value,
                 Total = topup.Amount
             });
-            account.Balance += topup.Amount;
-            accountCommands.Update(account);
+            account.Topup(topup.Amount, _unitOfWork);
             await _unitOfWork.SaveChangesAsync();
         }
 
@@ -104,24 +102,21 @@ namespace Monifier.BusinessLogic.Queries.Base
             if (amount < 0)
                 throw new ArgumentException("Сумма перевода не должна быть меньше нуля", nameof(amount));
             
-            var accountRepo = _unitOfWork.GetQueryRepository<Account>();
-            var accountCommands = _unitOfWork.GetCommandRepository<Account>();
-            var accountFrom = await accountRepo.GetById(accountFromId);
+            var accountQueries = _unitOfWork.GetQueryRepository<Account>();
+            var accountFrom = await accountQueries.GetById(accountFromId);
             if (accountFrom == null)
                 throw new ArgumentException($"Нет счета с Id = {accountFromId}");
-            var accountTo = await accountRepo.GetById(accountToId);
+            var accountTo = await accountQueries.GetById(accountToId);
             if (accountTo == null)
                 throw new ArgumentException($"Нет счета с Id = {accountToId}");
             
             if (accountFrom.Balance < amount)
                 throw new InvalidOperationException(
                     $"Невозможно перевести сумму {amount} со счета \"{accountFrom.Name}\", так как на его балансе не хватает средств");
-
             
-            accountFrom.Balance -= amount;
-            accountTo.Balance += amount;
-            accountCommands.Update(accountFrom);
-            accountCommands.Update(accountTo);
+            accountFrom.Withdraw(amount, _unitOfWork);
+            accountTo.Topup(amount, _unitOfWork);
+            
             await _unitOfWork.SaveChangesAsync();
         }
 
@@ -144,9 +139,8 @@ namespace Monifier.BusinessLogic.Queries.Base
                 throw new InvalidOperationException(
                     $"Не возможно перевести сумму {amount} со счета \"{account.Name}\", так как на его балансе не хватает средств");
 
-            account.Balance -= amount;
+            account.Withdraw(amount, _unitOfWork);
             flow.Balance += amount;
-            _unitOfWork.GetCommandRepository<Account>().Update(account);
             _unitOfWork.GetCommandRepository<ExpenseFlow>().Update(flow);
 
             await _unitOfWork.SaveChangesAsync();

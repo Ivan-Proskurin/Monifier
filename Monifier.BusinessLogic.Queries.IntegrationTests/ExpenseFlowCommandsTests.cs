@@ -1,4 +1,5 @@
 ﻿using System;
+using FluentAssertions;
 using Monifier.BusinessLogic.Model.Expenses;
 using Monifier.BusinessLogic.Queries.Expenses;
 using Monifier.DataAccess.Model.Expenses;
@@ -24,7 +25,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
         }
         
         [Fact]
-        public async void Update_NewFlow_LastUpdatedEqualsDateCreated()
+        public async void Update_NewFlow_VersionEqualsOne()
         {
             var queries = UnitOfWork.GetQueryRepository<ExpenseFlow>();
             var efc = new ExpenseFlowCommands(UnitOfWork);
@@ -32,22 +33,23 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
             Assert.True(_model.Id > 0);
 
             var flow = await queries.GetById(_model.Id);
-            Assert.NotNull(flow);
-            Assert.Equal(_model.Name, flow.Name);
-            Assert.Equal(_model.Balance, flow.Balance);
-            Assert.Equal(_model.DateCreated, flow.DateCreated);
-            Assert.Equal(1, flow.Version);
+            
+            flow.Should().NotBeNull();
+            flow.Name.ShouldBeEquivalentTo(_model.Name);
+            flow.Balance.ShouldBeEquivalentTo(_model.Balance);
+            flow.DateCreated.ShouldBeEquivalentTo(_model.DateCreated);
+            flow.Version.ShouldBeEquivalentTo(1);
         }
 
         [Fact]
-        public async void Update_UpdateFlow_LastUpdatedIncreased()
+        public async void Update_UpdateFlow_VersionIncreased()
         {
             await UseUnitOfWorkAsync(async uof =>
             {
                 var efc = new ExpenseFlowCommands(uof);
                 _model.DateCreated = DateTime.Today;
                 _model = await efc.Update(_model); // created first
-                Assert.True(_model.Id > 0);
+                _model.Id.Should().BeGreaterThan(0);
             });
 
             await UseUnitOfWorkAsync(async uof =>
@@ -57,7 +59,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 _model.Balance -= 50;
                 await efc.Update(_model); // flow updated
                 var flow = await queries.GetById(_model.Id);
-                Assert.Equal(2, flow.Version);
+                flow.Version.ShouldBeEquivalentTo(2);
             });
         }
 
@@ -70,7 +72,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
             model.Balance -= 100;
             await efc.Update(model);
             var flow = await queries.GetById(model.Id);
-            Assert.Equal(model.Balance, flow.Balance);
+            flow.Balance.ShouldBeEquivalentTo(model.Balance);
         }
 
         [Fact]
@@ -78,6 +80,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
         {
             var expense = new ExpenseFlowExpense
             {
+                Account = DebitCardAccount.Name,
                 ExpenseFlowId = FoodExpenseFlow.Id,
                 Category = FoodCategory.Name,
                 Cost = 25.60m,
@@ -88,8 +91,8 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
             var efc = new ExpenseFlowCommands(UnitOfWork);
             await efc.AddExpense(expense);
             var flow = await UnitOfWork.GetQueryRepository<ExpenseFlow>().GetById(FoodExpenseFlow.Id);
-            Assert.Equal(FoodExpenseFlow.Balance - expense.Cost, flow.Balance);
-            Assert.Equal(FoodExpenseFlow.Version + 1, flow.Version);
+            flow.Balance.ShouldBeEquivalentTo(FoodExpenseFlow.Balance - expense.Cost);
+            flow.Version.ShouldBeEquivalentTo(FoodExpenseFlow.Version + 1);
         }
     }
 }

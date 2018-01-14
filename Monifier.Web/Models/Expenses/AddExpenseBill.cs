@@ -12,6 +12,9 @@ namespace Monifier.Web.Models.Expenses
         public int ExpenseFlowId { get; set; }
         
         public string Bill { get; set; }
+        
+        [DisplayName("Счет")]
+        public string Account { get; set; }
 
         [DisplayName("Категория")]
         public string Category { get; set; }

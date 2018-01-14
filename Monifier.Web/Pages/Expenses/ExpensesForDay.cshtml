@@ -62,7 +62,7 @@
              var billId = @item.BillIds.FirstOrDefault();
 
              <tr class="@trClass">
-                 <td>@item.Interval</td>
+                 <td>@item.Period</td>
                  <td>
                      <a asp-page="./ViewExpenseBill" asp-route-billId="@billId"
                         class="edit-item-link">

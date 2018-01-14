@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Monifier.BusinessLogic.Contract.Distribution;
-using Monifier.BusinessLogic.Model.Distribution;
+using Monifier.BusinessLogic.Distribution.Model;
+using Monifier.BusinessLogic.Distribution.Model.Contract;
+using Monifier.DataAccess.Model.Distribution;
 
 namespace Monifier.BusinessLogic.Distribution
 {
@@ -11,6 +12,7 @@ namespace Monifier.BusinessLogic.Distribution
         public void Distribute(IEnumerable<IFlowEndPoint> endPoints)
         {
             ValidateAndSplit(endPoints);
+            CalculateRecipientWants();
             PrepareToDistribute();
             try
             {
@@ -32,20 +34,52 @@ namespace Monifier.BusinessLogic.Distribution
             if (_endPoints.Count == 0)
                 throw new InvalidOperationException("endPoints must be non empty collection");
 
-            _sources = _endPoints.Where(x => x.FlowRule.CanFlow && 
-                                             (x.FlowRule.Destination == FlowDestination.Source && x.Balance > 0 ||
-                                              x.FlowRule.Destination == FlowDestination.Both)).ToList();
-            _recipients = _endPoints.Where(x => x.FlowRule.CanFlow && 
-                                                (x.FlowRule.Destination == FlowDestination.Recipient ||
-                                                 x.FlowRule.Destination == FlowDestination.Both)).ToList();
+            _sources = _endPoints.Where(x => x.FlowRule.CanFlow  && x.Balance > 0 &&
+                                             x.FlowRule.Destination == FlowDestination.Source).ToList();
+            _recipients = _endPoints.Where(x => x.FlowRule.CanFlow && x.FlowRule.Rule != FlowRule.None &&
+                                                x.FlowRule.Destination == FlowDestination.Recipient).ToList();
 
             if (_sources.Count == 0 && _recipients.Count > 0)
-                throw new FlowDistributionSchemaException(_endPoints, "No source points with no zero recipients");
-            
+                throw new FlowDistributionSchemaException(_endPoints, "No source points with non zero recipients");
+
             if (_sources.Sum(x => x.Balance) <= 0 && _recipients.Count > 0)
                 throw new FlowDistributionSchemaException(_endPoints, "Total balance of all sources must be positive");
         }
 
+        private void CalculateRecipientWants()
+        {
+            _recipientWants.Clear();
+            var fixedRecipients = _recipients.Where(x => x.FlowRule.Rule == FlowRule.FixedFromBase).ToList();
+            var sumBalance = _sources.Sum(x => x.Balance) - fixedRecipients.Sum(x => x.FlowRule.Amount);
+            
+            if (sumBalance < 0)
+                throw new FlowDistributionSchemaException(_endPoints, "Сумма значений фиксированных правил превышает базовую сумму");
+            
+            fixedRecipients.ForEach(x =>
+            {
+                _recipientWants.Add(x.Id, x.FlowRule.Amount);
+            });
+
+            var percentRecipients = _recipients.Where(x => x.FlowRule.Rule == FlowRule.PercentFromBase).ToList();
+            if (percentRecipients.Sum(x => x.FlowRule.Amount) > 100)
+                throw new FlowDistributionSchemaException(_endPoints, "Сумма процентных правил превышает 100%");
+
+            var percentSum = 0m;
+            percentRecipients.ForEach(x =>
+            {
+                var amount = Math.Round(sumBalance * x.FlowRule.Amount / 100, 2, MidpointRounding.AwayFromZero);
+                _recipientWants.Add(x.Id, amount);
+                percentSum += amount;
+            });
+
+            var restRecipients = _recipients.Where(x => x.FlowRule.Rule == FlowRule.AllRest).ToList();
+            var restAmount = restRecipients.Count > 0 ? (sumBalance - percentSum) / restRecipients.Count : 0;
+            restRecipients.ForEach(x =>
+            {
+                _recipientWants.Add(x.Id, restAmount);
+            });
+        }
+        
         private void PrepareToDistribute()
         {
             _sources = _sources.OrderBy(x => x.FlowRule.Destination).ThenByDescending(x => x.Balance).ToList();
@@ -55,12 +89,11 @@ namespace Monifier.BusinessLogic.Distribution
 
         private void RecordFlowsEntries()
         {
-            var totalRest = _sources.Where(x => x.Balance > 0).Sum(x => x.Balance);
+            var totalRest = _sources.Sum(x => x.Balance);
             foreach (var recipient in _recipients)
             {
-                var amount = ApplyRule(totalRest, recipient.FlowRule);
-                if (amount > totalRest)
-                    throw new FlowDistributionException(_sources, recipient, amount);
+                var amount = _recipientWants[recipient.Id];
+                if (amount > totalRest) amount = totalRest;
 
                 totalRest -= amount;
                 
@@ -74,7 +107,8 @@ namespace Monifier.BusinessLogic.Distribution
                         recipient.Topup(amount);
                         break;
                     }
-                    else if (source.Balance > 0)
+                    
+                    if (source.Balance > 0)
                     {
                         var flowRec = new DistributionFlow(source, recipient, source.Balance);
                         _flowRecords.Add(flowRec);
@@ -84,13 +118,10 @@ namespace Monifier.BusinessLogic.Distribution
                         recipient.Topup(withdrawValue);
                     }
                 }
-
-                if (recipient.FlowRule.Destination == FlowDestination.Both && recipient.Balance > 0)
-                    totalRest += recipient.Balance;
             }
         }
 
-        private decimal? allRestValue = null;
+        private decimal? _allRestValue;
         private decimal ApplyRule(decimal value, DistributionFlowRule flowRule)
         {
             var rule = flowRule.Rule;
@@ -100,15 +131,17 @@ namespace Monifier.BusinessLogic.Distribution
                 case FlowRule.None:
                     return 0;
                 case FlowRule.FixedFromBase:
-                case FlowRule.FixedFromRest:
                     return amount;
                 case FlowRule.PercentFromBase:
-                case FlowRule.PercentFromRest:
-                    return value * amount / 100;
+                    return Math.Round(value * amount / 100, 2, MidpointRounding.AwayFromZero);
                 case FlowRule.AllRest:
-                    if (allRestValue != null) return allRestValue.Value;
-                    allRestValue = value / _recipients.Count(x => x.FlowRule.Rule == FlowRule.AllRest);
-                    return allRestValue.Value;
+                    if (_allRestValue != null)
+                    {
+                        return _allRestValue.Value > value ? value : _allRestValue.Value; 
+                    }
+                    _allRestValue = value / _recipients.Count(x => x.FlowRule.Rule == FlowRule.AllRest);
+                    _allRestValue = Math.Round(_allRestValue.Value, 2, MidpointRounding.AwayFromZero);
+                    return _allRestValue.Value;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(rule), rule, null);
             }
@@ -127,7 +160,8 @@ namespace Monifier.BusinessLogic.Distribution
         private List<IFlowEndPoint> _endPoints;
         private List<IFlowEndPoint> _sources;
         private List<IFlowEndPoint> _recipients;
-        private List<DistributionFlow> _flowRecords = new List<DistributionFlow>();
+        private readonly Dictionary<int, decimal> _recipientWants = new Dictionary<int, decimal>();
+        private readonly List<DistributionFlow> _flowRecords = new List<DistributionFlow>();
         public IList<DistributionFlow> FlowRecords => _flowRecords;
     }
 }

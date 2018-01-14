@@ -19,6 +19,7 @@ namespace Monifier.Web.Pages.Expenses
 {
     public class AddExpenseModel : PageModel
     {
+        private readonly IAccountQueries _accountQueries;
         private readonly IExpenseFlowQueries _expenseFlowQueries;
         private readonly IProductQueries _productQueries;
         private readonly IExpenseFlowCommands _expenseFlowCommands;
@@ -27,6 +28,7 @@ namespace Monifier.Web.Pages.Expenses
         private readonly IProductCommands _productCommands;
 
         public AddExpenseModel(
+            IAccountQueries accountQueries,
             IExpenseFlowQueries expenseFlowQueries,
             IProductQueries productQueries,
             IExpenseFlowCommands expenseFlowCommands,
@@ -34,6 +36,7 @@ namespace Monifier.Web.Pages.Expenses
             ICategoriesCommands categoriesCommands,
             IProductCommands productCommands)
         {
+            _accountQueries = accountQueries;
             _expenseFlowQueries = expenseFlowQueries;
             _productQueries = productQueries;
             _expenseFlowCommands = expenseFlowCommands;
@@ -44,12 +47,15 @@ namespace Monifier.Web.Pages.Expenses
 
         private async Task PrepareModels(int expenseId)
         {
+            Accounts = await _accountQueries.GetAll();
             Categories = await _categoriesQueries.GetFlowCategories(expenseId);
             Products = await _productQueries.GetExpensesFlowProducts(expenseId);
         }
         
         [BindProperty]
         public EditExpense Expense { get; set; }
+        
+        public List<AccountModel> Accounts { get; private set; }
         
         public List<CategoryModel> Categories { get; private set; }
         
@@ -61,11 +67,11 @@ namespace Monifier.Web.Pages.Expenses
             var flow = await _expenseFlowQueries.GetById(flowId);
             Expense = new EditExpense
             {
+                Account = Accounts.GetLastUsedAccount()?.Name,
                 ExpenseFlowId = flowId,
                 FlowName = flow.Name,
                 DateTime = DateTime.Now.ToStandardString(),
                 Cost = string.Empty,
-                ContinueInput = true,
             };
             if (Categories.Count == 1)
             {
@@ -84,9 +90,7 @@ namespace Monifier.Web.Pages.Expenses
                 async () =>
                 {
                     await _expenseFlowCommands.AddExpense(Expense.ToModel());
-                    if (!Expense.ContinueInput) return RedirectToPage("./ExpenseFlows");
-                    await PrepareToInputNewExpense(Expense.ExpenseFlowId);
-                    return Page();
+                    return RedirectToPage("./ExpenseFlows");
                 },
                 async () =>
                 {
@@ -95,6 +99,11 @@ namespace Monifier.Web.Pages.Expenses
                 },
                 async vrList =>
                 {
+                    var account = await _accountQueries.GetByName(Expense.Account);
+                    if (account == null)
+                    {
+                        vrList.Add(new ModelValidationResult("Expense.Account", "Нет такого счета"));
+                    }
                     CategoryModel category = null;
                     if (!string.IsNullOrEmpty(Expense.Category))
                     {

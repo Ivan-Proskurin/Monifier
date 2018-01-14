@@ -118,7 +118,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             };
         }
 
-        private async Task GroupAndSortBillsGoodsAsync(IEnumerable<BillGoodsGroup> goodsGroups)
+        private async Task GroupAndSortBillsGoodsAsync(IReadOnlyCollection<BillGoodsGroup> goodsGroups)
         {
             // ищем категории, принадлежащие отобранным счетам и группируем их
             var billItemsQuery = _unitOfWork.GetQueryRepository<ExpenseItem>();
@@ -188,34 +188,34 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                 {
                     BillIds = x.BillIds,
                     Sum = x.Sum,
-                    
-                    DateFrom = byMonth 
-                        ? x.DateTime.StartOfTheMonth().ToStandardString() 
+
+                    DateFrom = byMonth
+                        ? x.DateTime.StartOfTheMonth().ToStandardString()
                         : x.DateTime.Date.ToStandardString(),
-                    
-                    DateTo = byMonth 
-                        ? x.DateTime.EndOfTheMonth().ToStandardString() 
+
+                    DateTo = byMonth
+                        ? x.DateTime.EndOfTheMonth().ToStandardString()
                         : x.DateTime.AddDays(1).AddMinutes(-1).ToStandardString(),
-                    
-                    Interval = byMonth 
-                        ? $"{x.DateTime.StartOfTheMonth().ToStandardDateStr()} - {x.DateTime.EndOfTheMonth().ToStandardDateStr()}" 
+
+                    Period = byMonth
+                        ? $"{x.DateTime.StartOfTheMonth().ToStandardDateStr()} - {x.DateTime.EndOfTheMonth().ToStandardDateStr()}"
                         : x.DateTime.ToStandardDateStr(),
-                    
+
                     Caption = byMonth ? x.DateTime.GetMonthName() : x.DateTime.GetWeekDayName().Capitalize(),
                     Goods = x.Goods.Select(g => g.Name).ToList().GetLaconicString(),
                     IsDangerExpense = x.Sum >= _userSettings.DangerExpense(byMonth)
                 }).ToList(),
-                Pagination = goodsGroupsWithPagination.Pagination
+                Pagination = goodsGroupsWithPagination.Pagination,
+                
+                // считаем тоталы
+                Totals = new TotalsInfoModel
+                {
+                    Caption = $"Итого за период с {dateFrom.ToStandardString()} по {dateTo.ToStandardString()}",
+                    Total = await _unitOfWork.GetQueryRepository<ExpenseBill>().Query
+                        .Where(x => x.DateTime >= dateFrom && x.DateTime < dateTo).SumAsync(x => x.SumPrice)
+                }
             };
-            
-            // считаем тоталы
-            expenses.Totals = new TotalsInfoModel
-            {
-                Caption = $"Итого за период с {dateFrom.ToStandardString()} по {dateTo.ToStandardString()}",
-                Total = await _unitOfWork.GetQueryRepository<ExpenseBill>().Query
-                    .Where(x => x.DateTime >= dateFrom && x.DateTime < dateTo).SumAsync(x => x.SumPrice)
-            };
-            
+
             return expenses;
         }
         
@@ -237,7 +237,6 @@ namespace Monifier.BusinessLogic.Queries.Expenses
         {
             // отбираем нужные счета          
             var expensesQueries = _unitOfWork.GetQueryRepository<ExpenseBill>();
-            var flowQueries = _unitOfWork.GetQueryRepository<ExpenseFlow>();
             
             var today = day.Date;
             var tomorrow = today.AddDays(1);
@@ -265,20 +264,20 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                     Sum = x.Sum,
                     DateFrom = today.ToStandardString(),
                     DateTo = tomorrow.ToStandardString(),
-                    Interval = x.FlowName, 
+                    Period = x.FlowName,
                     Caption = x.DateTime.ToStandardString(),
                     Goods = x.Goods.Select(g => g.Name).ToList().GetLaconicString(),
                     IsDangerExpense = false
                 }).ToList(),
-                Pagination = null
-            };
-            
-            // считаем тоталы
-            expenses.Totals = new TotalsInfoModel
-            {
-                Caption = $"Итого за день с {today.ToStandardDateStr()} по {tomorrow.ToStandardDateStr()}",
-                Total = await _unitOfWork.GetQueryRepository<ExpenseBill>().Query
-                    .Where(x => x.DateTime >= today && x.DateTime < tomorrow).SumAsync(x => x.SumPrice)
+                Pagination = null,
+
+                // считаем тоталы
+                Totals = new TotalsInfoModel
+                {
+                    Caption = $"Итого за день с {today.ToStandardDateStr()} по {tomorrow.ToStandardDateStr()}",
+                    Total = await _unitOfWork.GetQueryRepository<ExpenseBill>().Query
+                        .Where(x => x.DateTime >= today && x.DateTime < tomorrow).SumAsync(x => x.SumPrice)
+                }
             };
 
             return expenses;

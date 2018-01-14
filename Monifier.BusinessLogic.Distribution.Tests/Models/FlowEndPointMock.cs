@@ -1,5 +1,6 @@
 ﻿using System;
-using Monifier.BusinessLogic.Model.Distribution;
+using Monifier.BusinessLogic.Distribution.Model;
+using Monifier.BusinessLogic.Distribution.Model.Contract;
 
 namespace Monifier.BusinessLogic.Distribution.Tests.Models
 {

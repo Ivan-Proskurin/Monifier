@@ -1,28 +1,28 @@
 @page "{expenseId:int}/{billId:int?}"
 @using System.Linq
 @using Common.Extensions
-@using Microsoft.CodeAnalysis.CSharp.Syntax
 @model Expenses.AddExpenseBillModel
 
 @{
     ViewBag.Title = "Расходы";
+    var accounts = @Model.Accounts.Select(x => x.Name);
     var billItems = @Model.Bill.GetItems();
 }
 
-<div class="container form-caption-bg bottom-dashed-line">
+<div class="container form-caption-sm bottom-dashed-line">
     <div class="row">
         <div class="col">
             @if (Model.Bill.IsNew)
             {
-                <h3>Добавление чека</h3>
+                <h4>Ввод чека</h4>
             }
             else
             {
-                <h3>Редактирование чека #@Model.Bill.Id</h3>
+                <h4>Чек #@Model.Bill.Id</h4>
             }
         </div>
         <div class="col">
-            <h3>@Model.ExpenseFlow.Name</h3>
+            <h4>@Model.ExpenseFlow.Name</h4>
         </div>
     </div>
 </div>
@@ -36,6 +36,14 @@
     <div id="error" class="text-danger add-bill-validation-summary hidden"></div>
       
     <div class="container">
+        <div class="row" style="margin-bottom: 35px;">
+            <div class="col-md-2">
+                <h5 style="margin-top: 4px;">Счет:</h5>
+            </div>
+            <div class="col-md-10">
+                <autocomplete asp-for="Good.Account" value="@Model.Good.Account" value-list="@accounts"/>
+            </div>
+        </div>
         <div class="row">
             <div class="col-md-6 col-sm-6">
                 <input asp-for="Good.ExpenseFlowId" hidden/>
@@ -43,7 +51,7 @@
                 <div class="container">
                     <div class="row">
                         <div class="column-header-col col col-md-8 col-sm-4 col-8">
-                            <h5 class="form-caption">Ввод:</h5>
+                            <h5 class="form-caption">Позиция:</h5>
                         </div>
                         <div class="col col-md-4 col-sm-8 col-4">
                             <button type="submit" asp-page-handler="add" style="margin-left: 12px;"
@@ -59,7 +67,7 @@
                         <autocomplete asp-for="Good.Category" class="form-control"
                                       value="@Model.Good.Category" autocomplete="off"
                                       value-list="@Model.Categories.Select(x => x.Name)"/>
-                        <input type="text" name="Good.CategoryToAdd" value="@Model.Good.CategoryToAdd" 
+                        <input type="text" name="Good.CategoryToAdd" value="@Model.Good.CategoryToAdd"
                                style="display: none;"/>
                         <span asp-validation-for="Good.Category"></span>
                     </div>
@@ -70,7 +78,7 @@
                         <autocomplete asp-for="Good.Product" class="form-control"
                                       value-list="@Model.Products.Select(x => x.Name)"
                                       value="@Model.Good.Product" autocomplete="off"/>
-                        <input type="text" name="Good.ProductToAdd" value="@Model.Good.ProductToAdd" 
+                        <input type="text" name="Good.ProductToAdd" value="@Model.Good.ProductToAdd"
                                style="display: none;"/>
                         <span asp-validation-for="Good.Product"></span>
                     </div>
@@ -158,6 +166,7 @@
 @section Scripts {
     <script>
         activateLink("#expensesLink");
+        makeInputAutocomplete("Good.Account");
         var categoryAutocomplete = makeInputAutocomplete("Good.Category", null, updateProductsList);
         var productsAutocomplete = makeInputAutocomplete("Good.Product", null, selectCategoryByProduct);
         makeInputNumeric("Good.Price", false);
@@ -170,13 +179,17 @@
 
         $("#confirmButton").click(function() {
             var url = urlPrefix + "?handler=confirm";
+            var args = {
+                account: $("#Good_Account").val(),
+                bill: $("#Good_Bill").val()
+            };
             sendAjax(url,
-                $("#Good_Bill").val(),
+                JSON.stringify(args),
                 function(response) {
                     if (!response.success) {
                         var error = $("#error");
                         error.html(response.error);
-                        error.toggleClass("hidden");
+                        error.removeClass("hidden");
                         return;
                     }
                     window.location.replace("/Expenses/ExpenseFlows");

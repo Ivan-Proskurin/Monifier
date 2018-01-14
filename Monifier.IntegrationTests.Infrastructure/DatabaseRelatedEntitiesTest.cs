@@ -26,6 +26,9 @@ namespace Monifier.IntegrationTests.Infrastructure
             Tv = CreateProduct(TechCategory.Id, "Телевизор", uof);
 
             FoodExpenseFlow = CreateExpenseFlow("Продукты питания", 1000, DateTime.Today, 1, uof);
+            
+            DebitCardAccount = CreateAccount("Дебетовая карта", 15000, DateTime.Today, uof);
+            CashAccount = CreateAccount("Наличные", 30000, DateTime.Today, uof);
         }
         
         protected Category FoodCategory { get; private set; }
@@ -36,5 +39,8 @@ namespace Monifier.IntegrationTests.Infrastructure
         protected Product Tv { get; private set; }
         
         protected ExpenseFlow FoodExpenseFlow { get; private set; }
+        
+        protected Account DebitCardAccount { get; private set; }
+        protected Account CashAccount { get; private set; }
     }
 }

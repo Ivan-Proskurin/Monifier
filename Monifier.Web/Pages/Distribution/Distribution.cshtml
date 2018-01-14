@@ -1,0 +1,299 @@
+@page
+@using Common.Extensions
+@model Distribution.DistributionModel
+
+@{
+    ViewBag.Title = "Распределение";
+    var accounts = @Model.Board.Accounts;
+    var expenseFlows = @Model.Board.ExpenseFlows;
+}
+
+@section Styles{
+    <link rel="stylesheet" href="~/css/distribution.css"/>
+}
+
+<div id="error" class="text-danger distribution-error hidden"></div>
+
+<form method="post">
+    <div class="header">
+        <h4>Счета</h4>
+        <div class="header-buttons">
+            <button id="btnDistribute" type="button" class="btn btn-success cursor-pointer">Распределить</button>
+            <button id="btnSave" type="button" class="btn btn-danger" disabled>Сохранить</button>
+            <a asp-page="../Accounts/AccountsList" class="btn btn-outline-danger cursor-pointer">Отмена</a>
+        </div>
+    </div>
+</form>
+
+<table class="cashed-table table table-striped table-hover">
+    <thead class="thead-dark">
+    <tr>
+        <th></th>
+        <th width="100%">
+            Название
+        </th>
+        <th class="money-cell">
+            Баланс
+        </th>
+        <th class="money-cell">
+            Распределено
+        </th>
+        <th class="money-cell">
+            Результат
+        </th>
+    </tr>
+    </thead>
+    
+    <tbody>
+        
+    @for (var i = 0; i < accounts.Count; i++)
+    {
+        var account = accounts[i];
+        var accountName = $"account_{account.Name}";
+        var accountDistId = $"accountDist_{account.Id}";
+        var accountResultId = $"accountResult_{account.Id}";
+        
+        <tr>
+            <td>
+                <input name="@accountName" class="checkbox account-checkbox cursor-pointer" 
+                       type="checkbox" data-id="@account.Id" data-val="@account.CanFlow"
+                       data-name="@account.Name"/>
+            </td>
+            <td>
+                @account.Name
+            </td>
+            <td class="money-cell">
+                @account.Balance.ToMoney()
+            </td>
+            <td id="@accountDistId" class="money-cell">
+                &mdash;
+            </td>
+            <td id="@accountResultId" class="money-cell">
+                &mdash;
+            </td>
+        </tr>
+    }
+
+    </tbody>
+    
+    <tfoot>
+        <tr class="table-info">
+            <td></td>
+            <td colspan="2">Базовая сумма:</td>
+            <td colspan="2" class="money-cell">@Model.Board.BaseAmount.ToMoney()</td>
+        </tr>
+    </tfoot>
+</table>
+
+<h4 class="table-header">Статьи расходов</h4>
+
+<table class="cashed-table table table-striped table-hover">
+    <thead class="thead-dark">
+    <tr>
+        <th></th>
+        <th width="100%">
+            Название
+        </th>
+        <th class="money-cell">
+            Баланс
+        </th>
+        <th>
+            Правило
+        </th>
+        <th>
+            Значение
+        </th>
+        <th class="money-cell">
+            Пополнение
+        </th>
+        <th class="money-cell">
+            Результат
+        </th>
+    </tr>
+    </thead>
+    
+    <tbody>
+        
+    @for (var i = 0; i < expenseFlows.Count; i++)
+    {
+        var expenseFlow = expenseFlows[i];
+        var expenseFlowName = $"expenseFlow_{expenseFlow.Name}";
+        var selectId = $"expenseFlowSelect_{expenseFlow.Id}";
+        var inputId = $"expenseFlowInput_{expenseFlow.Id}";
+        var expenseTopupId = $"expenseTopup_{expenseFlow.Id}";
+        var expenseResultId = $"expenseResult_{expenseFlow.Id}";
+        
+        <tr>
+            <td>
+                <input name="@expenseFlowName" class="checkbox expense-flow-checkbox cursor-pointer" 
+                       type="checkbox" data-val="@expenseFlow.CanFlow"
+                       data-id="@expenseFlow.Id" data-name="@expenseFlow.Name" 
+                       data-select-id="@selectId" data-input-id="@inputId"/>
+            </td>
+            <td>
+                @expenseFlow.Name
+            </td>
+            <td class="money-cell">
+                @expenseFlow.Balance.ToMoney()
+            </td>
+            <td>
+                <select id="@selectId" class="expense-flow-select" disabled="disabled"
+                        data-val="@expenseFlow.Rule">
+                    <option value="FixedFromBase">Сумма от базы</option>
+                    <option value="PercentFromBase">Процент от базы</option>
+                    <option value="AllRest">Остаток</option>
+                </select>
+            </td>
+            <td>
+                <input id="@inputId" class="amount-input" disabled="disabled" 
+                       type="text" value="@expenseFlow.Amount"/>
+            </td>
+            <td id="@expenseTopupId" class="money-cell">
+                &mdash;
+            </td>
+            <td id="@expenseResultId" class="money-cell">
+                &mdash;
+            </td>
+        </tr>
+    }
+
+    </tbody>
+</table>
+
+<div id="details" class="hidden">
+    <h4 class="table-header">Детализация</h4>
+    
+    <table id="detailsTable" class="cashed-table table table-striped table-hover">
+        <thead class="thead-dark">
+        <tr>
+            <th>Номер</th>
+            <th width="50%">Счет</th>
+            <th width="50%">Статья расходов</th>
+            <th class="money-cell">Сумма</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        activateLink("#accountsLink");
+
+        var urlPrefix = "/Distribution/Distribution";
+        var board;
+        
+        $("#btnDistribute").click(function() {
+            var url = urlPrefix + "?handler=distribute";
+            sendAjax(url,
+                JSON.stringify(getDistributionBoard()),
+                function(response) {
+                    if (!preprocessResponse(response)) return;
+                    board = JSON.parse(response.result);
+                    console.log(board);
+                    board.accounts.forEach(function(item) {
+                        $("#accountDist_" + item.id).html(item.withdrawTotal ? item.withdrawTotal : "&mdash;");
+                        $("#accountResult_" + item.id).html(item.result ? item.result : "&mdash;");
+                    });
+                    board.expenseFlows.forEach(function(item) {
+                        $("#expenseTopup_" + item.id).html(item.topupTotal ? item.topupTotal : "&mdash;");
+                        $("#expenseResult_" + item.id).html(item.result ? item.result : "&mdash;");
+                    });
+                    $("#detailsTable tbody tr").remove();
+                    board.distributionFlows.forEach(function(item, idx) {
+                        var tr = $("<tr>");
+                        tr.append($("<td>").html(idx + 1));
+                        tr.append($("<td width='50%'>").html(item.sourceName));
+                        tr.append($("<td width='50%'>").html(item.recipientName));
+                        var amountCell = $("<td>");
+                        amountCell.attr("class", "money-cell");
+                        amountCell.html(item.amountFormatted);
+                        tr.append(amountCell);
+                        $("#detailsTable").find("tbody").append(tr);
+                    });
+                    $("#details").removeClass("hidden");
+                    $("#btnSave").removeAttr("disabled");
+                    $("#btnSave").addClass("cursor-pointer");
+                });
+        });
+        
+        $("#btnSave").click(function() {
+            var url = urlPrefix + "?handler=save";
+            sendAjax(url, JSON.stringify(board), function(response) {
+                if (!preprocessResponse(response)) return;
+                window.location.assign("/Accounts/AccountsList");
+            });
+        });
+        
+        function preprocessResponse(response) {
+            var error = $("#error");
+            if (!response.success) {
+                error.html(response.error);
+                error.removeClass("hidden");
+            }
+            else
+                error.addClass("hidden");
+            return response.success;
+        }
+        
+        function getDistributionBoard() {
+            return {
+                accounts: $.map($("input.account-checkbox"), function(input) {
+                    var $input = $(input);
+                    return {
+                        id: $input.attr("data-id"),
+                        name: $input.attr("data-name"),
+                        canFlow: $input.prop("checked")
+                    };
+                }),
+                expenseFlows: $.map($("input.expense-flow-checkbox"), function(input) {
+                    var $input = $(input);
+                    var $select = $("#" + $input.attr("data-select-id"));
+                    var $amount = $("#" + $input.attr("data-input-id"));
+                    var ruleVal = $select.val();
+                    if (!ruleVal) ruleVal = "None";
+                    return {
+                        id: $input.attr("data-id"),
+                        name: $input.attr("data-name"),
+                        canFlow: $input.prop("checked"),
+                        rule: ruleVal,
+                        amount: +$amount.val().replace(",", ".")
+                    };
+                })
+            };
+        }
+
+        $("input.amount-input").each(function(idx, item) {
+            makeInputNumeric(item);
+        });
+
+        function enableExpenseFlow($target, value) {
+            $("#" + $target.attr("data-select-id")).prop("disabled", !value);
+            $("#" + $target.attr("data-input-id")).prop("disabled", !value);
+        }
+
+        $("input.checkbox").each(function(idx, item) {
+            var $item = $(item);
+            var val = $item.attr("data-val");
+            var checked = val === "True";
+            $item.prop("checked", checked);
+        });
+
+        $("select.expense-flow-select").each(function(idx, item) {
+            $(item).val($(item).attr("data-val"));
+        });
+
+        $("input.expense-flow-checkbox").each(function(idx, item) {
+            var $item = $(item);
+            enableExpenseFlow($item, $item.prop("checked"));
+        });
+
+        $("input.expense-flow-checkbox").change(function(evt) {
+            var $target = $(evt.target);
+            $("#" + $target.attr("data-select-id")).prop("disabled", !$target.prop("checked"));
+            $("#" + $target.attr("data-input-id")).prop("disabled", !$target.prop("checked"));
+        });
+
+    </script>
+}

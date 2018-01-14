@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
 using Monifier.DataAccess.EntityFramework;
+using Monifier.DataAccess.Model.Distribution;
 using System;
 
 namespace Monifier.Web.Migrations
@@ -25,11 +26,15 @@ namespace Monifier.Web.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<decimal>("AvailBalance");
+
                     b.Property<decimal>("Balance");
 
                     b.Property<DateTime>("DateCreated");
 
                     b.Property<bool>("IsDeleted");
+
+                    b.Property<DateTime?>("LastWithdraw");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -78,10 +83,86 @@ namespace Monifier.Web.Migrations
                     b.ToTable("Products");
                 });
 
+            modelBuilder.Entity("Monifier.DataAccess.Model.Distribution.AccountFlowSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("AccountId");
+
+                    b.Property<bool>("CanFlow");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.ToTable("AccountFlowSettings");
+                });
+
+            modelBuilder.Entity("Monifier.DataAccess.Model.Distribution.Distribution", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<DateTime>("DateTime");
+
+                    b.Property<decimal>("SumFlow");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Distributions");
+                });
+
+            modelBuilder.Entity("Monifier.DataAccess.Model.Distribution.ExpenseFlowSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<decimal>("Amount");
+
+                    b.Property<bool>("CanFlow");
+
+                    b.Property<int>("ExpenseFlowId");
+
+                    b.Property<int>("Rule");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExpenseFlowId");
+
+                    b.ToTable("ExpenseFlowSettings");
+                });
+
+            modelBuilder.Entity("Monifier.DataAccess.Model.Distribution.Flow", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<decimal>("Amount");
+
+                    b.Property<int?>("DistributionId");
+
+                    b.Property<int>("RecipientId");
+
+                    b.Property<int>("SourceId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DistributionId");
+
+                    b.HasIndex("RecipientId");
+
+                    b.HasIndex("SourceId");
+
+                    b.ToTable("DistributionFlows");
+                });
+
             modelBuilder.Entity("Monifier.DataAccess.Model.Expenses.ExpenseBill", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
+
+                    b.Property<int?>("AccountId");
 
                     b.Property<DateTime>("DateTime");
 
@@ -90,6 +171,8 @@ namespace Monifier.Web.Migrations
                     b.Property<decimal>("SumPrice");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
 
                     b.HasIndex("ExpenseFlowId");
 
@@ -210,8 +293,45 @@ namespace Monifier.Web.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
+            modelBuilder.Entity("Monifier.DataAccess.Model.Distribution.AccountFlowSettings", b =>
+                {
+                    b.HasOne("Monifier.DataAccess.Model.Base.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Monifier.DataAccess.Model.Distribution.ExpenseFlowSettings", b =>
+                {
+                    b.HasOne("Monifier.DataAccess.Model.Expenses.ExpenseFlow", "ExpenseFlow")
+                        .WithMany()
+                        .HasForeignKey("ExpenseFlowId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Monifier.DataAccess.Model.Distribution.Flow", b =>
+                {
+                    b.HasOne("Monifier.DataAccess.Model.Distribution.Distribution")
+                        .WithMany("Flows")
+                        .HasForeignKey("DistributionId");
+
+                    b.HasOne("Monifier.DataAccess.Model.Expenses.ExpenseFlow", "Recipient")
+                        .WithMany()
+                        .HasForeignKey("RecipientId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Monifier.DataAccess.Model.Base.Account", "Source")
+                        .WithMany()
+                        .HasForeignKey("SourceId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("Monifier.DataAccess.Model.Expenses.ExpenseBill", b =>
                 {
+                    b.HasOne("Monifier.DataAccess.Model.Base.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId");
+
                     b.HasOne("Monifier.DataAccess.Model.Expenses.ExpenseFlow", "ExpenseFlow")
                         .WithMany()
                         .HasForeignKey("ExpenseFlowId")

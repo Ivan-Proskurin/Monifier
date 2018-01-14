@@ -3,19 +3,28 @@
 @model Expenses.AddExpenseModel
 
 @{
+    var accounts = Model.Accounts.Select(x => x.Name);
     var categories = Model.Categories.Select(x => x.Name);
     var products = Model.Products.Select(x => x.Name);
 }
 
 <div class="col-md-7 centered-form">
-    <h3 class="form-caption-sm">Добавление расхода</h3>
+@*    <h3 class="form-caption-sm">Добавление расхода</h3>*@
     
-    <h4 class="form-caption-sm">@Model.Expense.FlowName</h4>
+    <h3 class="form-caption-sm">@Model.Expense.FlowName</h3>
     
     <form method="post">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <input asp-for="Expense.ExpenseFlowId" hidden/>
         <input asp-for="Expense.FlowName" hidden/>
+        <div class="row">
+            <div class="form-group col-md-12 col-sm-7 col-7">
+                <label asp-for="Expense.Account" class="control-label"></label>
+                <autocomplete asp-for="Expense.Account" value="@Model.Expense.Account" value-list="@accounts"
+                              autocomplete="off"/>
+                <span asp-validation-for="Expense.Account" class="text-danger"></span>
+            </div>
+        </div>
         <div class="row">
             <div class="form-group col-md-12 col-sm-7 col-7">
                 <label asp-for="Expense.Category" class="control-label"></label>
@@ -49,14 +58,8 @@
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="form-group col-md-12 col-sm-12 col-12" style="margin: 10px 0 25px 0;">
-                <input asp-for="Expense.ContinueInput"/>
-                <label asp-for="Expense.ContinueInput"></label>
-            </div>
-        </div>
         
-        <div class="form-group">
+        <div class="form-group bottom-buttons-row">
             <input type="submit" value="Добавить расход" class="btn btn-outline-danger cursor-pointer"/>
             <a asp-page="./ExpenseFlows" class="btn btn-outline-primary gapped">Отмена</a>
         </div>
@@ -64,7 +67,10 @@
 </div>
 
 @section Scripts {
-    <script>
+    <script type="text/javascript">
+        activateLink("#expensesLink");
+        
+        makeInputAutocomplete("Expense.Account");
         var categoryAutocomplete = makeInputAutocomplete("Expense.Category", null, updateProductsList);
         var productsAutocomplete = makeInputAutocomplete("Expense.Product", null, selectCategoryByProduct);
         makeInputDatetimePicker("Expense.DateTime");
@@ -123,6 +129,6 @@
             $("#Expense_Product").focus();
         else
             $("#Expense_Category").focus();
-        
+
     </script>
 }

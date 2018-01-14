@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using Monifier.BusinessLogic.Distribution.Model.Contract;
 
-namespace Monifier.BusinessLogic.Model.Distribution
+namespace Monifier.BusinessLogic.Distribution.Model
 {
     public class FlowDistributionSchemaException : ApplicationException
     {

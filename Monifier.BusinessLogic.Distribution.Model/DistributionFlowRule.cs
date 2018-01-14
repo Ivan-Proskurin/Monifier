@@ -1,20 +1,11 @@
-﻿namespace Monifier.BusinessLogic.Model.Distribution
-{
-    public enum FlowRule
-    {
-        None,
-        FixedFromBase,
-        PercentFromBase,
-        FixedFromRest,
-        PercentFromRest,
-        AllRest
-    }
+﻿using Monifier.DataAccess.Model.Distribution;
 
+namespace Monifier.BusinessLogic.Distribution.Model
+{
     public enum FlowDestination
     {
         Source,
-        Recipient,
-        Both
+        Recipient
     }
     
     public class DistributionFlowRule

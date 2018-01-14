@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Monifier.DataAccess.Model.Base;
+using Monifier.DataAccess.Model.Distribution;
 using Monifier.DataAccess.Model.Expenses;
 using Monifier.DataAccess.Model.Incomes;
 
@@ -21,6 +21,10 @@ namespace Monifier.DataAccess.EntityFramework
         public DbSet<Account> Accounts { get; set; }
         public DbSet<ExpenseFlow> ExpenseFlows { get; set; }
         public DbSet<ExpensesFlowProductCategory> ExpensesFlowProductCategories { get; set; }
+        public DbSet<Distribution> Distributions { get; set; }
+        public DbSet<Flow> DistributionFlows { get; set; }
+        public DbSet<AccountFlowSettings> AccountFlowSettings { get; set; } 
+        public DbSet<ExpenseFlowSettings> ExpenseFlowSettings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

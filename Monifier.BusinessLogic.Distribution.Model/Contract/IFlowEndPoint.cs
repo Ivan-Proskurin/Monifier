@@ -1,4 +1,4 @@
-﻿namespace Monifier.BusinessLogic.Model.Distribution
+﻿namespace Monifier.BusinessLogic.Distribution.Model.Contract
 {
     public interface IFlowEndPoint
     {

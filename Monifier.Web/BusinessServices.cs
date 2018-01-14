@@ -1,9 +1,13 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Monifier.BusinessLogic.Contract.Base;
+using Monifier.BusinessLogic.Contract.Distribution;
 using Monifier.BusinessLogic.Contract.Expenses;
 using Monifier.BusinessLogic.Contract.Incomes;
 using Monifier.BusinessLogic.Contract.Settings;
+using Monifier.BusinessLogic.Distribution;
+using Monifier.BusinessLogic.Distribution.Model.Contract;
 using Monifier.BusinessLogic.Queries.Base;
+using Monifier.BusinessLogic.Queries.Distribution;
 using Monifier.BusinessLogic.Queries.Expenses;
 using Monifier.BusinessLogic.Queries.Incomes;
 using Monifier.BusinessLogic.Queries.Settings;
@@ -32,6 +36,9 @@ namespace Monifier.Web
             services.AddTransient<IExpensesQueries, ExpensesQueries>();
             services.AddTransient<IUserSettings, UserSettings>();
             services.AddTransient<IIncomesQueries, IncomesQueries>();
+            services.AddTransient<IDistributionQueries, DistributionQueries>();
+            services.AddTransient<IDistributionCommands, DistributionCommands>();
+            services.AddTransient<IFlowDistributor, DefaultFlowDistributor>();
         }
     }
 }

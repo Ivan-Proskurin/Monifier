@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using Monifier.BusinessLogic.Model.Distribution;
 
-namespace Monifier.BusinessLogic.Contract.Distribution
+namespace Monifier.BusinessLogic.Distribution.Model.Contract
 {
     public interface IFlowDistributor
     {

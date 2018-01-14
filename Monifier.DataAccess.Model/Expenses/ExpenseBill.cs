@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Contracts;
 
 namespace Monifier.DataAccess.Model.Expenses
@@ -19,5 +20,10 @@ namespace Monifier.DataAccess.Model.Expenses
         
         [ForeignKey("ExpenseFlowId")]
         public ExpenseFlow ExpenseFlow { get; set; }
+        
+        public int? AccountId { get; set; }
+        
+        [ForeignKey("AccountId")]
+        public Account Account { get; set; }
     }
 }

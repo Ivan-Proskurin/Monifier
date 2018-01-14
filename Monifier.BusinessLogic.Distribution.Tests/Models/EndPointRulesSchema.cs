@@ -1,4 +1,5 @@
-﻿using Monifier.BusinessLogic.Model.Distribution;
+﻿using Monifier.BusinessLogic.Distribution.Model;
+using Monifier.DataAccess.Model.Distribution;
 
 namespace Monifier.BusinessLogic.Distribution.Tests.Models
 {
@@ -14,11 +15,11 @@ namespace Monifier.BusinessLogic.Distribution.Tests.Models
                 Amount = 1000
             };
 
-            RecipientRule_FixedFromRest500 = new DistributionFlowRule
+            RecipientRule_FixedFromBase500 = new DistributionFlowRule
             {
                 CanFlow = true,
                 Destination = FlowDestination.Recipient,
-                Rule = FlowRule.FixedFromRest,
+                Rule = FlowRule.FixedFromBase,
                 Amount = 500
             };
             
@@ -45,14 +46,6 @@ namespace Monifier.BusinessLogic.Distribution.Tests.Models
                 Rule = FlowRule.None,
                 Amount = 0
             };
-            
-            SourceRule_BothDestination = new DistributionFlowRule
-            {
-                CanFlow = true,
-                Destination = FlowDestination.Both,
-                Rule = FlowRule.FixedFromBase,
-                Amount = 2000
-            };
 
             RecipientRule_PercentFromBase25 = new DistributionFlowRule
             {
@@ -62,19 +55,19 @@ namespace Monifier.BusinessLogic.Distribution.Tests.Models
                 Amount = 25
             };
 
-            RecipientRule_FixedFromRest3000 = new DistributionFlowRule
+            RecipientRule_FixedFromBase3000 = new DistributionFlowRule
             {
                 CanFlow = true,
                 Destination = FlowDestination.Recipient,
-                Rule = FlowRule.FixedFromRest,
+                Rule = FlowRule.FixedFromBase,
                 Amount = 3000
             };
 
-            RecipientRule_FixedFromRest2500 = new DistributionFlowRule
+            RecipientRule_FixedFromBase2500 = new DistributionFlowRule
             {
                 CanFlow = true,
                 Destination = FlowDestination.Recipient,
-                Rule = FlowRule.FixedFromRest,
+                Rule = FlowRule.FixedFromBase,
                 Amount = 2500
             };
             
@@ -86,11 +79,11 @@ namespace Monifier.BusinessLogic.Distribution.Tests.Models
                 Amount = 0
             };
             
-            RecipientRule_PercentFromRest30 = new DistributionFlowRule
+            RecipientRule_PercentFromBase30 = new DistributionFlowRule
             {
                 CanFlow = true,
                 Destination = FlowDestination.Recipient,
-                Rule = FlowRule.PercentFromRest,
+                Rule = FlowRule.PercentFromBase,
                 Amount = 30
             };
         }
@@ -98,13 +91,12 @@ namespace Monifier.BusinessLogic.Distribution.Tests.Models
         public DistributionFlowRule NotParticipantSourceRule { get; }
         public DistributionFlowRule NotParticipantRecipientRule { get; }
         public DistributionFlowRule RecipientRule_FixedFromBase1000 { get; }
-        public DistributionFlowRule RecipientRule_FixedFromRest500 { get; }
+        public DistributionFlowRule RecipientRule_FixedFromBase500 { get; }
         public DistributionFlowRule RecipientRule_PercentFromBase25 { get; }
-        public DistributionFlowRule RecipientRule_PercentFromRest30 { get; }
-        public DistributionFlowRule RecipientRule_FixedFromRest3000 { get; }
-        public DistributionFlowRule RecipientRule_FixedFromRest2500 { get; }
+        public DistributionFlowRule RecipientRule_PercentFromBase30 { get; }
+        public DistributionFlowRule RecipientRule_FixedFromBase3000 { get; }
+        public DistributionFlowRule RecipientRule_FixedFromBase2500 { get; }
         public DistributionFlowRule RecipientRule_AllRest { get; }
         public DistributionFlowRule SourceRule_SourceDestination { get; }
-        public DistributionFlowRule SourceRule_BothDestination { get; }
     }
 }

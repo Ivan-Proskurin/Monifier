@@ -49,6 +49,14 @@ namespace Monifier.IntegrationTests.Infrastructure
                 await action(uof);
             }
         }
+
+        protected async Task<T> UseUnitOfWorkAsync<T>(Func<IUnitOfWork, Task<T>> action)
+        {
+            using (var uof = CreateUnitOfWork())
+            {
+                return await action(uof);
+            }
+        }
         
         #endregion
         
@@ -119,6 +127,22 @@ namespace Monifier.IntegrationTests.Infrastructure
                 DateCreated = date,
                 Number = number,
                 Version = 1,
+            };
+            commands.Create(entity);
+            return entity;
+        }
+
+        protected Account CreateAccount(string name, decimal balance, DateTime date, IUnitOfWork uof = null)
+        {
+            if (uof == null) uof = UnitOfWork;
+            var commands = uof.GetCommandRepository<Account>();
+            var entity = new Account
+            {
+                Name = name,
+                DateCreated = date,
+                Balance = balance,
+                AvailBalance = balance,
+                Number = 1,
             };
             commands.Create(entity);
             return entity;

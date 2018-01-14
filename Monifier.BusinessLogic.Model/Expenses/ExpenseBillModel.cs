@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Monifier.BusinessLogic.Model.Base;
 using Monifier.Common.Extensions;
 using Monifier.DataAccess.Contract;
+using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Expenses;
 
 namespace Monifier.BusinessLogic.Model.Expenses
@@ -18,9 +20,9 @@ namespace Monifier.BusinessLogic.Model.Expenses
         }
         
         public int Id { get; set; }
+        public int? AccountId { get; set; }
         public int ExpenseFlowId { get; set; }
         public DateTime DateTime { get; set; }
-        public string Category { get; set; }
         public decimal Cost { get; set; }
         public List<ExpenseItemModel> Items { get; set; }
 
@@ -69,7 +71,6 @@ namespace Monifier.BusinessLogic.Model.Expenses
             {
                 Id = Id,
                 DateTime = DateTime,
-                Category = Category,
                 Cost = Cost
             };
             if (Items == null) return clone;
@@ -107,7 +108,7 @@ namespace Monifier.BusinessLogic.Model.Expenses
             UpdateState();
         }
 
-        public void Validate()
+        private void Validate()
         {
             if (Cost != GetItems().Sum(x => x.Cost))
                 throw new ValidationException("Сумма чека должна равняться сумме всех входящих в него позиций");
@@ -133,6 +134,7 @@ namespace Monifier.BusinessLogic.Model.Expenses
             var bill = new ExpenseBill
             {
                 ExpenseFlowId = ExpenseFlowId,
+                AccountId = AccountId,
                 DateTime = DateTime,
                 SumPrice = Cost
             };
@@ -161,7 +163,16 @@ namespace Monifier.BusinessLogic.Model.Expenses
             flow.Version++;
             flowCommands.Update(flow);
 
+            if (AccountId != null)
+            {
+                var accountQueries = unitOfWork.GetQueryRepository<Account>();
+                var account = await accountQueries.GetById(AccountId.Value);
+                account.Withdraw(bill.SumPrice, unitOfWork);
+            }
+
             await unitOfWork.SaveChangesAsync();
+
+            Id = bill.Id;
         }
 
         public async Task Update(IUnitOfWork unitOfWork)
@@ -179,9 +190,11 @@ namespace Monifier.BusinessLogic.Model.Expenses
                 throw new ArgumentException($"Нет счета с Id = {Id}");
             
             var oldsum = bill.SumPrice;
+            var oldAccountId = bill.AccountId;
             bill.DateTime = DateTime;
             bill.SumPrice = Cost;
             bill.ExpenseFlowId = ExpenseFlowId;
+            bill.AccountId = AccountId;
 
             var itemQueries = unitOfWork.GetQueryRepository<ExpenseItem>();
             var itemCommands = unitOfWork.GetCommandRepository<ExpenseItem>();
@@ -223,6 +236,58 @@ namespace Monifier.BusinessLogic.Model.Expenses
             flow.Balance = flow.Balance + oldsum - Cost;
             flowCommands.Update(flow);
 
+            var accountQueries = unitOfWork.GetQueryRepository<Account>();
+            if (oldAccountId != bill.AccountId)
+            {
+                if (oldAccountId != null)
+                {
+                    var oldAccount = await accountQueries.GetById(oldAccountId.Value);
+                    oldAccount.Topup(oldsum, unitOfWork);
+                }
+
+                if (bill.AccountId != null)
+                {
+                    var newAccount = await accountQueries.GetById(bill.AccountId.Value);
+                    newAccount.Withdraw(bill.SumPrice, unitOfWork);
+                }
+            }
+            else if (AccountId != null)
+            {
+                var account = await accountQueries.GetById(AccountId.Value);
+                var amount = oldsum - Cost;
+                if (amount > 0)
+                    account.Topup(amount, unitOfWork);
+                else
+                    account.Withdraw(-amount, unitOfWork);
+            }
+
+            await unitOfWork.SaveChangesAsync();
+        }
+
+        public static async Task Delete(int id, IUnitOfWork unitOfWork)
+        {
+            var billQueries = unitOfWork.GetQueryRepository<ExpenseBill>();
+            var bill = await billQueries.GetById(id);
+            if (bill == null)
+                throw new ArgumentException($"Нет счета с Id = {id}");
+            
+            var billCommands = unitOfWork.GetCommandRepository<ExpenseBill>();
+            var flowQueries = unitOfWork.GetQueryRepository<ExpenseFlow>();
+            var flowCommands = unitOfWork.GetCommandRepository<ExpenseFlow>();
+
+            var flow = await flowQueries.GetById(bill.ExpenseFlowId);
+            flow.Balance += bill.SumPrice;
+            flowCommands.Update(flow);
+
+            if (bill.AccountId != null)
+            {
+                var accountQueries = unitOfWork.GetQueryRepository<Account>();
+                var account = await accountQueries.GetById(bill.AccountId.Value);
+                account.Topup(bill.SumPrice, unitOfWork);
+            }
+            
+            billCommands.Delete(bill);
+            
             await unitOfWork.SaveChangesAsync();
         }
     }

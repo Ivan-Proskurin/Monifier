@@ -145,6 +145,7 @@ a.edit-item-link {
 
 .money-cell {
     text-align: right;
+    min-width: 113px;
 }
 
 .money-input {
@@ -162,8 +163,7 @@ a.edit-item-link {
 
 .add-bill-validation-summary {
     text-align: center;
-    margin-right: 50px;
-    margin-bottom: 40px;
+    margin-bottom: 20px;
 }
 
 .addon-caption-container {

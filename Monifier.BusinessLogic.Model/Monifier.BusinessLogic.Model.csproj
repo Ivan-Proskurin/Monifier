@@ -3,12 +3,11 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Folder Include="Agregation" />
-    <Folder Include="Base" />
     <Folder Include="Pagination" />
     <Folder Include="Settings" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Monifier.BusinessLogic.Distribution.Model\Monifier.BusinessLogic.Distribution.Model.csproj" />
     <ProjectReference Include="..\Monifier.Common.Extensions\Monifier.Common.Extensions.csproj">
       <Project>{D2635426-B606-451E-B681-5B34C4DC5186}</Project>
       <Name>Monifier.Common.Extensions</Name>

@@ -20,6 +20,7 @@ namespace Monifier.Web.Pages.Expenses
 {
     public class AddExpenseBillModel : PageModel
     {
+        private readonly IAccountQueries _accountQueries;
         private readonly IExpenseFlowQueries _expenseFlowQueries;
         private readonly ICategoriesQueries _categoriesQueries;
         private readonly IProductQueries _productQueries;
@@ -29,6 +30,7 @@ namespace Monifier.Web.Pages.Expenses
         private readonly IProductCommands _productCommands;
 
         public AddExpenseBillModel(
+            IAccountQueries accountQueries,
             IExpenseFlowQueries expenseFlowQueries,
             ICategoriesQueries categoriesQueries,
             IProductQueries productQueries,
@@ -37,6 +39,7 @@ namespace Monifier.Web.Pages.Expenses
             ICategoriesCommands categoriesCommands,
             IProductCommands productCommands)
         {
+            _accountQueries = accountQueries;
             _expenseFlowQueries = expenseFlowQueries;
             _categoriesQueries = categoriesQueries;
             _productQueries = productQueries;
@@ -48,6 +51,7 @@ namespace Monifier.Web.Pages.Expenses
 
         private async Task PrepareModelsAsync(int expenseId)
         {
+            Accounts = await _accountQueries.GetAll();
             ExpenseFlow = await _expenseFlowQueries.GetById(expenseId);
             Categories = await _categoriesQueries.GetFlowCategories(expenseId);
             Products = await _productQueries.GetExpensesFlowProducts(expenseId);
@@ -55,8 +59,10 @@ namespace Monifier.Web.Pages.Expenses
 
         [BindProperty]
         public AddExpenseBill Good { get; set; }
-
+        
         public ExpenseFlowModel ExpenseFlow { get; private set; }
+        
+        public List<AccountModel> Accounts { get; private set; }
 
         public List<CategoryModel> Categories { get; private set; }
 
@@ -84,11 +90,13 @@ namespace Monifier.Web.Pages.Expenses
         private async Task PrepareInputNewBill(int flowId)
         {
             await PrepareEditBill(flowId, () => Task.FromResult(new ExpenseBillModel {ExpenseFlowId = flowId}));
+            Good.Account = Accounts.GetLastUsedAccount()?.Name;
         }
 
         private async Task PrepareEditExistingBill(int flowId, int billId)
         {
             await PrepareEditBill(flowId, async () => await _expensesBillQueries.GetById(billId));
+            Good.Account = Accounts.FirstOrDefault(x => x.Id == Bill.AccountId)?.Name;
         }
 
         public async Task OnGetAsync(int expenseId, int? billId = null)
@@ -122,7 +130,7 @@ namespace Monifier.Web.Pages.Expenses
                     Bill = JsonConvert.DeserializeObject<ExpenseBillModel>(Good.Bill);
                     Bill.AddItem(await GetExpenseItem());
                     Good.ClearInput();
-                    Good.Bill = JsonConvert.SerializeObject(Bill);                    
+                    Good.Bill = JsonConvert.SerializeObject(Bill);
                     return Page();
                 },
                 async () =>
@@ -195,12 +203,17 @@ namespace Monifier.Web.Pages.Expenses
         
         public async Task<JsonResult> OnPostConfirmAsync()
         {
-            return await this.ProcessAjaxPostRequestAsync(async jsonBill =>
+            return await this.ProcessAjaxPostRequestAsync(async request =>
             {
                 try
                 {
-                    var bill = JsonConvert.DeserializeObject<ExpenseBillModel>(jsonBill);
+                    var args = request.FromJson<ConfirmBillArgs>();
+                    if (args.Account.IsNullOrEmpty()) return AjaxResponse.ErrorResponse("Выберите счет");
+                    var account = await _accountQueries.GetByName(args.Account);
+                    if (account == null) return AjaxResponse.ErrorResponse($"Нет счета с именем \"{args.Account}\"");
+                    var bill = args.Bill.FromJson<ExpenseBillModel>();
                     if (bill.Items.Count == 0) return AjaxResponse.ErrorResponse("Добавьте в чек хотя бы один товар");
+                    bill.AccountId = account.Id;
                     await _expensesBillCommands.Save(bill);
                     return AjaxResponse.SuccessResponse();
                 }

@@ -19,25 +19,12 @@ namespace Monifier.BusinessLogic.Queries.Base
             _unitOfWork = unitOfWork;
         }
 
-        private static AccountModel ToModel(Account account)
-        {
-            if (account == null) return null;
-            return new AccountModel
-            {
-                Id = account.Id,
-                Number = account.Number,
-                DateCreated = account.DateCreated,
-                Name = account.Name,
-                Balance = account.Balance
-            };
-        }
-
         public async Task<List<AccountModel>> GetAll(bool includeDeleted = false)
         {
             var queryRep = _unitOfWork.GetQueryRepository<Account>();
             return await queryRep.Query
                 .Where(x => !x.IsDeleted || includeDeleted)
-                .Select(x => ToModel(x))
+                .Select(x => x.ToModel())
                 .OrderBy(x => x.Number)
                 .ToListAsync();
         }
@@ -48,24 +35,25 @@ namespace Monifier.BusinessLogic.Queries.Base
             return new AccountList
             {
                 Accounts = accounts,
-                Totals = new TotalsInfoModel
+                Totals = new AccountsTotals
                 {
                     Caption = "Суммарный баланс:",
-                    Total = accounts.Sum(x => x.Balance)
+                    Total = accounts.Sum(x => x.Balance),
+                    AvailBalanceTotal = accounts.Sum(x => x.AvailBalance)
                 }
             };
         }
 
         public async Task<AccountModel> GetById(int id)
         {
-            return ToModel(await _unitOfWork.GetQueryRepository<Account>().GetById(id));
+            return (await _unitOfWork.GetQueryRepository<Account>().GetById(id)).ToModel();
         }
 
         public async Task<AccountModel> GetByName(string name, bool includeDeleted = false)
         {
             var account = await _unitOfWork.GetNamedModelQueryRepository<Account>().GetByName(name);
             if (account == null || account.IsDeleted && !includeDeleted) return null;
-            return ToModel(account);
+            return account.ToModel();
         }
 
         public async Task<int> GetNextNumber()

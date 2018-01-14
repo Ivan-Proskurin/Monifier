@@ -11,6 +11,10 @@ namespace Monifier.Web.Models.Expenses
         public int ExpenseFlowId { get; set; }
         
         public string FlowName { get; set; }
+        
+        [Display(Name = "Счет *")]
+        [Required(ErrorMessage = "Выберите счет")]
+        public string Account { get; set; }
              
         [Display(Name = "Дата/время *")]
         [Required(ErrorMessage = "Укажите дату/время")]
@@ -29,9 +33,6 @@ namespace Monifier.Web.Models.Expenses
         [Display(Name = "Сумма *")]
         [Required(ErrorMessage = "Введите сумму")]
         public string Cost { get; set; }
-        
-        [Display(Name = "Продолжить ввод расходов после ввода этого")]
-        public bool ContinueInput { get; set; }
 
         public IEnumerable<ModelValidationResult> Validate()
         {
@@ -41,7 +42,7 @@ namespace Monifier.Web.Models.Expenses
             if (costResult != null) yield return costResult;
             if (Category == null && Product == null)
             {
-                const string message = "Укажите хотя бы категорию или товар";
+                const string message = "Укажите категорию или товар";
                 yield return new ModelValidationResult("Expense.Category", message);
                 yield return new ModelValidationResult("Expense.Product", message);
             }
@@ -51,6 +52,7 @@ namespace Monifier.Web.Models.Expenses
         {
             return new ExpenseFlowExpense
             {
+                Account = Account,
                 ExpenseFlowId = ExpenseFlowId,
                 Category = Category,
                 Product = Product,

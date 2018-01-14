@@ -1,4 +1,6 @@
-﻿namespace Monifier.BusinessLogic.Model.Distribution
+﻿using Monifier.BusinessLogic.Distribution.Model.Contract;
+
+namespace Monifier.BusinessLogic.Distribution.Model
 {
     public class DistributionFlow
     {

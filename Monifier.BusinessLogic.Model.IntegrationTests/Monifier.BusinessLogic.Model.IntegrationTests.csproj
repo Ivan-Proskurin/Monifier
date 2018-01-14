@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="4.19.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
+    <PackageReference Include="Microsoft.NETCore.App" Version="2.0.3" />
+    <PackageReference Include="xunit" Version="2.3.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Monifier.BusinessLogic.Model\Monifier.BusinessLogic.Model.csproj">
+      <Project>{0A397923-A446-4A76-86B9-0D66E9C920EF}</Project>
+      <Name>Monifier.BusinessLogic.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Monifier.IntegrationTests.Infrastructure\Monifier.IntegrationTests.Infrastructure.csproj">
+      <Project>{778C8086-55D3-42EE-976D-3A78DCDB4012}</Project>
+      <Name>Monifier.IntegrationTests.Infrastructure</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

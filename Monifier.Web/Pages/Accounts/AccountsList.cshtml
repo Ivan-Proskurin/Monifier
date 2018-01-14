@@ -15,25 +15,42 @@
 
 <div class="header">
     <h4 class="form-caption-xs">Счета</h4>
-    <a asp-page="./CreateAccount" class="btn btn-outline-danger cursor-pointer header-button">Добавить счет</a>
+    <div class="header-buttons">
+        <a asp-page="./CreateAccount" class="btn btn-outline-danger cursor-pointer">Добавить счет</a>
+        @if (@Model.CanDistribute)
+        {
+            <a asp-page="../Distribution/Distribution" class="btn btn-success cursor-pointer">Распределить</a>
+        }
+        else
+        {
+            <span aria-disabled="true" data-toggle="tooltip" data-placement="left"
+                 title="Нет ни одного счета с положительным доступным балансом">
+                <a class="btn btn-success cursor-pointer disabled" role="button" role="button">Распределить</a>
+            </span>
+        }
+    </div>
 </div>
 
 <table class="cashed-table table table-striped table-hover">
     <thead class="thead-dark">
     <tr>
-        <th width="30%">
+        <th width="10%">
             Номер
         </th>
         <th width="50%">
             Название
         </th>
-        <th width="50%" class="money-cell">
+        <th width="25%" class="money-cell">
             Баланс
+        </th>
+        <th width="25%" class="money-cell">
+            Доступно
         </th>
         <th width="10%"></th>
     </tr>
     </thead>
-    <tbody id="cat-table-body">
+    
+    <tbody>
         
     @for (var i = 0; i < accounts.Count; i++)
     {
@@ -47,6 +64,9 @@
             </td>
             <td class="money-cell">
                 @account.Balance.ToMoney()
+            </td>
+            <td class="money-cell">
+                @account.AvailBalance.ToMoney()
             </td>
             <td>
                 <div class="dropdown show">
@@ -65,11 +85,13 @@
     }
 
     </tbody>
+    
     <tfoot class="thead-dark">
         <tr class="@footerClass">
             <td></td>
             <td>@totals.Caption</td>
             <td class="money-cell">@totals.Total.ToMoney()</td>
+            <td class="money-cell">@totals.AvailBalanceTotal.ToMoney()</td>
             <td></td>
         </tr>
     </tfoot>
@@ -78,5 +100,6 @@
 @section Scripts {
     <script type="text/javascript">
         activateLink("#accountsLink");
+        $('[data-toggle="tooltip"]').tooltip();
     </script>
 }

@@ -52,10 +52,10 @@ function makeInputAutocomplete(inputId, list, onSelect) {
     return comboplete;
 }
 
-function makeInputNumeric(inputId, allowNegative = false) {
-    inputId = inputId.replace(".", "_");
-    var input = document.getElementById(inputId);
-    var $input = $("#" + inputId);
+function makeInputNumeric(input, allowNegative = false) {
+    if (typeof input === "string"){
+        input = document.getElementById(input.replace(".", "_"));
+    }
     input.onkeydown = function (e) {
         // Allow: backspace, delete, tab, escape, enter and .
         var allowCodes = [46, 8, 9, 27, 13, 110, 190, 188];

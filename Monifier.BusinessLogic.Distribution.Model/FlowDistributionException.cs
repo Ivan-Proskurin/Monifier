@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Monifier.BusinessLogic.Distribution.Model.Contract;
+using Monifier.Common.Extensions;
 
-namespace Monifier.BusinessLogic.Model.Distribution
+namespace Monifier.BusinessLogic.Distribution.Model
 {
     public class FlowDistributionException : ApplicationException
     {
         public FlowDistributionException(IEnumerable<IFlowEndPoint> sources, 
             IFlowEndPoint recipient, decimal amount)
-            : base("Невозможно выполнить перевод от источников получателю на указанную сумму")
+            : base($"Невозможно пополнить \"{recipient.Name}\" на указанную сумму ({amount.ToMoney()})")
         {
             Sources = sources.ToList();
             Recipient = recipient;

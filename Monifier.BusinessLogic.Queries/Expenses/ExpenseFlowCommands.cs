@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Monifier.BusinessLogic.Contract.Expenses;
 using Monifier.BusinessLogic.Model.Expenses;
+using Monifier.Common.Extensions;
 using Monifier.DataAccess.Contract;
 using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Expenses;
@@ -100,6 +101,13 @@ namespace Monifier.BusinessLogic.Queries.Expenses
 
         public async Task AddExpense(ExpenseFlowExpense expense)
         {
+            if (expense.Account.IsNullOrEmpty())
+                throw new ArgumentException("Необходимо указать счет");
+            
+            var account = await _unitOfWork.GetNamedModelQueryRepository<Account>().GetByName(expense.Account);
+            if (account == null)
+                throw new ArgumentException($"Нет счета с именем \"{expense.Account}\"");
+            
             var flow = await _unitOfWork.GetQueryRepository<ExpenseFlow>().GetById(expense.ExpenseFlowId);
             if (flow == null)
                 throw new ArgumentException($"Нет статьи расходов с идентификатором Id = {expense.ExpenseFlowId}");
@@ -129,6 +137,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             
             var billModel = new ExpenseBillModel
             {
+                AccountId = account.Id,
                 ExpenseFlowId = expense.ExpenseFlowId,
                 DateTime = expense.DateCreated,
                 Cost = expense.Cost,
