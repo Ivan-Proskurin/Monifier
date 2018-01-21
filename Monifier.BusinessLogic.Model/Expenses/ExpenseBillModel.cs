@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using Monifier.BusinessLogic.Model.Base;
 using Monifier.Common.Extensions;
 using Monifier.DataAccess.Contract;
 using Monifier.DataAccess.Model.Base;
@@ -166,8 +165,10 @@ namespace Monifier.BusinessLogic.Model.Expenses
             if (AccountId != null)
             {
                 var accountQueries = unitOfWork.GetQueryRepository<Account>();
+                var accountCommands = unitOfWork.GetCommandRepository<Account>();
                 var account = await accountQueries.GetById(AccountId.Value);
-                account.Withdraw(bill.SumPrice, unitOfWork);
+                account.Balance -= bill.SumPrice;
+                accountCommands.Update(account);
             }
 
             await unitOfWork.SaveChangesAsync();
@@ -237,28 +238,28 @@ namespace Monifier.BusinessLogic.Model.Expenses
             flowCommands.Update(flow);
 
             var accountQueries = unitOfWork.GetQueryRepository<Account>();
+            var accountCommands = unitOfWork.GetCommandRepository<Account>();
             if (oldAccountId != bill.AccountId)
             {
                 if (oldAccountId != null)
                 {
                     var oldAccount = await accountQueries.GetById(oldAccountId.Value);
-                    oldAccount.Topup(oldsum, unitOfWork);
+                    oldAccount.Balance += oldsum;
+                    accountCommands.Update(oldAccount);
                 }
 
                 if (bill.AccountId != null)
                 {
                     var newAccount = await accountQueries.GetById(bill.AccountId.Value);
-                    newAccount.Withdraw(bill.SumPrice, unitOfWork);
+                    newAccount.Balance -= bill.SumPrice;
+                    accountCommands.Update(newAccount);
                 }
             }
             else if (AccountId != null)
             {
                 var account = await accountQueries.GetById(AccountId.Value);
-                var amount = oldsum - Cost;
-                if (amount > 0)
-                    account.Topup(amount, unitOfWork);
-                else
-                    account.Withdraw(-amount, unitOfWork);
+                account.Balance += oldsum - Cost;
+                accountCommands.Update(account);
             }
 
             await unitOfWork.SaveChangesAsync();
@@ -282,8 +283,10 @@ namespace Monifier.BusinessLogic.Model.Expenses
             if (bill.AccountId != null)
             {
                 var accountQueries = unitOfWork.GetQueryRepository<Account>();
+                var accountCommands = unitOfWork.GetCommandRepository<Account>();
                 var account = await accountQueries.GetById(bill.AccountId.Value);
-                account.Topup(bill.SumPrice, unitOfWork);
+                account.Balance += bill.SumPrice;
+                accountCommands.Update(account);
             }
             
             billCommands.Delete(bill);

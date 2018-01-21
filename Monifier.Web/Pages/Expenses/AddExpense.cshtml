@@ -9,8 +9,6 @@
 }
 
 <div class="col-md-7 centered-form">
-@*    <h3 class="form-caption-sm">Добавление расхода</h3>*@
-    
     <h3 class="form-caption-sm">@Model.Expense.FlowName</h3>
     
     <form method="post">
@@ -20,8 +18,7 @@
         <div class="row">
             <div class="form-group col-md-12 col-sm-7 col-7">
                 <label asp-for="Expense.Account" class="control-label"></label>
-                <autocomplete asp-for="Expense.Account" value="@Model.Expense.Account" value-list="@accounts"
-                              autocomplete="off"/>
+                <autocomplete asp-for="Expense.Account" value-list="@accounts" value="@Model.Expense.Account"/>
                 <span asp-validation-for="Expense.Account" class="text-danger"></span>
             </div>
         </div>
@@ -68,6 +65,8 @@
 
 @section Scripts {
     <script type="text/javascript">
+        var flowId = "@Model.Expense.ExpenseFlowId";
+        
         activateLink("#expensesLink");
         
         makeInputAutocomplete("Expense.Account");
@@ -76,19 +75,15 @@
         makeInputDatetimePicker("Expense.DateTime");
         makeInputNumeric('Expense.Cost', false);
 
-        var flowId = "@Model.Expense.ExpenseFlowId";
-        
         function updateProductsList() {
             var url = "/Expenses/AddExpense/" + flowId + "?handler=getcategoryproducts";
             var productVal = $("#Expense_Product").val();
             sendAjax(url,
                 $("#Expense_Category").val(),
                 function(response) {
-                    console.log(response);
                     productsAutocomplete.destroy();
                     productsAutocomplete = makeInputAutocomplete("Expense.Product", response, selectCategoryByProduct);
                     if (response.indexOf(productVal) >= 0) {
-                        console.log("setting old value: [" + productVal + "]");
                         $("#Expense_Product").val(productVal);
                     }
                     else
@@ -103,22 +98,18 @@
                 product: $("#Expense_Product").val()
             };
 
-            console.log(args);
             sendAjax(url,
                 JSON.stringify(args),
                 function(response) {
-                    console.log("response: [" + response + "]");
                     $("#Expense_Category").val(response);
                 });
         }
 
         $("#Expense_Category").keyup(function() {
             if (!($("#Expense_Category")).val()) {
-                console.log("category is empty");
                 var url = "/Expenses/AddExpense/" + flowId + "?handler=getflowproducts";
                 sendAjax(url, flowId,
                     function(response) {
-                        console.log(response);
                         productsAutocomplete.destroy();
                         productsAutocomplete = makeInputAutocomplete("Expense.Product", response, selectCategoryByProduct);
                     });

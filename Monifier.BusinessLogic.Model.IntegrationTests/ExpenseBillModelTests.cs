@@ -33,13 +33,14 @@ namespace Monifier.BusinessLogic.Model.IntegrationTests
         {
             await _bill.Create(UnitOfWork);
 
+            var availBalance = DebitCardAccount.AvailBalance;
             var accountBalance = DebitCardAccount.Balance - _bill.Cost;
             var flowBalance = FoodExpenseFlow.Balance - _bill.Cost;
             
             var accountQueries = UnitOfWork.GetQueryRepository<Account>();
             var account = await accountQueries.GetById(DebitCardAccount.Id);
             account.Balance.ShouldBeEquivalentTo(accountBalance);
-            account.AvailBalance.ShouldBeEquivalentTo(accountBalance);
+            account.AvailBalance.ShouldBeEquivalentTo(availBalance);
             
             var flowQueries = UnitOfWork.GetQueryRepository<ExpenseFlow>();
             var flow = await flowQueries.GetById(FoodExpenseFlow.Id);
@@ -67,7 +68,7 @@ namespace Monifier.BusinessLogic.Model.IntegrationTests
         }
         
         [Fact]
-        public async void Create_LessAvailBalanceBecameZero()
+        public async void Create_LessAvailBalanceNotModified()
         {
             await UseUnitOfWorkAsync(async uof =>
             {
@@ -77,19 +78,21 @@ namespace Monifier.BusinessLogic.Model.IntegrationTests
                 accountCommands.Update(DebitCardAccount);
                 await uof.SaveChangesAsync();
             });
-            
+
+            var availBalance = DebitCardAccount.AvailBalance;
             await _bill.Create(UnitOfWork);
 
             var accountBalance = DebitCardAccount.Balance - _bill.Cost;
             var accountQueries = UnitOfWork.GetQueryRepository<Account>();
             var account = await accountQueries.GetById(DebitCardAccount.Id);
             account.Balance.ShouldBeEquivalentTo(accountBalance);
-            account.AvailBalance.ShouldBeEquivalentTo(0);
+            account.AvailBalance.ShouldBeEquivalentTo(availBalance);
         }
 
         [Fact]
         public async void Update_SameAccountBalanceCorrected()
         {
+            var availBalance = DebitCardAccount.AvailBalance;
             var oldBalance = await UseUnitOfWorkAsync(async uof =>
             {
                 await _bill.Create(uof);
@@ -106,10 +109,11 @@ namespace Monifier.BusinessLogic.Model.IntegrationTests
                     Product = Tv.Name,
                     Cost = 10000m
                 });
-                var costDiff = _bill.Cost - oldCost; 
+                var costDiff = _bill.Cost - oldCost;
                 await _bill.Update(uof);
                 var account = await uof.GetQueryRepository<Account>().GetById(DebitCardAccount.Id);
                 account.Balance.ShouldBeEquivalentTo(oldBalance - costDiff);
+                account.AvailBalance.ShouldBeEquivalentTo(availBalance);
             });
         }
 
@@ -117,6 +121,7 @@ namespace Monifier.BusinessLogic.Model.IntegrationTests
         public async void Update_AccountChangedBalancesChangedCorrectly()
         {
             var oldBalance = DebitCardAccount.Balance;
+            var availBalance = DebitCardAccount.AvailBalance;
             await _bill.Create(UnitOfWork);
 
             await UseUnitOfWorkAsync(async uof =>
@@ -131,6 +136,7 @@ namespace Monifier.BusinessLogic.Model.IntegrationTests
                 await _bill.Update(uof);
                 var prevAccount = await uof.GetQueryRepository<Account>().GetById(DebitCardAccount.Id);
                 prevAccount.Balance.ShouldBeEquivalentTo(oldBalance);
+                prevAccount.AvailBalance.ShouldBeEquivalentTo(availBalance);
                 var newAccount = await uof.GetQueryRepository<Account>().GetById(CashAccount.Id);
                 newAccount.Balance.ShouldBeEquivalentTo(CashAccount.Balance - _bill.Cost);
             });
@@ -139,16 +145,22 @@ namespace Monifier.BusinessLogic.Model.IntegrationTests
         [Fact]
         public async void Delete_AccountBalanceTopuped()
         {
-            decimal balance = 0;
-            await UseUnitOfWorkAsync(async uof =>
+            decimal availBalance = 0;
+            var balance = await UseUnitOfWorkAsync(async uof =>
             {
                 await _bill.Save(uof);
-                balance = (await uof.GetQueryRepository<Account>().GetById(_bill.AccountId ?? 0)).Balance;                
+                var account = await uof.GetQueryRepository<Account>().GetById(_bill.AccountId ?? 0);
+                availBalance = account.AvailBalance;
+                return account.Balance;
             });
 
-            await ExpenseBillModel.Delete(_bill.Id, UnitOfWork);
-            var newBalance = (await UnitOfWork.GetQueryRepository<Account>().GetById(_bill.AccountId ?? 0)).Balance;
-            newBalance.ShouldBeEquivalentTo(balance + _bill.Cost);
+            await UseUnitOfWorkAsync(async uof =>
+            {
+                await ExpenseBillModel.Delete(_bill.Id, UnitOfWork);
+                var account = await UnitOfWork.GetQueryRepository<Account>().GetById(_bill.AccountId ?? 0);
+                account.Balance.ShouldBeEquivalentTo(balance + _bill.Cost);
+                account.AvailBalance.ShouldBeEquivalentTo(availBalance);
+            });
         }
     }
 }

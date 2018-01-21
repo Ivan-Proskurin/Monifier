@@ -2,6 +2,7 @@
 using Monifier.DataAccess.Contract;
 using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Expenses;
+using Monifier.DataAccess.Model.Incomes;
 
 namespace Monifier.IntegrationTests.Infrastructure
 {
@@ -18,6 +19,8 @@ namespace Monifier.IntegrationTests.Infrastructure
 
         private void CreateEntities(IUnitOfWork uof)
         {
+            SalaryIncome = CreateIncomeType("Зарплата", uof);
+            
             FoodCategory = CreateCategory("Продукты", uof);
             TechCategory = CreateCategory("Техника", uof);
 
@@ -30,6 +33,8 @@ namespace Monifier.IntegrationTests.Infrastructure
             DebitCardAccount = CreateAccount("Дебетовая карта", 15000, DateTime.Today, uof);
             CashAccount = CreateAccount("Наличные", 30000, DateTime.Today, uof);
         }
+        
+        protected IncomeType SalaryIncome { get; private set; }
         
         protected Category FoodCategory { get; private set; }
         protected Category TechCategory { get; private set; }

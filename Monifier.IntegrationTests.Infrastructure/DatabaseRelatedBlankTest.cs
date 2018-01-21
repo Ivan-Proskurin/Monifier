@@ -5,6 +5,7 @@ using Monifier.DataAccess.Contract;
 using Monifier.DataAccess.EntityFramework;
 using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Expenses;
+using Monifier.DataAccess.Model.Incomes;
 
 namespace Monifier.IntegrationTests.Infrastructure
 {
@@ -143,6 +144,18 @@ namespace Monifier.IntegrationTests.Infrastructure
                 Balance = balance,
                 AvailBalance = balance,
                 Number = 1,
+            };
+            commands.Create(entity);
+            return entity;
+        }
+
+        protected IncomeType CreateIncomeType(string name, IUnitOfWork uof = null)
+        {
+            if (uof == null) uof = UnitOfWork;
+            var commands = uof.GetCommandRepository<IncomeType>();
+            var entity = new IncomeType
+            {
+                Name = name,
             };
             commands.Create(entity);
             return entity;

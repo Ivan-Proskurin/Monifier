@@ -165,17 +165,17 @@
 
 @section Scripts {
     <script>
+        var flowId = "@Model.ExpenseFlow.Id";
+        var billId = "@Model.Bill.Id";
+        var urlPrefix = "/Expenses/AddExpenseBill/" + flowId;
+        if (billId !== "0") urlPrefix += "/" + billId;
+        
         activateLink("#expensesLink");
         makeInputAutocomplete("Good.Account");
         var categoryAutocomplete = makeInputAutocomplete("Good.Category", null, updateProductsList);
         var productsAutocomplete = makeInputAutocomplete("Good.Product", null, selectCategoryByProduct);
         makeInputNumeric("Good.Price", false);
         makeInputNumeric("Good.Quantity", false);
-
-        var flowId = "@Model.ExpenseFlow.Id";
-        var billId = "@Model.Bill.Id";
-        var urlPrefix = "/Expenses/AddExpenseBill/" + flowId;
-        if (billId !== "0") urlPrefix += "/" + billId;
 
         $("#confirmButton").click(function() {
             var url = urlPrefix + "?handler=confirm";

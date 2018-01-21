@@ -16,37 +16,61 @@ function makeInputAutocomplete(inputId, list, onSelect) {
         comboplete.list = list;
     }
 
+    $("div.awesomplete").addClass("input-group");
+    comboplete.ul.setAttribute("style", "margin-top: 45px;");
+    
+    comboplete.selectItem = function (item) {
+
+        function find(list, item) {
+            for (var i = 0; i < list.length; i++){
+                if (list[i].value === item) return i;
+            }
+            return -1;
+        }
+        
+        comboplete.evaluate();
+        var index = find(comboplete._list, item);
+        if (index < 0) {
+            comboplete.close();
+            return -1;
+        }
+        comboplete.index = index;
+        comboplete.select();
+        return index;
+    };
+    
+    var $input = $(input);
+    var val = $input.val();
+    if (val){
+        $input.val("");
+        if (comboplete.selectItem(val) < 0){
+            $input.val(val);
+        }
+    }
+
+    function openDropdown() {
+        if (comboplete.ul.childNodes.length === 0) {
+            comboplete.minChars = 0;
+            comboplete.evaluate();
+        }
+        else if (comboplete.ul.hasAttribute('hidden')) {
+            comboplete.open();
+        }
+        else {
+            comboplete.close();
+        }
+    }
+    
     if (onSelect) {
         input.addEventListener("awesomplete-selectcomplete", onSelect);
     }
 
-    $("div.awesomplete").addClass("input-group");
-    comboplete.ul.setAttribute("style", "margin-top: 45px;");
-
     input.addEventListener("click", function () {
-        if (comboplete.ul.childNodes.length === 0) {
-            comboplete.minChars = 0;
-            comboplete.evaluate();
-        }
-        else if (comboplete.ul.hasAttribute('hidden')) {
-            comboplete.open();
-        }
-        else {
-            comboplete.close();
-        }
+        openDropdown();
     });
 
     $("#" + inputId + "_Btn").click(function () {
-        if (comboplete.ul.childNodes.length === 0) {
-            comboplete.minChars = 0;
-            comboplete.evaluate();
-        }
-        else if (comboplete.ul.hasAttribute('hidden')) {
-            comboplete.open();
-        }
-        else {
-            comboplete.close();
-        }
+        openDropdown();
     });
 
     return comboplete;
