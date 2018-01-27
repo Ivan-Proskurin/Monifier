@@ -1,16 +1,40 @@
 @page "{id:int}"
 @model Accounts.TopupAccountModel
 
+@{
+    var accounts = Model.Accounts?.Select(x => x.Name);
+}
+
 <div class="col-md-7 centered-form">
     <h3>Пополнение счета</h3>
     <br/>
-    <h4>@Model.Topup.AccountName</h4>
-    <br />
+    @if (!Model.Topup.Correcting)
+    {
+        <h4>@Model.Topup.AccountName</h4>
+        <br/>
+    }
 
     <form method="post">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <input asp-for="Topup.Id" hidden/>
-        <input asp-for="Topup.AccountName" hidden/>
+        <input asp-for="Topup.Correcting" hidden/>
+        @if (Model.Topup.Correcting)
+        {
+            <div class="row">
+                <div class="col-md-12 col-sm-7 col-7">
+                    <div class="form-group">
+                        <label asp-for="Topup.AccountName" class="control-label"></label>
+                        <autocomplete asp-for="Topup.AccountName" value="@Model.Topup.AccountName"
+                                      value-list="@accounts"/>
+                        <span asp-validation-for="Topup.AccountName" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <input asp-for="Topup.AccountName" hidden/>
+        }
         <div class="row">
             <div class="col-md-12 col-sm-7 col-7">
                 <div class="form-group">
@@ -55,6 +79,11 @@
         makeInputAutocomplete("Topup.IncomeType");
         makeInputNumeric('Topup.Amount', false);
 
-        $("#Topup_IncomeType").focus();
+        if ("@Model.Topup.Correcting" === "True") {
+            makeInputAutocomplete("Topup_AccountName");
+            $("#Topup_AccountName").focus();
+        } else {
+            $("#Topup_IncomeType").focus();
+        }
     </script>
 }

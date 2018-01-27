@@ -76,9 +76,9 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             return flow;
         }
 
-        public Task<ExpenseFlowModel> GetByName(string name, bool includeDeleted = false)
+        public async Task<ExpenseFlowModel> GetByName(string name, bool includeDeleted = false)
         {
-            throw new System.NotImplementedException();
+            return (await _unitOfWork.GetNamedModelQueryRepository<ExpenseFlow>().GetByName(name)).ToModel();
         }
 
         public async Task<int> GetNextNumber()

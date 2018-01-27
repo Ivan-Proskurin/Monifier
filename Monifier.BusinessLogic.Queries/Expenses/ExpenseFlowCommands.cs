@@ -154,7 +154,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                 }
             };
 
-            await billModel.Create(_unitOfWork);
+            await billModel.Create(_unitOfWork, expense.Correcting);
         }
     }
 }

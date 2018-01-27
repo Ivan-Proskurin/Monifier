@@ -3,18 +3,32 @@
 @model Expenses.AddExpenseModel
 
 @{
+    var flows = Model.Flows.Select(x => x.Name);
     var accounts = Model.Accounts.Select(x => x.Name);
     var categories = Model.Categories.Select(x => x.Name);
     var products = Model.Products.Select(x => x.Name);
 }
 
 <div class="col-md-7 centered-form">
-    <h3 class="form-caption-sm">@Model.Expense.FlowName</h3>
+    <h3 class="form-caption-sm">
+        @if (Model.Expense.Correcting)
+        {
+            <span>Ввод расхода</span>
+        }
+        else
+        {
+            <span>@Model.Expense.FlowName</span>
+        }
+    </h3>
     
     <form method="post">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input asp-for="Expense.Correcting" hidden/>
         <input asp-for="Expense.ExpenseFlowId" hidden/>
-        <input asp-for="Expense.FlowName" hidden/>
+        @if (!Model.Expense.Correcting)
+        {
+            <input asp-for="Expense.FlowName" hidden/>
+        }
         <div class="row">
             <div class="form-group col-md-12 col-sm-7 col-7">
                 <label asp-for="Expense.Account" class="control-label"></label>
@@ -22,6 +36,16 @@
                 <span asp-validation-for="Expense.Account" class="text-danger"></span>
             </div>
         </div>
+        @if (Model.Expense.Correcting)
+        {
+            <div class="row">
+                <div class="form-group col-md-12 col-sm-7 col-7">
+                    <label asp-for="Expense.FlowName" class="control-label"></label>
+                    <autocomplete asp-for="Expense.FlowName" value-list="@flows" value="@Model.Expense.FlowName"/>
+                    <span asp-validation-for="Expense.FlowName" class="text-danger"></span>
+                </div>
+            </div>
+        }
         <div class="row">
             <div class="form-group col-md-12 col-sm-7 col-7">
                 <label asp-for="Expense.Category" class="control-label"></label>
@@ -66,17 +90,42 @@
 @section Scripts {
     <script type="text/javascript">
         var flowId = "@Model.Expense.ExpenseFlowId";
+        var urlPrefix = "/Expenses/AddExpense/" + flowId;
+        var correcting = "@Model.Expense.Correcting" === "True"; 
         
         activateLink("#expensesLink");
-        
+
+        if (correcting) {
+            makeInputAutocomplete("Expense.FlowName", null, updateCategoriesList);
+        }
         makeInputAutocomplete("Expense.Account");
         var categoryAutocomplete = makeInputAutocomplete("Expense.Category", null, updateProductsList);
         var productsAutocomplete = makeInputAutocomplete("Expense.Product", null, selectCategoryByProduct);
         makeInputDatetimePicker("Expense.DateTime");
         makeInputNumeric('Expense.Cost', false);
+        
+        function updateCategoriesList() {
+            var url = urlPrefix + "?handler=getflowcategories";
+            var categoryVal = $("#Expense_Category").val();
+            sendAjax(url,
+                $("#Expense_FlowName").val(),
+                function(response) {
+                    flowId = "" + response.flowId;
+                    categoryAutocomplete.destroy();
+                    categoryAutocomplete = makeInputAutocomplete("Expense.Category", response.categories, updateProductsList);
+                    if (response.categories.indexOf(categoryVal) >= 0) {
+                        $("#Expense_Category").val(categoryVal);
+                    } else {
+                        $("#Expense_Category").val("");
+                        productsAutocomplete.destroy();
+                        productsAutocomplete = makeInputAutocomplete("Expense.Product", null, selectCategoryByProduct);
+                        $("#Expense_Product").val("");
+                    }
+                });
+        }
 
         function updateProductsList() {
-            var url = "/Expenses/AddExpense/" + flowId + "?handler=getcategoryproducts";
+            var url = urlPrefix + "?handler=getcategoryproducts";
             var productVal = $("#Expense_Product").val();
             sendAjax(url,
                 $("#Expense_Category").val(),
@@ -92,7 +141,7 @@
         }
 
         function selectCategoryByProduct() {
-            var url = "/Expenses/AddExpense/" + flowId + "?handler=getcategorybyproduct";
+            var url = urlPrefix + "?handler=getcategorybyproduct";
             var args = { 
                 flowId: +flowId, 
                 product: $("#Expense_Product").val()
@@ -107,7 +156,7 @@
 
         $("#Expense_Category").keyup(function() {
             if (!($("#Expense_Category")).val()) {
-                var url = "/Expenses/AddExpense/" + flowId + "?handler=getflowproducts";
+                var url = urlPrefix + "?handler=getflowproducts";
                 sendAjax(url, flowId,
                     function(response) {
                         productsAutocomplete.destroy();
@@ -116,10 +165,14 @@
             }
         });
 
-        if ($("#Expense_Category").val())
-            $("#Expense_Product").focus();
-        else
-            $("#Expense_Category").focus();
+        if (correcting) {
+            $("#Expense_FlowName").focus();
+        } else {
+            if ($("#Expense_Category").val())
+                $("#Expense_Product").focus();
+            else
+                $("#Expense_Category").focus();
+        }
 
     </script>
 }

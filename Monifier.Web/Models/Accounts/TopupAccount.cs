@@ -8,6 +8,10 @@ namespace Monifier.Web.Models.Accounts
     {
         public int Id { get; set; }
         
+        public bool Correcting { get; set; }
+        
+        [Display(Name = "Счет пополнения")]
+        [Required(ErrorMessage = "Выберите счет пополнения")]
         public string AccountName { get; set; }
         
         [Display(Name = "Дата пополнения")]

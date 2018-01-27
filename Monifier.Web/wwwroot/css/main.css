@@ -1,5 +1,6 @@
 ﻿.body-content {
     margin-top: 25px;
+    min-width: 800px;
 }
 
 .navbar-nav .nav-item {

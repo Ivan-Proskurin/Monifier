@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Contract.Expenses;
+using Monifier.BusinessLogic.Contract.Inventorization;
 using Monifier.BusinessLogic.Model.Base;
+using Monifier.BusinessLogic.Model.Expenses;
 using Monifier.Common.Extensions;
 using Monifier.Web.Api.Models;
 using Monifier.Web.Extensions;
@@ -26,6 +28,7 @@ namespace Monifier.Web.Pages.Expenses
         private readonly ICategoriesQueries _categoriesQueries;
         private readonly ICategoriesCommands _categoriesCommands;
         private readonly IProductCommands _productCommands;
+        private readonly IInventorizationQueries _inventorizationQueries;
 
         public AddExpenseModel(
             IAccountQueries accountQueries,
@@ -34,7 +37,8 @@ namespace Monifier.Web.Pages.Expenses
             IExpenseFlowCommands expenseFlowCommands,
             ICategoriesQueries categoriesQueries,
             ICategoriesCommands categoriesCommands,
-            IProductCommands productCommands)
+            IProductCommands productCommands,
+            IInventorizationQueries inventorizationQueries)
         {
             _accountQueries = accountQueries;
             _expenseFlowQueries = expenseFlowQueries;
@@ -43,6 +47,7 @@ namespace Monifier.Web.Pages.Expenses
             _categoriesQueries = categoriesQueries;
             _categoriesCommands = categoriesCommands;
             _productCommands = productCommands;
+            _inventorizationQueries = inventorizationQueries;
         }
 
         private async Task PrepareModels(int expenseId)
@@ -50,10 +55,13 @@ namespace Monifier.Web.Pages.Expenses
             Accounts = await _accountQueries.GetAll();
             Categories = await _categoriesQueries.GetFlowCategories(expenseId);
             Products = await _productQueries.GetExpensesFlowProducts(expenseId);
+            Flows = await _expenseFlowQueries.GetAll();
         }
         
         [BindProperty]
         public EditExpense Expense { get; set; }
+        
+        public List<ExpenseFlowModel> Flows { get; private set; }
         
         public List<AccountModel> Accounts { get; private set; }
         
@@ -61,15 +69,16 @@ namespace Monifier.Web.Pages.Expenses
         
         public List<ProductModel> Products { get; private set; }
 
-        private async Task PrepareToInputNewExpense(int flowId)
+        private async Task PrepareToInputNewExpense(int flowId, bool correcting)
         {
             await PrepareModels(flowId);
-            var flow = await _expenseFlowQueries.GetById(flowId);
+            var flow = correcting ? null : await _expenseFlowQueries.GetById(flowId);
             Expense = new EditExpense
             {
+                Correcting = correcting,
                 Account = Accounts.GetLastUsedAccount()?.Name,
                 ExpenseFlowId = flowId,
-                FlowName = flow.Name,
+                FlowName = flow?.Name,
                 DateTime = DateTime.Now.ToStandardString(),
                 Cost = string.Empty,
             };
@@ -77,11 +86,18 @@ namespace Monifier.Web.Pages.Expenses
             {
                 Expense.Category = Categories.First().Name;
             }
+
+            if (correcting)
+            {
+                var balanceState = await _inventorizationQueries.GetBalanceState();
+                if (balanceState.Balance < 0)
+                    Expense.Cost = (-balanceState.Balance).ToStandardString();
+            }
         }
 
-        public async Task OnGetAsync(int expenseId)
+        public async Task OnGetAsync(int expenseId, bool correcting = false)
         {
-            await PrepareToInputNewExpense(expenseId);
+            await PrepareToInputNewExpense(expenseId, correcting);
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -94,6 +110,11 @@ namespace Monifier.Web.Pages.Expenses
                 },
                 async () =>
                 {
+                    if (Expense.Correcting)
+                    {
+                        var flow = await _expenseFlowQueries.GetByName(Expense.FlowName);
+                        if (flow != null) Expense.ExpenseFlowId = flow.Id;
+                    }
                     await PrepareModels(Expense.ExpenseFlowId);
                     return Page();
                 },
@@ -103,6 +124,19 @@ namespace Monifier.Web.Pages.Expenses
                     if (account == null)
                     {
                         vrList.Add(new ModelValidationResult("Expense.Account", "Нет такого счета"));
+                    }
+
+                    if (Expense.Correcting)
+                    {
+                        var flow = await _expenseFlowQueries.GetByName(Expense.FlowName);
+                        if (flow == null)
+                        {
+                            vrList.Add(new ModelValidationResult("Expense.FlowName", "Нет такой статьи расхода"));
+                        }
+                        else
+                        {
+                            Expense.ExpenseFlowId = flow.Id;
+                        }
                     }
                     CategoryModel category = null;
                     if (!string.IsNullOrEmpty(Expense.Category))
@@ -145,12 +179,30 @@ namespace Monifier.Web.Pages.Expenses
                 });
         }
 
+        public async Task<JsonResult> OnPostGetFlowCategoriesAsync()
+        {
+            return await this.ProcessAjaxPostRequestAsync(async name =>
+            {
+                var flow = await _expenseFlowQueries.GetByName(name);
+                if (flow == null) return new { flowId = 0, categories = Enumerable.Empty<string>()};
+                var categories = await _categoriesQueries.GetFlowCategories(flow.Id);
+                return new { flowId = flow.Id, categories = categories.Select(x => x.Name)};
+            });
+        }
+
         public async Task<JsonResult> OnPostGetCategoryProductsAsync()
         {
             return await this.ProcessAjaxPostRequestAsync(async name =>
             {
-                var products = await _categoriesQueries.GetProductsByCategoryName(name);
-                return products.Select(x => x.Name).ToList();
+                try
+                {
+                    var products = await _categoriesQueries.GetProductsByCategoryName(name);
+                    return products.Select(x => x.Name);
+                }
+                catch (ArgumentException)
+                {
+                    return Enumerable.Empty<string>();
+                }
             });
         }
 
@@ -169,7 +221,7 @@ namespace Monifier.Web.Pages.Expenses
             return await this.ProcessAjaxPostRequestAsync(async args =>
             {
                 var products = await _productQueries.GetExpensesFlowProducts(int.Parse(args));
-                return products.Select(x => x.Name).ToList();
+                return products.Select(x => x.Name);
             });
         }
     }

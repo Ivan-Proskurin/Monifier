@@ -3,6 +3,7 @@ using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Contract.Distribution;
 using Monifier.BusinessLogic.Contract.Expenses;
 using Monifier.BusinessLogic.Contract.Incomes;
+using Monifier.BusinessLogic.Contract.Inventorization;
 using Monifier.BusinessLogic.Contract.Settings;
 using Monifier.BusinessLogic.Distribution;
 using Monifier.BusinessLogic.Distribution.Model.Contract;
@@ -10,6 +11,7 @@ using Monifier.BusinessLogic.Queries.Base;
 using Monifier.BusinessLogic.Queries.Distribution;
 using Monifier.BusinessLogic.Queries.Expenses;
 using Monifier.BusinessLogic.Queries.Incomes;
+using Monifier.BusinessLogic.Queries.Inventorization;
 using Monifier.BusinessLogic.Queries.Settings;
 using Monifier.DataAccess.Contract;
 using Monifier.DataAccess.EntityFramework;
@@ -39,6 +41,7 @@ namespace Monifier.Web
             services.AddTransient<IDistributionQueries, DistributionQueries>();
             services.AddTransient<IDistributionCommands, DistributionCommands>();
             services.AddTransient<IFlowDistributor, DefaultFlowDistributor>();
+            services.AddTransient<IInventorizationQueries, InventorizationQueries>();
         }
     }
 }

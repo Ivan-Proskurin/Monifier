@@ -1,0 +1,24 @@
+﻿@using BusinessLogic.Model.Inventorization
+@using Common.Extensions
+@model BalanceState
+
+@if (Model.ShowPrompt)
+{
+    <div id="inventorizationBlock" class="alert alert-danger" role="alert">
+        <div>
+            Внимание! Разница балансов счетов и статей расходов составляет
+            <span id="inventorizationBalance" style="font-weight: bold;">@Model.Balance.ToMoney()</span>
+        </div>
+        <div>
+            Для устранения дисбаланса необходимо ввести 
+            @if (Model.Balance > 0)
+            {
+                <a href="/Accounts/TopupAccount/0?correcting=true" class="alert-link">корректирующий доход</a>
+            }
+            @if (Model.Balance < 0)
+            {
+                <a href="/Expenses/AddExpense/0?correcting=true" class="alert-link">корректирующий расход</a>
+            }
+        </div>
+    </div>
+}

@@ -57,7 +57,9 @@ namespace Monifier.Web.Pages.Expenses
             return await ExpenseFlow.ProcessAsync(ModelState,
                 async () =>
                 {
-                    await _expenseFlowCommands.Update(ExpenseFlow.ToExpenseFlowModel());
+                    var model = await _expenseFlowQueries.GetById(ExpenseFlow.Id);
+                    ExpenseFlow.ToExpenseFlowModel(model);
+                    await _expenseFlowCommands.Update(model);
                     return RedirectToPage("./ExpenseFlows");
                 },
                 

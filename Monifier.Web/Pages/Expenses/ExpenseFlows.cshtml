@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="~/css/expense.flows.css"/>
 }
 
+@Html.Partial("_Inventorization", Model.BalanceState)
+
 <div class="header">
     <h4 class="form-caption-xs">Статьи расходов</h4>
     <a asp-page="./CreateExpenseFlow" class="btn btn-outline-danger cursor-pointer header-button">Добавить статью</a>

@@ -8,8 +8,12 @@ namespace Monifier.Web.Models.Expenses
 {
     public class EditExpense : IValidatable
     {
+        public bool Correcting { get; set; }
+        
         public int ExpenseFlowId { get; set; }
         
+        [Display(Name = "Статья расходов *")]
+        [Required(ErrorMessage = "Выберите статью расходов")]
         public string FlowName { get; set; }
         
         [Display(Name = "Счет *")]
@@ -52,6 +56,7 @@ namespace Monifier.Web.Models.Expenses
         {
             return new ExpenseFlowExpense
             {
+                Correcting = Correcting,
                 Account = Account,
                 ExpenseFlowId = ExpenseFlowId,
                 Category = Category,

@@ -151,3 +151,14 @@ function sendAjax(url, args, success) {
         }
     });
 }
+
+function apiGet(url, success) {
+    $.ajax({
+        type: "GET",
+        url: url,
+        success: success,
+        failure: function(response) {
+            console.log(response);
+        }
+    });
+}

@@ -4,6 +4,7 @@ namespace Monifier.BusinessLogic.Model.Expenses
 {
     public class ExpenseFlowExpense
     {
+        public bool Correcting { get; set; }
         public string Account { get; set; }
         public int ExpenseFlowId { get; set; }
         public string Category { get; set; }

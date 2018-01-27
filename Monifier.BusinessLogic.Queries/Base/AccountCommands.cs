@@ -35,12 +35,16 @@ namespace Monifier.BusinessLogic.Queries.Base
             {
                 Name = model.Name,
                 Balance = model.Balance,
+                AvailBalance = model.AvailBalance,
                 DateCreated = model.DateCreated,
                 Number = model.Number,
                 IsDeleted = false
             };
             if (model.Id < 0)
+            {
+                account.AvailBalance = model.Balance;
                 commands.Create(account);
+            }
             else
             {
                 account.Id = model.Id;
@@ -94,7 +98,10 @@ namespace Monifier.BusinessLogic.Queries.Base
                 IncomeTypeId = incomeTypeId.Value,
                 Total = topup.Amount
             });
-            account.Balance += topup.Amount;
+            if (!topup.Correcting)
+            {
+                account.Balance += topup.Amount;
+            }
             account.AvailBalance += topup.Amount;
             accountCommands.Update(account);
             await _unitOfWork.SaveChangesAsync();
@@ -119,7 +126,9 @@ namespace Monifier.BusinessLogic.Queries.Base
                     $"Невозможно перевести сумму {amount} со счета \"{accountFrom.Name}\", так как на его балансе не хватает средств");
 
             accountFrom.Balance -= amount;
+            accountFrom.AvailBalance -= amount;
             accountTo.Balance += amount;
+            accountTo.AvailBalance += amount;
             accountCommands.Update(accountFrom);
             accountCommands.Update(accountTo);
             

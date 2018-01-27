@@ -1,7 +1,9 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Expenses;
+using Monifier.BusinessLogic.Contract.Inventorization;
 using Monifier.BusinessLogic.Model.Expenses;
+using Monifier.BusinessLogic.Model.Inventorization;
 using Monifier.BusinessLogic.Model.Pagination;
 
 namespace Monifier.Web.Pages.Expenses
@@ -9,13 +11,16 @@ namespace Monifier.Web.Pages.Expenses
     public class ExpenseFlowsModel : PageModel
     {
         private readonly IExpenseFlowQueries _expenseFlowQueries;
+        private readonly IInventorizationQueries _inventorizationQueries;
 
-        public ExpenseFlowsModel(IExpenseFlowQueries expenseFlowQueries)
+        public ExpenseFlowsModel(IExpenseFlowQueries expenseFlowQueries, IInventorizationQueries inventorizationQueries)
         {
             _expenseFlowQueries = expenseFlowQueries;
+            _inventorizationQueries = inventorizationQueries;
         }
         
         public ExpenseFlowList ExpenseFlows { get; private set; }
+        public BalanceState BalanceState { get; private set; }
 
         public async Task OnGetAsync(int pageNumber = 1)
         {
@@ -25,6 +30,7 @@ namespace Monifier.Web.Pages.Expenses
                 ItemsPerPage = 7,
                 PageNumber = pageNumber
             });
+            BalanceState = await _inventorizationQueries.GetBalanceState();
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Expenses;
+using Monifier.BusinessLogic.Model.Expenses;
 using Monifier.Common.Extensions;
 using Monifier.Web.Models;
 using Monifier.Web.Models.Expenses;
@@ -39,7 +40,9 @@ namespace Monifier.Web.Pages.Expenses
             return await ExpenseFlow.ProcessAsync(ModelState,
                 async () =>
                 {
-                    var flow = await _expenseFlowCommands.Update(ExpenseFlow.ToExpenseFlowModel());
+                    var model = new ExpenseFlowModel {Id = -1};
+                    ExpenseFlow.ToExpenseFlowModel(model);
+                    var flow = await _expenseFlowCommands.Update(model);
                     return RedirectToPage("./EditExpenseFlow", new { id = flow.Id });
                 },
                 

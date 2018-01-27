@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Base;
@@ -33,7 +32,9 @@ namespace Monifier.Web.Pages.Accounts
             return await Account.ProcessAsync(ModelState,
                 async () =>
                 {
-                    await _accountCommands.Update(Account.ToAccountModel());
+                    var model = await _accountQueries.GetById(Account.Id);
+                    Account.ToAccountModel(model);
+                    await _accountCommands.Update(model);
                     return RedirectToPage("./AccountsList");
                 },
 

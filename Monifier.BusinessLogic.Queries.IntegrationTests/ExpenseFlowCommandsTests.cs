@@ -2,6 +2,7 @@
 using FluentAssertions;
 using Monifier.BusinessLogic.Model.Expenses;
 using Monifier.BusinessLogic.Queries.Expenses;
+using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Expenses;
 using Monifier.IntegrationTests.Infrastructure;
 using Xunit;
@@ -80,6 +81,34 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
         {
             var expense = new ExpenseFlowExpense
             {
+                Correcting = false,
+                Account = DebitCardAccount.Name,
+                ExpenseFlowId = FoodExpenseFlow.Id,
+                Category = FoodCategory.Name,
+                Cost = 25.60m,
+                DateCreated = DateTime.Today,
+                Product = Meat.Name,
+            };
+
+            var now = DateTime.Now;
+            var efc = new ExpenseFlowCommands(UnitOfWork);
+            await efc.AddExpense(expense);
+            var flow = await UnitOfWork.GetQueryRepository<ExpenseFlow>().GetById(FoodExpenseFlow.Id);
+            flow.Balance.ShouldBeEquivalentTo(FoodExpenseFlow.Balance - expense.Cost);
+            flow.Version.ShouldBeEquivalentTo(FoodExpenseFlow.Version + 1);
+            var account = await UnitOfWork.GetQueryRepository<Account>().GetById(DebitCardAccount.Id);
+            account.Balance.ShouldBeEquivalentTo(DebitCardAccount.Balance - expense.Cost);
+            account.AvailBalance.ShouldBeEquivalentTo(DebitCardAccount.AvailBalance);
+            account.LastWithdraw.Should().NotBeNull();
+            account.LastWithdraw?.Should().BeOnOrAfter(now);
+        }
+
+        [Fact]
+        public async void AddExpense_Correcting_OnlyFlowBalanceChanged()
+        {
+            var expense = new ExpenseFlowExpense
+            {
+                Correcting = true,
                 Account = DebitCardAccount.Name,
                 ExpenseFlowId = FoodExpenseFlow.Id,
                 Category = FoodCategory.Name,
@@ -93,6 +122,10 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
             var flow = await UnitOfWork.GetQueryRepository<ExpenseFlow>().GetById(FoodExpenseFlow.Id);
             flow.Balance.ShouldBeEquivalentTo(FoodExpenseFlow.Balance - expense.Cost);
             flow.Version.ShouldBeEquivalentTo(FoodExpenseFlow.Version + 1);
+            var account = await UnitOfWork.GetQueryRepository<Account>().GetById(DebitCardAccount.Id);
+            account.Balance.ShouldBeEquivalentTo(DebitCardAccount.Balance);
+            account.AvailBalance.ShouldBeEquivalentTo(DebitCardAccount.AvailBalance);
+            account.LastWithdraw.ShouldBeEquivalentTo(DebitCardAccount.LastWithdraw);
         }
     }
 }

@@ -31,6 +31,7 @@ namespace Monifier.BusinessLogic.Model.IntegrationTests
         [Fact]
         public async void Create_BalancesAreModifiedCorrectly()
         {
+            var now = DateTime.Now;
             await _bill.Create(UnitOfWork);
 
             var availBalance = DebitCardAccount.AvailBalance;
@@ -41,6 +42,8 @@ namespace Monifier.BusinessLogic.Model.IntegrationTests
             var account = await accountQueries.GetById(DebitCardAccount.Id);
             account.Balance.ShouldBeEquivalentTo(accountBalance);
             account.AvailBalance.ShouldBeEquivalentTo(availBalance);
+            account.LastWithdraw.Should().NotBeNull();
+            account.LastWithdraw?.Should().BeOnOrAfter(now);
             
             var flowQueries = UnitOfWork.GetQueryRepository<ExpenseFlow>();
             var flow = await flowQueries.GetById(FoodExpenseFlow.Id);
@@ -93,10 +96,12 @@ namespace Monifier.BusinessLogic.Model.IntegrationTests
         public async void Update_SameAccountBalanceCorrected()
         {
             var availBalance = DebitCardAccount.AvailBalance;
+            var lastWithdraw = DebitCardAccount.LastWithdraw;
             var oldBalance = await UseUnitOfWorkAsync(async uof =>
             {
                 await _bill.Create(uof);
                 var account = await uof.GetQueryRepository<Account>().GetById(DebitCardAccount.Id);
+                lastWithdraw = account.LastWithdraw;
                 return account.Balance;
             });
 
@@ -114,6 +119,7 @@ namespace Monifier.BusinessLogic.Model.IntegrationTests
                 var account = await uof.GetQueryRepository<Account>().GetById(DebitCardAccount.Id);
                 account.Balance.ShouldBeEquivalentTo(oldBalance - costDiff);
                 account.AvailBalance.ShouldBeEquivalentTo(availBalance);
+                account.LastWithdraw.ShouldBeEquivalentTo(lastWithdraw);
             });
         }
 
@@ -133,12 +139,15 @@ namespace Monifier.BusinessLogic.Model.IntegrationTests
                     Cost = 10000m
                 });
                 _bill.AccountId = CashAccount.Id;
+                var now = DateTime.Now;
                 await _bill.Update(uof);
                 var prevAccount = await uof.GetQueryRepository<Account>().GetById(DebitCardAccount.Id);
                 prevAccount.Balance.ShouldBeEquivalentTo(oldBalance);
                 prevAccount.AvailBalance.ShouldBeEquivalentTo(availBalance);
                 var newAccount = await uof.GetQueryRepository<Account>().GetById(CashAccount.Id);
                 newAccount.Balance.ShouldBeEquivalentTo(CashAccount.Balance - _bill.Cost);
+                newAccount.LastWithdraw.Should().NotBeNull();
+                newAccount.LastWithdraw?.Should().BeOnOrAfter(now);
             });
         }
 

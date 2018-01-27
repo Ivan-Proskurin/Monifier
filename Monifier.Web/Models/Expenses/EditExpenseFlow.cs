@@ -56,17 +56,13 @@ namespace Monifier.Web.Models.Expenses
             };
         }
 
-        public static ExpenseFlowModel ToExpenseFlowModel(this EditExpenseFlow flow)
+        public static void ToExpenseFlowModel(this EditExpenseFlow flow, ExpenseFlowModel model)
         {
-            return new ExpenseFlowModel
-            {
-                Id = flow.Id,
-                Number = flow.Number,
-                DateCreated = flow.CreationDate.ParseDtFromStandardString(),
-                Name = flow.Name,
-                Balance = flow.Balance.ParseMoneyInvariant(),
-                Categories = flow.Categories.ToIntList()
-            };
+            model.Number = flow.Number;
+            model.DateCreated = flow.CreationDate.ParseDtFromStandardString();
+            model.Name = flow.Name;
+            model.Balance = flow.Balance.ParseMoneyInvariant();
+            model.Categories = flow.Categories.ToIntList();
         }
     }
 }

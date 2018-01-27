@@ -55,7 +55,7 @@
 </nav>    
 <div class="container body-content">
     @RenderBody()
-    <hr />
+    <hr/>
     <footer>
         <p>&copy; crusader, @DateTime.Now.Year - Приложение учета личных финансов</p>
     </footer>
@@ -70,6 +70,7 @@
         <script src="~/js/jquery.datetimepicker.full.js"></script>
         <script src="~/js/helpers.js"></script>
         <script src="~/js/checkboxed-table.js"></script>
+        <script src="~/js/inventorization.js"></script>
     </environment>
     <environment exclude="Development">
         <script src="https://code.jquery.com/jquery-3.2.1.js"
@@ -90,6 +91,7 @@
         <script src="~/js/jquery.datetimepicker.full.js"></script>
         <script src="~/js/helpers.js"></script>
         <script src="~/js/checkboxed-table.js"></script>
+        <script src="~/js/inventorization.js"></script>
     </environment>
 
     @RenderSection("Scripts", required: false)

@@ -121,7 +121,7 @@ namespace Monifier.BusinessLogic.Model.Expenses
                 await Update(unitOfWork);
         }
 
-        public async Task Create(IUnitOfWork unitOfWork)
+        public async Task Create(IUnitOfWork unitOfWork, bool correcting = false)
         {
             if (unitOfWork == null)
                 throw new ArgumentNullException(nameof(unitOfWork));
@@ -162,12 +162,13 @@ namespace Monifier.BusinessLogic.Model.Expenses
             flow.Version++;
             flowCommands.Update(flow);
 
-            if (AccountId != null)
+            if (AccountId != null && !correcting)
             {
                 var accountQueries = unitOfWork.GetQueryRepository<Account>();
                 var accountCommands = unitOfWork.GetCommandRepository<Account>();
                 var account = await accountQueries.GetById(AccountId.Value);
                 account.Balance -= bill.SumPrice;
+                account.LastWithdraw = DateTime.Now;
                 accountCommands.Update(account);
             }
 
@@ -252,6 +253,7 @@ namespace Monifier.BusinessLogic.Model.Expenses
                 {
                     var newAccount = await accountQueries.GetById(bill.AccountId.Value);
                     newAccount.Balance -= bill.SumPrice;
+                    newAccount.LastWithdraw = DateTime.Now;
                     accountCommands.Update(newAccount);
                 }
             }

@@ -54,16 +54,12 @@ namespace Monifier.Web.Models.Accounts
             };
         }
 
-        public static AccountModel ToAccountModel(this EditAccount account)
+        public static void ToAccountModel(this EditAccount account, AccountModel model)
         {
-            return new AccountModel
-            {
-                Id = account.Id,
-                Number = account.Number,
-                Name = account.Name,
-                DateCreated = account.CreationDate.ParseDtFromStandardString(),
-                Balance = account.Balance.ParseMoneyInvariant()
-            };
+            model.Number = account.Number;
+            model.DateCreated = account.CreationDate.ParseDtFromStandardString();
+            model.Name = account.Name;
+            model.Balance = account.Balance.ParseMoneyInvariant();
         }
     }
 }
