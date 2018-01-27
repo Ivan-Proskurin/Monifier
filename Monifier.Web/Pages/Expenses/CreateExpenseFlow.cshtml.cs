@@ -43,7 +43,7 @@ namespace Monifier.Web.Pages.Expenses
                     var model = new ExpenseFlowModel {Id = -1};
                     ExpenseFlow.ToExpenseFlowModel(model);
                     var flow = await _expenseFlowCommands.Update(model);
-                    return RedirectToPage("./EditExpenseFlow", new { id = flow.Id });
+                    return RedirectToPage("./ExpenseFlows");
                 },
                 
                 async () => await Task.FromResult(Page())

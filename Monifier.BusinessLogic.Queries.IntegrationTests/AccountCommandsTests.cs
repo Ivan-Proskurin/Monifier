@@ -76,6 +76,13 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
         [Fact]
         public async void TransferToExpenseFlow_AvailBalanceDecreasedBalanceNot()
         {
+            await UseUnitOfWorkAsync(async uof =>
+            {
+                DebitCardAccount.Balance = 1000;
+                uof.GetCommandRepository<Account>().Update(DebitCardAccount);
+                await uof.SaveChangesAsync();
+            });
+            
             var accountBalance = DebitCardAccount.Balance;
             var availBalance = DebitCardAccount.AvailBalance;
             var flowBalance = FoodExpenseFlow.Balance;
@@ -90,6 +97,23 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
             account.Balance.ShouldBeEquivalentTo(accountBalance);
             account.AvailBalance.ShouldBeEquivalentTo(availBalance - transferAmount);
             flow.Balance.ShouldBeEquivalentTo(flowBalance + transferAmount);
+        }
+
+        [Fact]
+        public async void TransferToExpenseFlow_AboveAvailableBalance_ThrowsException()
+        {
+            await UseUnitOfWorkAsync(async uof =>
+            {
+                DebitCardAccount.AvailBalance = 1000;
+                uof.GetCommandRepository<Account>().Update(DebitCardAccount);
+                await uof.SaveChangesAsync();
+            });
+            
+            await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            {
+                var commands = new AccountCommands(UnitOfWork);
+                await commands.TransferToExpenseFlow(FoodExpenseFlow.Id, DebitCardAccount.Id, 2000);
+            });
         }
 
         [Fact]

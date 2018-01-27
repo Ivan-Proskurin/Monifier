@@ -150,7 +150,7 @@ namespace Monifier.BusinessLogic.Queries.Base
             if (account == null)
                 throw new ArgumentException($"Нет такого счета с Id = {fromAccountId}", nameof(fromAccountId));
             
-            if (account.Balance < amount)
+            if (account.AvailBalance < amount)
                 throw new InvalidOperationException(
                     $"Невозможно перевести сумму {amount} со счета \"{account.Name}\", так как на его доступном балансе не хватает средств");
 

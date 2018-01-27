@@ -49,7 +49,7 @@ namespace Monifier.Web.Pages.Expenses
             const string unknownBalance = "-";
             if (string.IsNullOrEmpty(Transfer?.AccountFrom)) return unknownBalance;
             var account = await _accountQueries.GetByName(Transfer.AccountFrom);
-            return account == null ? unknownBalance : account.Balance.ToMoney();
+            return account == null ? unknownBalance : account.AvailBalance.ToMoney();
         }
 
         public async Task OnGetAsync(int expenseId)
@@ -67,7 +67,7 @@ namespace Monifier.Web.Pages.Expenses
             return await Transfer.ProcessAsync(ModelState,
                 async () =>
                 {
-                    var account = _accountQueries.GetByName(Transfer.AccountFrom);
+                    var account = await _accountQueries.GetByName(Transfer.AccountFrom);
                     await _accountCommands.TransferToExpenseFlow(Transfer.FlowId,
                         account.Id, Transfer.Amount.ParseMoneyInvariant());
                     return RedirectToPage("./ExpenseFlows");
@@ -82,7 +82,6 @@ namespace Monifier.Web.Pages.Expenses
                 {
                     var account = await _accountQueries.GetByName(Transfer.AccountFrom); 
                     if (account == null) vrList.Add(new ModelValidationResult("Transfer.AccountFrom", "Нет такого счета"));
-                    await Task.CompletedTask;
                 }
             );
         }
@@ -92,7 +91,7 @@ namespace Monifier.Web.Pages.Expenses
             return await this.ProcessAjaxPostRequestAsync(async name =>
             {
                 var account = await _accountQueries.GetByName(name);
-                return account == null ? "-" : account.Balance.ToMoney();
+                return account == null ? "-" : account.AvailBalance.ToMoney();
             });
         }
     }
