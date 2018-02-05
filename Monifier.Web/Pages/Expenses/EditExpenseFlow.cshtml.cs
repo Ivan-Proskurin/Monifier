@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -15,8 +14,8 @@ namespace Monifier.Web.Pages.Expenses
 {
     public class EditExpenseFlowModel : PageModel
     {
-        private static readonly string addcatProp = "ExpenseFlow.AddOrDeleteCategory";
-        
+        private const string AddcatProp = "ExpenseFlow.AddOrDeleteCategory";
+
         private readonly IExpenseFlowQueries _expenseFlowQueries;
         private readonly IExpenseFlowCommands _expenseFlowCommands;
         private readonly ICategoriesQueries _categoriesQueries;
@@ -81,13 +80,13 @@ namespace Monifier.Web.Pages.Expenses
             await LoadCategories();
             if (string.IsNullOrEmpty(ExpenseFlow.AddOrDeleteCategory))
             {
-                ModelState.AddModelError(addcatProp, "Введите категорию товаров");
+                ModelState.AddModelError(AddcatProp, "Введите категорию товаров");
                 return Page();
             }
             
             if (FlowCategories.FindByName(ExpenseFlow.AddOrDeleteCategory) != null)
             {
-                ModelState.AddModelError(addcatProp, 
+                ModelState.AddModelError(AddcatProp, 
                     $"Категория \"{ExpenseFlow.AddOrDeleteCategory}\" уже есть в списке");
             }
             else
@@ -95,7 +94,7 @@ namespace Monifier.Web.Pages.Expenses
                 var category = Categories.FindByName(ExpenseFlow.AddOrDeleteCategory);
                 if (category == null)
                 {
-                    ModelState.AddModelError(addcatProp,
+                    ModelState.AddModelError(AddcatProp,
                         $"Нет категории \"{ExpenseFlow.AddOrDeleteCategory}\"");
                 }
                 else
@@ -114,14 +113,14 @@ namespace Monifier.Web.Pages.Expenses
             
             if (string.IsNullOrEmpty(ExpenseFlow.AddOrDeleteCategory))
             {
-                ModelState.AddModelError(addcatProp, "Введите категорию товаров");
+                ModelState.AddModelError(AddcatProp, "Введите категорию товаров");
                 return Page();
             }
 
             var category = FlowCategories.FindByName(ExpenseFlow.AddOrDeleteCategory); 
             if (category == null)
             {
-                ModelState.AddModelError(addcatProp, $"Нет такой категории \"{ExpenseFlow.AddOrDeleteCategory}\"");
+                ModelState.AddModelError(AddcatProp, $"Нет такой категории \"{ExpenseFlow.AddOrDeleteCategory}\"");
             }
             else
             {

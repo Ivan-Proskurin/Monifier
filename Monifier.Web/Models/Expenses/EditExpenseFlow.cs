@@ -51,7 +51,7 @@ namespace Monifier.Web.Models.Expenses
                 CreationDate = model.DateCreated.ToStandardString(),
                 Name = model.Name,
                 OriginalName = model.Name,
-                Balance = model.Balance.ToMoney(),
+                Balance = model.Balance.ToStandardString(),
                 Categories = model.Categories.ToCsvString()
             };
         }
