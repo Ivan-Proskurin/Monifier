@@ -25,7 +25,9 @@ namespace Monifier.BusinessLogic.Queries.Incomes
         public async Task<List<IncomeTypeModel>> GetAll(bool includeDeleted = false)
         {
             var typesRepo = _unitOfWork.GetQueryRepository<IncomeType>();
+            var ownerId = _currentSession.UserId;
             var items = await typesRepo.Query
+                .Where(x => x.OwnerId == ownerId)
                 .Select(x => new IncomeTypeModel
                 {
                     Id = x.Id,
@@ -62,10 +64,11 @@ namespace Monifier.BusinessLogic.Queries.Incomes
         {
             var typesRepo = _unitOfWork.GetQueryRepository<IncomeType>();
             var itemsRepo = _unitOfWork.GetQueryRepository<IncomeItem>();
+            var ownerId = _currentSession.UserId;
             var query = from t in typesRepo.Query
                         join i in itemsRepo.Query on t.Id equals i.IncomeTypeId into typeItemsJoin
                         from ti in typeItemsJoin.DefaultIfEmpty()
-                        where ti.DateTime >= dateFrom && ti.DateTime < dateTo
+                        where ti.OwnerId == ownerId && ti.DateTime >= dateFrom && ti.DateTime < dateTo
                         group new { ti.IncomeType, ti.Total } by ti.IncomeTypeId into tiGroup
                         select new IncomeTypeModel
                         {

@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Monifier.BusinessLogic.Contract.Auth;
 using Monifier.BusinessLogic.Contract.Incomes;
 using Monifier.BusinessLogic.Model.Incomes;
 using Monifier.DataAccess.Contract;
@@ -9,10 +10,12 @@ namespace Monifier.BusinessLogic.Queries.Incomes
     public class IncomeTypeCommands : IIncomeTypeCommands
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICurrentSession _currentSession;
 
-        public IncomeTypeCommands(IUnitOfWork unitOfWork)
+        public IncomeTypeCommands(IUnitOfWork unitOfWork, ICurrentSession currentSession)
         {
             _unitOfWork = unitOfWork;
+            _currentSession = currentSession;
         }
 
         public async Task<IncomeTypeModel> Update(IncomeTypeModel model)
@@ -21,7 +24,8 @@ namespace Monifier.BusinessLogic.Queries.Incomes
             var type = new IncomeType
             {
                 Id = model.Id,
-                Name = model.Name
+                Name = model.Name,
+                OwnerId = _currentSession.UserId
             };
             if (type.Id > 0)
             {

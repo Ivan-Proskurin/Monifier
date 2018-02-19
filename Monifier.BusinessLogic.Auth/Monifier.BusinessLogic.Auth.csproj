@@ -13,4 +13,7 @@
       <HintPath>..\..\..\Users\811239\.nuget\packages\microsoft.entityframeworkcore\2.0.1\lib\netstandard2.0\Microsoft.EntityFrameworkCore.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="NETStandard.Library" Version="2.0.1" />
+  </ItemGroup>
 </Project>

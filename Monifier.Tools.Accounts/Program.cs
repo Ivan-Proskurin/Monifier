@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
 using Monifier.BusinessLogic.Auth;
 using Monifier.DataAccess.EntityFramework;
 
@@ -29,17 +30,27 @@ namespace Monifier.Tools.Accounts
         
         static void Main()
         {
-            var contextOptions = new DbContextOptionsBuilder<MonifierDbContext>()
-                .UseSqlServer(ConnectionString)
-                .Options;
-            
-            using (var context = new MonifierDbContext(contextOptions))
+            try
             {
-                using (var unitOfWork = new UnitOfWork(context))
+                var contextOptions = new DbContextOptionsBuilder<MonifierDbContext>()
+                    .UseSqlServer(ConnectionString)
+                    .Options;
+            
+                Console.WriteLine("Creating context...");
+                using (var context = new MonifierDbContext(contextOptions))
                 {
-                    var authCommands = new AuthCommands(unitOfWork);
-                    authCommands.CreateUser(Account.Name, Account.Login, Account.Password, Account.IsAdmin).Wait();
+                    using (var unitOfWork = new UnitOfWork(context))
+                    {
+                        var authCommands = new AuthCommands(unitOfWork);
+                        Console.WriteLine($"Creating user account for {Account.Name} (aka {Account.Login})...");
+                        authCommands.CreateUser(Account.Name, Account.Login, Account.Password, Account.IsAdmin).Wait();
+                        Console.WriteLine("Success");
+                    }
                 }
+            }
+            catch (Exception exc)
+            {
+                Console.WriteLine(exc.ToString());
             }
         }
     }

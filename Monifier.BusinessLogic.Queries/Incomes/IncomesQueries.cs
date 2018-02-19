@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Monifier.BusinessLogic.Contract.Auth;
 using Monifier.BusinessLogic.Contract.Incomes;
 using Monifier.BusinessLogic.Model.Agregation;
 using Monifier.BusinessLogic.Model.Incomes;
@@ -17,10 +18,12 @@ namespace Monifier.BusinessLogic.Queries.Incomes
     public class IncomesQueries : IIncomesQueries
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICurrentSession _currentSession;
 
-        public IncomesQueries(IUnitOfWork unitOfWork)
+        public IncomesQueries(IUnitOfWork unitOfWork, ICurrentSession currentSession)
         {
             _unitOfWork = unitOfWork;
+            _currentSession = currentSession;
         }
 
         private class IncomeGroup
@@ -39,11 +42,12 @@ namespace Monifier.BusinessLogic.Queries.Incomes
             
             var incomesQueries = _unitOfWork.GetQueryRepository<IncomeItem>();
             var typesQueries = _unitOfWork.GetQueryRepository<IncomeType>();
+            var ownerId = _currentSession.UserId;
 
             var incomesQuery =
                 from income in incomesQueries.Query
                 join itype in typesQueries.Query on income.IncomeTypeId equals itype.Id
-                where income.DateTime >= dateFrom && income.DateTime < dateTo
+                where income.OwnerId == ownerId && income.DateTime >= dateFrom && income.DateTime < dateTo
                 orderby income.Total descending 
                 group new {income, itype} by new {income.DateTime.Year, income.DateTime.Month}
                 into incomeGroups
@@ -94,12 +98,13 @@ namespace Monifier.BusinessLogic.Queries.Incomes
             var incomesQueries = _unitOfWork.GetQueryRepository<IncomeItem>();
             var typeQueries = _unitOfWork.GetQueryRepository<IncomeType>();
             var accountQueries = _unitOfWork.GetQueryRepository<Account>();
+            var ownerId = _currentSession.UserId;
 
             var incomesQuery =
                 from income in incomesQueries.Query
                 join itype in typeQueries.Query on income.IncomeTypeId equals itype.Id
                 join account in accountQueries.Query on income.AccountId equals account.Id
-                where income.DateTime >= dateFrom && income.DateTime < dateTo
+                where income.OwnerId == ownerId && income.DateTime >= dateFrom && income.DateTime < dateTo
                 orderby income.DateTime
                 select new
                 {

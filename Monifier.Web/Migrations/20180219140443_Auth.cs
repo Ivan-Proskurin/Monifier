@@ -15,6 +15,11 @@ namespace Monifier.Web.Migrations
 
             migrationBuilder.AddColumn<int>(
                 name: "OwnerId",
+                table: "Products",
+                nullable: true);
+
+            migrationBuilder.AddColumn<int>(
+                name: "OwnerId",
                 table: "IncomeTypes",
                 nullable: true);
 
@@ -90,6 +95,11 @@ namespace Monifier.Web.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Products_OwnerId",
+                table: "Products",
+                column: "OwnerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_IncomeTypes_OwnerId",
@@ -187,6 +197,14 @@ namespace Monifier.Web.Migrations
                 principalTable: "Users",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Restrict);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Products_Users_OwnerId",
+                table: "Products",
+                column: "OwnerId",
+                principalTable: "Users",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -219,11 +237,19 @@ namespace Monifier.Web.Migrations
                 name: "FK_IncomeTypes_Users_OwnerId",
                 table: "IncomeTypes");
 
+            migrationBuilder.DropForeignKey(
+                name: "FK_Products_Users_OwnerId",
+                table: "Products");
+
             migrationBuilder.DropTable(
                 name: "Sessions");
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Products_OwnerId",
+                table: "Products");
 
             migrationBuilder.DropIndex(
                 name: "IX_IncomeTypes_OwnerId",
@@ -248,6 +274,10 @@ namespace Monifier.Web.Migrations
             migrationBuilder.DropIndex(
                 name: "IX_Accounts_OwnerId",
                 table: "Accounts");
+
+            migrationBuilder.DropColumn(
+                name: "OwnerId",
+                table: "Products");
 
             migrationBuilder.DropColumn(
                 name: "OwnerId",

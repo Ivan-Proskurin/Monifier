@@ -12,7 +12,7 @@ using System;
 namespace Monifier.Web.Migrations
 {
     [DbContext(typeof(MonifierDbContext))]
-    [Migration("20180206103507_Auth")]
+    [Migration("20180219140443_Auth")]
     partial class Auth
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -132,9 +132,13 @@ namespace Monifier.Web.Migrations
                         .IsRequired()
                         .HasMaxLength(50);
 
+                    b.Property<int?>("OwnerId");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("Products");
                 });
@@ -385,6 +389,10 @@ namespace Monifier.Web.Migrations
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Monifier.DataAccess.Model.Auth.User", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId");
                 });
 
             modelBuilder.Entity("Monifier.DataAccess.Model.Distribution.AccountFlowSettings", b =>

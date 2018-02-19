@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Monifier.BusinessLogic.Contract.Auth;
 using Monifier.BusinessLogic.Contract.Incomes;
 using Monifier.BusinessLogic.Model.Incomes;
 using Monifier.DataAccess.Contract;
@@ -9,10 +10,12 @@ namespace Monifier.BusinessLogic.Queries.Incomes
     public class IncomeItemCommands : IIncomeItemCommands
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICurrentSession _currentSession;
 
-        public IncomeItemCommands(IUnitOfWork unitOfWork)
+        public IncomeItemCommands(IUnitOfWork unitOfWork, ICurrentSession currentSession)
         {
             _unitOfWork = unitOfWork;
+            _currentSession = currentSession;
         }
 
         public Task Delete(int id, bool onlyMark = true)
@@ -28,7 +31,8 @@ namespace Monifier.BusinessLogic.Queries.Incomes
                 Id = model.Id,
                 DateTime = model.DateTime,
                 IncomeTypeId = model.IncomeTypeId,
-                Total = model.Total
+                Total = model.Total,
+                OwnerId = _currentSession.UserId
             };
             if (item.Id > 0)
             {

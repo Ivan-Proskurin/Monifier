@@ -88,12 +88,12 @@ namespace Monifier.BusinessLogic.Queries.Base
         public async Task<CategoryList> GetList(PaginationArgs args)
         {
             var repo = _unitOfWork.GetQueryRepository<Category>();
+            var ownerId = _currentSession.UserId;
             var query = args.IncludeDeleted ? repo.Query : repo.Query.Where(x => !x.IsDeleted);
+            query = query.Where(x => x.OwnerId == ownerId);
             var totalCount = await query.CountAsync();
             var pagination = new PaginationInfo(args, totalCount);
-            var ownerId = _currentSession.UserId;
             var models = await query
-                .Where(x => x.OwnerId == ownerId)
                 .OrderBy(x => x.Id)
                 .Skip(pagination.Skipped).Take(pagination.Taken)
                 .Select(x => new CategoryModel

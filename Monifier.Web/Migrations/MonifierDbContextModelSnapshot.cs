@@ -131,9 +131,13 @@ namespace Monifier.Web.Migrations
                         .IsRequired()
                         .HasMaxLength(50);
 
+                    b.Property<int?>("OwnerId");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("Products");
                 });
@@ -384,6 +388,10 @@ namespace Monifier.Web.Migrations
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Monifier.DataAccess.Model.Auth.User", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId");
                 });
 
             modelBuilder.Entity("Monifier.DataAccess.Model.Distribution.AccountFlowSettings", b =>

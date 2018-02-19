@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Monifier.BusinessLogic.Contract.Auth;
 using Monifier.BusinessLogic.Contract.Expenses;
 using Monifier.BusinessLogic.Contract.Settings;
 using Monifier.BusinessLogic.Model.Agregation;
@@ -19,11 +20,13 @@ namespace Monifier.BusinessLogic.Queries.Expenses
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserSettings _userSettings;
+        private readonly ICurrentSession _currentSession;
 
-        public ExpensesQueries(IUnitOfWork unitOfWork, IUserSettings userSettings)
+        public ExpensesQueries(IUnitOfWork unitOfWork, IUserSettings userSettings, ICurrentSession currentSession)
         {
             _unitOfWork = unitOfWork;
             _userSettings = userSettings;
+            _currentSession = currentSession;
         }
 
         private class BillGoodsGroup
@@ -66,8 +69,9 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             DateTime dateFrom, DateTime dateTo, PaginationArgs paginationArgs)
         {
             var expenseQueries = _unitOfWork.GetQueryRepository<ExpenseBill>();
+            var ownerId = _currentSession.UserId;
             var goodsGroupQuery = expenseQueries.Query
-                .Where(x => x.DateTime >= dateFrom && x.DateTime < dateTo)
+                .Where(x => x.OwnerId == ownerId && x.DateTime >= dateFrom && x.DateTime < dateTo)
                 .OrderBy(x => x.DateTime)
                 .GroupBy(x => x.DateTime.Date)
                 .Select(x => new BillGoodsGroup
@@ -94,8 +98,9 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             DateTime dateFrom, DateTime dateTo, PaginationArgs paginationArgs)
         {
             var expenseQueries = _unitOfWork.GetQueryRepository<ExpenseBill>();
+            var ownerId = _currentSession.UserId;
             var goodsGroupQuery = expenseQueries.Query
-                .Where(x => x.DateTime >= dateFrom && x.DateTime < dateTo)
+                .Where(x => x.OwnerId == ownerId && x.DateTime >= dateFrom && x.DateTime < dateTo)
                 .OrderBy(x => x.DateTime)
                 .GroupBy(x => new { x.DateTime.Year, x.DateTime.Month })
                 .Select(x => new BillGoodsGroup
@@ -240,9 +245,10 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             
             var today = day.Date;
             var tomorrow = today.AddDays(1);
+            var ownerId = _currentSession.UserId;
 
             var goodsGroups = await expensesQueries.Query
-                .Where(x => x.DateTime >= today && x.DateTime < tomorrow)
+                .Where(x => x.OwnerId == ownerId && x.DateTime >= today && x.DateTime < tomorrow)
                 .OrderBy(x => x.DateTime)
                 .Select(x => new FlowBillGoodsGroup
                 {
