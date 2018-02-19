@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Monifier.BusinessLogic.Contract.Auth;
 using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Model.Base;
 using Monifier.DataAccess.Contract;
@@ -11,10 +12,12 @@ namespace Monifier.BusinessLogic.Queries.Base
     public class ProductCommands : IProductCommands
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICurrentSession _currentSession;
 
-        public ProductCommands(IUnitOfWork unitOfWork)
+        public ProductCommands(IUnitOfWork unitOfWork, ICurrentSession currentSession)
         {
             _unitOfWork = unitOfWork;
+            _currentSession = currentSession;
         }
 
         public async Task<ProductModel> Update(ProductModel model)
@@ -56,7 +59,8 @@ namespace Monifier.BusinessLogic.Queries.Base
             var model = new Product
             {
                 CategoryId = categoryId,
-                Name = productName
+                Name = productName,
+                OwnerId = _currentSession.UserId
             };
             commands.Create(model);
             await _unitOfWork.SaveChangesAsync();
