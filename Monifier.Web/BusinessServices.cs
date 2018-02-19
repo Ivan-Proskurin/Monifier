@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Monifier.BusinessLogic.Auth;
+using Monifier.BusinessLogic.Contract.Auth;
 using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Contract.Distribution;
 using Monifier.BusinessLogic.Contract.Expenses;
@@ -15,6 +17,7 @@ using Monifier.BusinessLogic.Queries.Inventorization;
 using Monifier.BusinessLogic.Queries.Settings;
 using Monifier.DataAccess.Contract;
 using Monifier.DataAccess.EntityFramework;
+using Monifier.Web.Auth;
 
 namespace Monifier.Web
 {
@@ -23,6 +26,7 @@ namespace Monifier.Web
         public static void AddBusinessServices(this IServiceCollection services)
         {
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<ICurrentSession, CurrentSession>();
             services.AddTransient<IAccountQueries, AccountQueries>();
             services.AddTransient<IAccountCommands, AccountCommands>();
             services.AddTransient<IIncomeTypeQueries, IncomeTypeQueries>();
@@ -42,6 +46,7 @@ namespace Monifier.Web
             services.AddTransient<IDistributionCommands, DistributionCommands>();
             services.AddTransient<IFlowDistributor, DefaultFlowDistributor>();
             services.AddTransient<IInventorizationQueries, InventorizationQueries>();
+            services.AddTransient<ISessionCommands, SessionCommands>();
         }
     }
 }

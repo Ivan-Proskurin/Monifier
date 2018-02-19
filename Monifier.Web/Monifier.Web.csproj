@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.0.1" />
@@ -16,6 +17,7 @@
     <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Monifier.BusinessLogic.Auth\Monifier.BusinessLogic.Auth.csproj" />
     <ProjectReference Include="..\Monifier.BusinessLogic.Contract\Monifier.BusinessLogic.Contract.csproj" />
     <ProjectReference Include="..\Monifier.BusinessLogic.Model\Monifier.BusinessLogic.Model.csproj" />
     <ProjectReference Include="..\Monifier.BusinessLogic.Queries\Monifier.BusinessLogic.Queries.csproj" />

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Monifier.BusinessLogic.Contract.Auth;
 using Monifier.BusinessLogic.Contract.Expenses;
 using Monifier.BusinessLogic.Model.Expenses;
 using Monifier.BusinessLogic.Model.Pagination;
@@ -14,17 +15,20 @@ namespace Monifier.BusinessLogic.Queries.Expenses
     public class ExpenseFlowQueries : IExpenseFlowQueries
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICurrentSession _currentSession;
 
-        public ExpenseFlowQueries(IUnitOfWork unitOfWork)
+        public ExpenseFlowQueries(IUnitOfWork unitOfWork, ICurrentSession currentSession)
         {
             _unitOfWork = unitOfWork;
+            _currentSession = currentSession;
         }
         
         public async Task<List<ExpenseFlowModel>> GetAll(bool includeDeleted = false)
         {
             var queries = _unitOfWork.GetQueryRepository<ExpenseFlow>();
+            var ownerId = _currentSession.UserId;
             return await queries.Query
-                .Where(x => !x.IsDeleted || includeDeleted)
+                .Where(x => (!x.IsDeleted || includeDeleted) && x.OwnerId == ownerId)
                 .Select(x => x.ToModel())
                 .OrderBy(x => x.Number)
                 .ToListAsync();
@@ -33,8 +37,9 @@ namespace Monifier.BusinessLogic.Queries.Expenses
         public async Task<ExpenseFlowList> GetList(PaginationArgs args)
         {
             var flowQueries = _unitOfWork.GetQueryRepository<ExpenseFlow>();
+            var ownerId = _currentSession.UserId;
             var query = flowQueries.Query
-                .Where(x => !x.IsDeleted || args.IncludeDeleted)
+                .Where(x => (!x.IsDeleted || args.IncludeDeleted) && x.OwnerId == ownerId)
                 .OrderByDescending(x => x.Version)
                 .ThenBy(x => x.Id);
             
@@ -78,13 +83,15 @@ namespace Monifier.BusinessLogic.Queries.Expenses
 
         public async Task<ExpenseFlowModel> GetByName(string name, bool includeDeleted = false)
         {
-            return (await _unitOfWork.GetNamedModelQueryRepository<ExpenseFlow>().GetByName(name)).ToModel();
+            return (await _unitOfWork.GetNamedModelQueryRepository<ExpenseFlow>().GetByName(
+                _currentSession.UserId, name)).ToModel();
         }
 
         public async Task<int> GetNextNumber()
         {
             var flowQuery = _unitOfWork.GetQueryRepository<ExpenseFlow>().Query;
-            var count = await flowQuery.CountAsync();
+            var ownerId = _currentSession.UserId;
+            var count = await flowQuery.CountAsync(x => x.OwnerId == ownerId);
             return count == 0 ? 1 : await flowQuery.MaxAsync(x => x.Number) + 1;
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Expenses;
 using Monifier.BusinessLogic.Contract.Inventorization;
@@ -8,6 +9,7 @@ using Monifier.BusinessLogic.Model.Pagination;
 
 namespace Monifier.Web.Pages.Expenses
 {
+    [Authorize]
     public class ExpenseFlowsModel : PageModel
     {
         private readonly IExpenseFlowQueries _expenseFlowQueries;

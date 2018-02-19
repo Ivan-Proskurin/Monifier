@@ -6,7 +6,7 @@ using Monifier.DataAccess.Model.Contracts;
 
 namespace Monifier.DataAccess.Model.Base
 {
-    public class Account : IHasId, IHasName
+    public class Account : IHasId, IHasName, IHasOwnerId
     {
         public int Id { get; set; }
         

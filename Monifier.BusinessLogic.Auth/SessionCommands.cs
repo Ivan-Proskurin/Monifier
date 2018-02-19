@@ -17,7 +17,7 @@ namespace Monifier.BusinessLogic.Auth
             _unitOfWork = unitOfWork;
         }
         
-        public async Task<Guid> CreateSession(string login, string password)
+        public async Task<Session> CreateSession(string login, string password)
         {
             if (login.IsNullOrEmpty())
                 throw new ArgumentException("Login must be a non empty string", nameof(login));
@@ -45,8 +45,9 @@ namespace Monifier.BusinessLogic.Auth
             _unitOfWork.GetCommandRepository<Session>().Create(session);
 
             await _unitOfWork.SaveChangesAsync();
-            
-            return session.Token;
+
+            session.User = user;
+            return session;
         }
 
         public async Task<bool> Authorize(Guid token, bool isAdmin)

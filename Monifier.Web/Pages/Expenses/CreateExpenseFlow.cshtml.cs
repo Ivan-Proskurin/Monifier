@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Expenses;
@@ -10,6 +11,7 @@ using Monifier.Web.Models.Expenses;
 
 namespace Monifier.Web.Pages.Expenses
 {
+    [Authorize]
     public class CreateExpenseFlowModel : PageModel
     {
         private readonly IExpenseFlowQueries _expenseFlowQueries;
@@ -42,7 +44,7 @@ namespace Monifier.Web.Pages.Expenses
                 {
                     var model = new ExpenseFlowModel {Id = -1};
                     ExpenseFlow.ToExpenseFlowModel(model);
-                    var flow = await _expenseFlowCommands.Update(model);
+                    await _expenseFlowCommands.Update(model);
                     return RedirectToPage("./ExpenseFlows");
                 },
                 

@@ -27,32 +27,35 @@
     @RenderSection("Styles", required: false)
 </head>
 <body>
-<nav class="navbar navbar-expand-md navbar-dark bg-dark">
-    <a asp-page="/Index" class="navbar-brand">Monifier</a>
-    <button class="navbar-toggler cursor-pointer" type="button" data-toggle="collapse" data-target="#navbarText" 
-            aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarText">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-                <a id="accountsLink" asp-page="/Accounts/AccountsList" class="nav-link">Счета</a>
-            </li>
-            <li class="nav-item">
-                <a id="flowsLink" asp-page="/Expenses/ExpenseFlows" asp-route-pageNumber="1" class="nav-link">Статьи расходов</a>
-            </li>
-            <li class="nav-item">
-                <a id="expensesLink" asp-page="/Expenses/ExpensesTable" class="nav-link">Расходы</a>
-            </li>
-            <li class="nav-item">
-                <a id="incomesLink" asp-page="/Incomes/IncomesByMonth" class="nav-link">Доходы</a>
-            </li>
-            <li class="nav-item">
-                <a id="productsLink" asp-page="/Products/Categories" asp-route-pageNumber="1" class="nav-link">Товары</a>
-            </li>
-        </ul>
-    </div>
-</nav>    
+@if (User.Identity.IsAuthenticated)
+{
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <a asp-page="/Index" class="navbar-brand">Monifier</a>
+        <button class="navbar-toggler cursor-pointer" type="button" data-toggle="collapse" data-target="#navbarText"
+                aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarText">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a id="accountsLink" asp-page="/Accounts/AccountsList" class="nav-link">Счета</a>
+                </li>
+                <li class="nav-item">
+                    <a id="flowsLink" asp-page="/Expenses/ExpenseFlows" asp-route-pageNumber="1" class="nav-link">Статьи расходов</a>
+                </li>
+                <li class="nav-item">
+                    <a id="expensesLink" asp-page="/Expenses/ExpensesTable" class="nav-link">Расходы</a>
+                </li>
+                <li class="nav-item">
+                    <a id="incomesLink" asp-page="/Incomes/IncomesByMonth" class="nav-link">Доходы</a>
+                </li>
+                <li class="nav-item">
+                    <a id="productsLink" asp-page="/Products/Categories" asp-route-pageNumber="1" class="nav-link">Товары</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+}
 <div class="container body-content">
     @RenderBody()
     <hr/>
@@ -61,39 +64,39 @@
     </footer>
 </div>
 
-    <environment include="Development">
-        <script src="~/lib/jquery/dist/jquery.js"></script>
-        <script src="~/lib/popper.js/dist/umd/popper-utils.js"></script>
-        <script src="~/lib/popper.js/dist/umd/popper.js"></script>
-        <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
-        <script src="~/js/awesomplete.js"></script>
-        <script src="~/js/jquery.datetimepicker.full.js"></script>
-        <script src="~/js/helpers.js"></script>
-        <script src="~/js/checkboxed-table.js"></script>
-        <script src="~/js/inventorization.js"></script>
-    </environment>
-    <environment exclude="Development">
-        <script src="https://code.jquery.com/jquery-3.2.1.js"
-                asp-fallback-src="~/lib/jquery/dist/jquery.min.js"
-                asp-fallback-test="window.jQuery"
-                crossorigin="anonymous"
-                integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35Eouy‌​E=">
-        </script>
-        <script src="~/lib/popper.js/dist/umd/popper-utils.min.js"></script>
-        <script src="~/lib/popper.js/dist/umd/popper.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" 
-                asp-fallback-src="~/lib/bootstrap/dist/js/bootstrap.min.js"
-                asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.fn.modal"
-                integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" 
-                crossorigin="anonymous">
-        </script>
-        <script src="~/js/awesomplete.js"></script>
-        <script src="~/js/jquery.datetimepicker.full.js"></script>
-        <script src="~/js/helpers.js"></script>
-        <script src="~/js/checkboxed-table.js"></script>
-        <script src="~/js/inventorization.js"></script>
-    </environment>
+<environment include="Development">
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script src="~/lib/popper.js/dist/umd/popper-utils.js"></script>
+    <script src="~/lib/popper.js/dist/umd/popper.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="~/js/awesomplete.js"></script>
+    <script src="~/js/jquery.datetimepicker.full.js"></script>
+    <script src="~/js/helpers.js"></script>
+    <script src="~/js/checkboxed-table.js"></script>
+    <script src="~/js/inventorization.js"></script>
+</environment>
+<environment exclude="Development">
+    <script src="https://code.jquery.com/jquery-3.2.1.js"
+            asp-fallback-src="~/lib/jquery/dist/jquery.min.js"
+            asp-fallback-test="window.jQuery"
+            crossorigin="anonymous"
+            integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35Eouy‌​E=">
+    </script>
+    <script src="~/lib/popper.js/dist/umd/popper-utils.min.js"></script>
+    <script src="~/lib/popper.js/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"
+            asp-fallback-src="~/lib/bootstrap/dist/js/bootstrap.min.js"
+            asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.fn.modal"
+            integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ"
+            crossorigin="anonymous">
+    </script>
+    <script src="~/js/awesomplete.js"></script>
+    <script src="~/js/jquery.datetimepicker.full.js"></script>
+    <script src="~/js/helpers.js"></script>
+    <script src="~/js/checkboxed-table.js"></script>
+    <script src="~/js/inventorization.js"></script>
+</environment>
 
-    @RenderSection("Scripts", required: false)
+@RenderSection("Scripts", required: false)
 </body>
 </html>

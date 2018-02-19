@@ -1,0 +1,33 @@
+﻿@page
+@model Auth.LoginModel
+
+@{
+    ViewBag.Title = "Вход";
+}
+
+<div class="col-md-7">
+@*    <h3>Вход:</h3>*@
+@*    <br>*@
+    
+    <form method="post">
+        <input asp-for="Login.ReturnUrl" hidden/>
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <div class="row">
+            <div class="form-group col-md-7 col-sm-7 col-7">
+                <label asp-for="Login.UserName" class="control-label"></label>
+                <input asp-for="Login.UserName" class="form-control" autocomplete="off"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-7 col-sm-7 col-7">
+                <label asp-for="Login.Password" class="control-label"></label>
+                <input type="password" asp-for="Login.Password" class="form-control" autocomplete="off"/>
+            </div>
+        </div>
+        <div class="row" style="margin-top: 15px;">
+            <div class="form-group col-md-7 col-sm-7 col-7">
+                <input type="submit" value="Войти" class="btn btn-danger cursor-pointer" style="padding: 5px 30px;"/>
+            </div>
+        </div>
+    </form>
+</div>

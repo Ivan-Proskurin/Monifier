@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Base;
@@ -13,6 +14,7 @@ using Monifier.Web.Models.Validation;
 
 namespace Monifier.Web.Pages.Accounts
 {
+    [Authorize]
     public class TransferModel : PageModel
     {
         private readonly IAccountQueries _accountQueries;
@@ -68,7 +70,7 @@ namespace Monifier.Web.Pages.Accounts
                 async () =>
                 {
                     var account = await _accountQueries.GetByName(Transfer.AccountFrom);
-                    AvailableBalance = account != null ? account?.Balance.ToMoney() : "-";
+                    AvailableBalance = account != null ? account.Balance.ToMoney() : "-";
                     return Page();
                 },
                 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Base;
@@ -18,6 +19,7 @@ using Newtonsoft.Json;
 
 namespace Monifier.Web.Pages.Expenses
 {
+    [Authorize]
     public class AddExpenseBillModel : PageModel
     {
         private readonly IAccountQueries _accountQueries;

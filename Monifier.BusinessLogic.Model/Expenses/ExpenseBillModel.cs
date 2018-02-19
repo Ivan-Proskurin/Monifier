@@ -23,6 +23,7 @@ namespace Monifier.BusinessLogic.Model.Expenses
         public int ExpenseFlowId { get; set; }
         public DateTime DateTime { get; set; }
         public decimal Cost { get; set; }
+        public int OwnerId { get; set; }
         public List<ExpenseItemModel> Items { get; set; }
 
         public bool IsNew => Id <= 0;
@@ -135,7 +136,8 @@ namespace Monifier.BusinessLogic.Model.Expenses
                 ExpenseFlowId = ExpenseFlowId,
                 AccountId = AccountId,
                 DateTime = DateTime,
-                SumPrice = Cost
+                SumPrice = Cost,
+                OwnerId = OwnerId
             };
 
             billCommands.Create(bill);

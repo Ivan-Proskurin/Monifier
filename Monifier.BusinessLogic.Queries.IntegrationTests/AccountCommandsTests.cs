@@ -25,7 +25,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 TopupDate = DateTime.Today,
                 Amount = 15000,
             };
-            var commands = new AccountCommands(UnitOfWork);
+            var commands = new AccountCommands(UnitOfWork, CurrentSession);
             await commands.Topup(model);
             var account = await UnitOfWork.GetQueryRepository<Account>().GetById(DebitCardAccount.Id);
             account.Balance.ShouldBeEquivalentTo(balance + model.Amount);
@@ -45,7 +45,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 TopupDate = DateTime.Today,
                 Amount = 15000,
             };
-            var commands = new AccountCommands(UnitOfWork);
+            var commands = new AccountCommands(UnitOfWork, CurrentSession);
             await commands.Topup(model);
             var account = await UnitOfWork.GetQueryRepository<Account>().GetById(DebitCardAccount.Id);
             account.Balance.ShouldBeEquivalentTo(balance);
@@ -61,7 +61,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
             var availBalance2 = CashAccount.AvailBalance;
             const decimal transferAmount = 10000m;
             
-            var commands = new AccountCommands(UnitOfWork);
+            var commands = new AccountCommands(UnitOfWork, CurrentSession);
             await commands.Transfer(DebitCardAccount.Id, CashAccount.Id, transferAmount);
 
             var accountQueries = UnitOfWork.GetQueryRepository<Account>();
@@ -88,7 +88,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
             var flowBalance = FoodExpenseFlow.Balance;
             const decimal transferAmount = 5000m;
             
-            var commands = new AccountCommands(UnitOfWork);
+            var commands = new AccountCommands(UnitOfWork, CurrentSession);
             await commands.TransferToExpenseFlow(FoodExpenseFlow.Id, DebitCardAccount.Id, transferAmount);
 
             var account = await UnitOfWork.GetQueryRepository<Account>().GetById(DebitCardAccount.Id);
@@ -111,7 +111,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
             
             await Assert.ThrowsAsync<InvalidOperationException>(async () =>
             {
-                var commands = new AccountCommands(UnitOfWork);
+                var commands = new AccountCommands(UnitOfWork, CurrentSession);
                 await commands.TransferToExpenseFlow(FoodExpenseFlow.Id, DebitCardAccount.Id, 2000);
             });
         }
@@ -123,7 +123,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
             var availBalance = DebitCardAccount.AvailBalance;
             var newBalance = balance + 500m;
             
-            var commands = new AccountCommands(UnitOfWork);
+            var commands = new AccountCommands(UnitOfWork, CurrentSession);
             var model = DebitCardAccount.ToModel();
             model.Balance = newBalance;
             await commands.Update(model);
@@ -144,7 +144,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 Name = "test",
                 Number = 1,
             };
-            var commands = new AccountCommands(UnitOfWork);
+            var commands = new AccountCommands(UnitOfWork, CurrentSession);
             model = await commands.Update(model);
             model.Id.Should().BeGreaterThan(0);
 

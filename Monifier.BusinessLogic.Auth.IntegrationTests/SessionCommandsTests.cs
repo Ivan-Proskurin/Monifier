@@ -11,7 +11,7 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
 {
     public class SessionCommandsTests : DatabaseRelatedBlankTest
     {
-        private const string User = "exosyphen";
+        private const string Login = "exosyphen";
         private const string Pass = "mywordismypassword";
         
         private async Task<int> CreateUser(IUnitOfWork uof, string login, string password, bool isAdmin = false)
@@ -22,17 +22,17 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
 
         private async Task<int> CreateUser(IUnitOfWork uof)
         {
-            return await CreateUser(uof, User, Pass);
+            return await CreateUser(uof, Login, Pass);
         }
 
-        private async Task<Guid> CreateSession(IUnitOfWork uof, bool isAdmin)
+        private async Task<Session> CreateSession(IUnitOfWork uof, bool isAdmin)
         {
-            await CreateUser(uof, User, Pass, isAdmin);
+            await CreateUser(uof, Login, Pass, isAdmin);
             var sessionCommands = new SessionCommands(uof);
-            return await sessionCommands.CreateSession(User, Pass);
+            return await sessionCommands.CreateSession(Login, Pass);
         }
         
-        private async Task<Guid> CreateSession(IUnitOfWork uof, string login, bool isAdmin)
+        private async Task<Session> CreateSession(IUnitOfWork uof, string login, bool isAdmin)
         {
             await CreateUser(uof, login, login, isAdmin);
             var sessionCommands = new SessionCommands(uof);
@@ -60,11 +60,12 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
             await UseUnitOfWorkAsync(async uof =>
             {
                 var commands = new SessionCommands(uof);
-                var token = await commands.CreateSession(User, Pass);
-                token.Should().NotBeEmpty();
-                var session = await uof.GetQueryRepository<Session>().GetByToken(token);
+                var session = await commands.CreateSession(Login, Pass);
                 session.Should().NotBeNull();
+                session.Token.Should().NotBeEmpty();
                 session.UserId.ShouldBeEquivalentTo(userId);
+                session.User.Should().NotBeNull();
+                session.User.Login.ShouldBeEquivalentTo(Login);
             });
         }
 
@@ -117,12 +118,12 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
         [Fact]
         public async void Authorize_InvalidRole_ReturnsFalse()
         {
-            var token = await UseUnitOfWorkAsync(async uof => await CreateSession(uof, false));
+            var session = await UseUnitOfWorkAsync(async uof => await CreateSession(uof, false));
 
             await UseUnitOfWorkAsync(async uof =>
             {
                 var commands = new SessionCommands(uof);
-                var result = await commands.Authorize(token, true);
+                var result = await commands.Authorize(session.Token, true);
                 result.Should().BeFalse();
             });
         }
@@ -130,23 +131,23 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
         [Fact]
         public async void Authorize_CorrectRole_ReturnsTrue()
         {
-            var token1 = await UseUnitOfWorkAsync(async uof => await CreateSession(uof, "user1", false));
+            var session1 = await UseUnitOfWorkAsync(async uof => await CreateSession(uof, "user1", false));
 
             await UseUnitOfWorkAsync(async uof =>
             {
                 var commands = new SessionCommands(uof);
-                var result = await commands.Authorize(token1, false);
+                var result = await commands.Authorize(session1.Token, false);
                 result.Should().BeTrue();
             });
             
-            var token2 = await UseUnitOfWorkAsync(async uof => await CreateSession(uof, "user2", true));
+            var session2 = await UseUnitOfWorkAsync(async uof => await CreateSession(uof, "user2", true));
 
             await UseUnitOfWorkAsync(async uof =>
             {
                 var commands = new SessionCommands(uof);
-                var result = await commands.Authorize(token2, true);
+                var result = await commands.Authorize(session2.Token, true);
                 result.Should().BeTrue();
-                result = await commands.Authorize(token2, false);
+                result = await commands.Authorize(session2.Token, false);
                 result.Should().BeTrue();
             });
         }

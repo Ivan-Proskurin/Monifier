@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Monifier.BusinessLogic.Contract.Auth;
 using Monifier.BusinessLogic.Contract.Expenses;
 using Monifier.BusinessLogic.Model.Expenses;
 using Monifier.Common.Extensions;
@@ -14,10 +15,12 @@ namespace Monifier.BusinessLogic.Queries.Expenses
     public class ExpenseFlowCommands : IExpenseFlowCommands
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICurrentSession _currentSession;
 
-        public ExpenseFlowCommands(IUnitOfWork unitOfWork)
+        public ExpenseFlowCommands(IUnitOfWork unitOfWork, ICurrentSession currentSession)
         {
             _unitOfWork = unitOfWork;
+            _currentSession = currentSession;
         }
         
         public async Task<ExpenseFlowModel> Update(ExpenseFlowModel model)
@@ -25,7 +28,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             var queries = _unitOfWork.GetNamedModelQueryRepository<ExpenseFlow>();
             var commands = _unitOfWork.GetCommandRepository<ExpenseFlow>();
 
-            var other = await queries.GetByName(model.Name);
+            var other = await queries.GetByName(_currentSession.UserId, model.Name);
             if (other != null)
                 if (other.Id != model.Id)
                     throw new ArgumentException("Категория расходов с таким названием уже есть");
@@ -38,7 +41,8 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                 Balance = model.Balance,
                 DateCreated = model.DateCreated,
                 Number = model.Number,
-                IsDeleted = false
+                IsDeleted = false,
+                OwnerId = _currentSession.UserId
             };
             if (model.Id < 0)
             {
@@ -104,7 +108,8 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             if (expense.Account.IsNullOrEmpty())
                 throw new ArgumentException("Необходимо указать счет");
             
-            var account = await _unitOfWork.GetNamedModelQueryRepository<Account>().GetByName(expense.Account);
+            var account = await _unitOfWork.GetNamedModelQueryRepository<Account>().GetByName(
+                _currentSession.UserId, expense.Account);
             if (account == null)
                 throw new ArgumentException($"Нет счета с именем \"{expense.Account}\"");
             
@@ -119,7 +124,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             if (!string.IsNullOrEmpty(expense.Category))
             {
                 var repo = _unitOfWork.GetNamedModelQueryRepository<Category>();
-                category = await repo.GetByName(expense.Category);
+                category = await repo.GetByName(_currentSession.UserId, expense.Category);
                 if (category == null)
                     throw new ArgumentException($"Нет категории продуктов с именем \"{expense.Category}\"");
             }
@@ -127,7 +132,8 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             Product product = null;
             if (!string.IsNullOrEmpty(expense.Product))
             {
-                product = await _unitOfWork.GetNamedModelQueryRepository<Product>().GetByName(expense.Product);
+                product = await _unitOfWork.GetNamedModelQueryRepository<Product>().GetByName(
+                    _currentSession.UserId, expense.Product);
                 if (product == null)
                     throw new ArgumentException($"Нет товара с именем \"{expense.Product}\"");
             }
@@ -141,6 +147,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                 ExpenseFlowId = expense.ExpenseFlowId,
                 DateTime = expense.DateCreated,
                 Cost = expense.Cost,
+                OwnerId = _currentSession.UserId,
                 Items = new List<ExpenseItemModel>
                 {
                     new ExpenseItemModel

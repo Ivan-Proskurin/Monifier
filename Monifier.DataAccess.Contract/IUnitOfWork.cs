@@ -7,7 +7,7 @@ namespace Monifier.DataAccess.Contract
     public interface IUnitOfWork : IDisposable
     {
         IQueryRepository<T> GetQueryRepository<T>() where T : class, IHasId;
-        INamedModelQueryRepository<T> GetNamedModelQueryRepository<T>() where T : class, IHasId, IHasName;
+        INamedModelQueryRepository<T> GetNamedModelQueryRepository<T>() where T : class, IHasId, IHasName, IHasOwnerId;
         ICommandRepository<T> GetCommandRepository<T>() where T : class, IHasId;
         Task SaveChangesAsync();
         void SaveChanges();

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Monifier.BusinessLogic.Contract.Auth;
 using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Model.Agregation;
 using Monifier.BusinessLogic.Model.Base;
@@ -13,17 +14,20 @@ namespace Monifier.BusinessLogic.Queries.Base
     public class AccountQueries : IAccountQueries
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICurrentSession _currentSession;
 
-        public AccountQueries(IUnitOfWork unitOfWork)
+        public AccountQueries(IUnitOfWork unitOfWork, ICurrentSession currentSession)
         {
             _unitOfWork = unitOfWork;
+            _currentSession = currentSession;
         }
 
         public async Task<List<AccountModel>> GetAll(bool includeDeleted = false)
         {
             var queryRep = _unitOfWork.GetQueryRepository<Account>();
+            var ownerId = _currentSession.UserId;
             return await queryRep.Query
-                .Where(x => !x.IsDeleted || includeDeleted)
+                .Where(x => (!x.IsDeleted || includeDeleted) && x.OwnerId == ownerId)
                 .Select(x => x.ToModel())
                 .OrderBy(x => x.Number)
                 .ToListAsync();
@@ -51,7 +55,7 @@ namespace Monifier.BusinessLogic.Queries.Base
 
         public async Task<AccountModel> GetByName(string name, bool includeDeleted = false)
         {
-            var account = await _unitOfWork.GetNamedModelQueryRepository<Account>().GetByName(name);
+            var account = await _unitOfWork.GetNamedModelQueryRepository<Account>().GetByName(_currentSession.UserId, name);
             if (account == null || account.IsDeleted && !includeDeleted) return null;
             return account.ToModel();
         }
@@ -59,7 +63,8 @@ namespace Monifier.BusinessLogic.Queries.Base
         public async Task<int> GetNextNumber()
         {
             var accountQuery = _unitOfWork.GetQueryRepository<Account>().Query;
-            var count = await accountQuery.CountAsync();
+            var ownerId = _currentSession.UserId;
+            var count = await accountQuery.CountAsync(x => x.OwnerId == ownerId);
             return count == 0 ? 1 : await accountQuery.MaxAsync(x => x.Number) + 1;
         }
     }
