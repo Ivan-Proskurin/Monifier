@@ -15,16 +15,16 @@ namespace Monifier.Tools.Accounts
 
     class Program
     {
-        private static readonly string ConnectionString =
-            "Data Source=.\\SQLEXPRESS;Initial Catalog=Monifier;Integrated Security=True;MultipleActiveResultSets=True";
 //        private static readonly string ConnectionString =
-//            "Data Source=.\\SQLEXPRESS;Initial Catalog=Moneyflow;Integrated Security=True;MultipleActiveResultSets=True";
+//            "Data Source=.\\SQLEXPRESS;Initial Catalog=Monifier;Integrated Security=True;MultipleActiveResultSets=True";
+        private static readonly string ConnectionString =
+            "Data Source=.\\SQLEXPRESS;Initial Catalog=Moneyflow;Integrated Security=True;MultipleActiveResultSets=True";
 
         private static readonly AccountInfo Account = new AccountInfo
         {
             Name = "Иван",
-            Login = "exosyphen",
-            Password = "[bnhsqgfhjkm",
+            Login = "crusader",
+            Password = "kjdrbqgfhjkm",
             IsAdmin = true,
         };
         
