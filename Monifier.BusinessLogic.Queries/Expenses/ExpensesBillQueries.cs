@@ -36,6 +36,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                 ExpenseFlowId = bill.ExpenseFlowId,
                 DateTime = bill.DateTime,
                 Cost = bill.SumPrice,
+                OwnerId = bill.OwnerId ?? 0,
                 Items = bill.Items.Select(x => new ExpenseItemModel
                 {
                     Id = x.Id,

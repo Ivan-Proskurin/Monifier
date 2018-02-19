@@ -21,6 +21,53 @@ namespace Monifier.Web.Migrations
                 .HasAnnotation("ProductVersion", "2.0.1-rtm-125")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+            modelBuilder.Entity("Monifier.DataAccess.Model.Auth.Session", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<DateTime>("Created");
+
+                    b.Property<DateTime?>("Expiration");
+
+                    b.Property<bool>("IsAdmin");
+
+                    b.Property<Guid>("Token");
+
+                    b.Property<int>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Sessions");
+                });
+
+            modelBuilder.Entity("Monifier.DataAccess.Model.Auth.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Hash");
+
+                    b.Property<bool>("IsAdmin");
+
+                    b.Property<bool>("IsDeleted");
+
+                    b.Property<string>("Login");
+
+                    b.Property<string>("Name");
+
+                    b.Property<string>("Salt");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
+                });
+
             modelBuilder.Entity("Monifier.DataAccess.Model.Base.Account", b =>
                 {
                     b.Property<int>("Id")
@@ -42,7 +89,11 @@ namespace Monifier.Web.Migrations
 
                     b.Property<int>("Number");
 
+                    b.Property<int?>("OwnerId");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("Accounts");
                 });
@@ -58,7 +109,11 @@ namespace Monifier.Web.Migrations
                         .IsRequired()
                         .HasMaxLength(50);
 
+                    b.Property<int?>("OwnerId");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("Categories");
                 });
@@ -76,9 +131,13 @@ namespace Monifier.Web.Migrations
                         .IsRequired()
                         .HasMaxLength(50);
 
+                    b.Property<int?>("OwnerId");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("Products");
                 });
@@ -140,7 +199,7 @@ namespace Monifier.Web.Migrations
 
                     b.Property<decimal>("Amount");
 
-                    b.Property<int?>("DistributionId");
+                    b.Property<int>("DistributionId");
 
                     b.Property<int>("RecipientId");
 
@@ -168,6 +227,8 @@ namespace Monifier.Web.Migrations
 
                     b.Property<int>("ExpenseFlowId");
 
+                    b.Property<int?>("OwnerId");
+
                     b.Property<decimal>("SumPrice");
 
                     b.HasKey("Id");
@@ -175,6 +236,8 @@ namespace Monifier.Web.Migrations
                     b.HasIndex("AccountId");
 
                     b.HasIndex("ExpenseFlowId");
+
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("ExpenseBills");
                 });
@@ -196,9 +259,13 @@ namespace Monifier.Web.Migrations
 
                     b.Property<int>("Number");
 
+                    b.Property<int?>("OwnerId");
+
                     b.Property<int>("Version");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("ExpenseFlows");
                 });
@@ -260,6 +327,8 @@ namespace Monifier.Web.Migrations
 
                     b.Property<int>("IncomeTypeId");
 
+                    b.Property<int?>("OwnerId");
+
                     b.Property<decimal>("Total");
 
                     b.HasKey("Id");
@@ -267,6 +336,8 @@ namespace Monifier.Web.Migrations
                     b.HasIndex("AccountId");
 
                     b.HasIndex("IncomeTypeId");
+
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("IncomeItems");
                 });
@@ -280,9 +351,35 @@ namespace Monifier.Web.Migrations
                         .IsRequired()
                         .HasMaxLength(50);
 
+                    b.Property<int?>("OwnerId");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("OwnerId");
+
                     b.ToTable("IncomeTypes");
+                });
+
+            modelBuilder.Entity("Monifier.DataAccess.Model.Auth.Session", b =>
+                {
+                    b.HasOne("Monifier.DataAccess.Model.Auth.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Monifier.DataAccess.Model.Base.Account", b =>
+                {
+                    b.HasOne("Monifier.DataAccess.Model.Auth.User", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId");
+                });
+
+            modelBuilder.Entity("Monifier.DataAccess.Model.Base.Category", b =>
+                {
+                    b.HasOne("Monifier.DataAccess.Model.Auth.User", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId");
                 });
 
             modelBuilder.Entity("Monifier.DataAccess.Model.Base.Product", b =>
@@ -291,6 +388,10 @@ namespace Monifier.Web.Migrations
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Monifier.DataAccess.Model.Auth.User", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId");
                 });
 
             modelBuilder.Entity("Monifier.DataAccess.Model.Distribution.AccountFlowSettings", b =>
@@ -311,9 +412,10 @@ namespace Monifier.Web.Migrations
 
             modelBuilder.Entity("Monifier.DataAccess.Model.Distribution.Flow", b =>
                 {
-                    b.HasOne("Monifier.DataAccess.Model.Distribution.Distribution")
+                    b.HasOne("Monifier.DataAccess.Model.Distribution.Distribution", "Distribution")
                         .WithMany("Flows")
-                        .HasForeignKey("DistributionId");
+                        .HasForeignKey("DistributionId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Monifier.DataAccess.Model.Expenses.ExpenseFlow", "Recipient")
                         .WithMany()
@@ -336,6 +438,17 @@ namespace Monifier.Web.Migrations
                         .WithMany()
                         .HasForeignKey("ExpenseFlowId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Monifier.DataAccess.Model.Auth.User", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId");
+                });
+
+            modelBuilder.Entity("Monifier.DataAccess.Model.Expenses.ExpenseFlow", b =>
+                {
+                    b.HasOne("Monifier.DataAccess.Model.Auth.User", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId");
                 });
 
             modelBuilder.Entity("Monifier.DataAccess.Model.Expenses.ExpenseItem", b =>
@@ -379,6 +492,17 @@ namespace Monifier.Web.Migrations
                         .WithMany()
                         .HasForeignKey("IncomeTypeId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Monifier.DataAccess.Model.Auth.User", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId");
+                });
+
+            modelBuilder.Entity("Monifier.DataAccess.Model.Incomes.IncomeType", b =>
+                {
+                    b.HasOne("Monifier.DataAccess.Model.Auth.User", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId");
                 });
 #pragma warning restore 612, 618
         }

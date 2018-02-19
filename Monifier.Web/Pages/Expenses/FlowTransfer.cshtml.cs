@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Base;
@@ -14,6 +15,7 @@ using Monifier.Web.Models.Validation;
 
 namespace Monifier.Web.Pages.Expenses
 {
+    [Authorize]
     public class FlowTransferModel : PageModel
     {
         private readonly IAccountQueries _accountQueries;

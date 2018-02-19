@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Incomes;
@@ -9,6 +10,7 @@ using Monifier.Web.Models;
 
 namespace Monifier.Web.Pages.Incomes
 {
+    [Authorize]
     public class IncomesTableModel : PageModel
     {
         private readonly IIncomesQueries _incomesQueries;

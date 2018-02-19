@@ -19,6 +19,8 @@ namespace Monifier.IntegrationTests.Infrastructure
 
         private void CreateEntities(IUnitOfWork uof)
         {
+            CurrentUser = CreateUser("Евгений", "evgen", "password", true, uof);
+            
             SalaryIncome = CreateIncomeType("Зарплата", uof);
             
             FoodCategory = CreateCategory("Продукты", uof);

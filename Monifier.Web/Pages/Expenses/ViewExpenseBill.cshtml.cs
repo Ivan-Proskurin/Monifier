@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Expenses;
@@ -7,6 +8,7 @@ using Monifier.Common.Extensions;
 
 namespace Monifier.Web.Pages.Expenses
 {
+    [Authorize]
     public class ViewExpenseBillModel : PageModel
     {
         private readonly IExpensesBillQueries _expensesBillQueries;

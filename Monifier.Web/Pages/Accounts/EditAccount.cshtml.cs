@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Base;
@@ -7,6 +8,7 @@ using Monifier.Web.Models.Accounts;
 
 namespace Monifier.Web.Pages.Accounts
 {
+    [Authorize]
     public class EditAccountModel : PageModel
     {
         private readonly IAccountQueries _accountQueries;

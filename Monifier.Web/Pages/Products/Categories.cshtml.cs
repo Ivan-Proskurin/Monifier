@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Base;
@@ -10,6 +11,7 @@ using Monifier.Web.Models.Validation;
 
 namespace Monifier.Web.Pages.Products
 {
+    [Authorize]
     public class CategoriesModel : PageModel
     {
         private readonly ICategoriesQueries _categoriesQueries;

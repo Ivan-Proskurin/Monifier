@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Monifier.BusinessLogic.Auth;
+using Monifier.BusinessLogic.Contract.Auth;
 using Monifier.DataAccess.Contract;
 using Monifier.DataAccess.EntityFramework;
+using Monifier.DataAccess.Model.Auth;
 using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Expenses;
 using Monifier.DataAccess.Model.Incomes;
@@ -91,6 +94,29 @@ namespace Monifier.IntegrationTests.Infrastructure
         
         #region Entities
 
+        private User _currentUser;
+        public User CurrentUser
+        {
+            get => _currentUser;
+            set
+            {
+                _currentUser = value;
+                CurrentSession = new CurrentSessionImpl(_currentUser);
+            }
+        }
+        
+        public ICurrentSession CurrentSession { get; private set; }
+
+        protected User CreateUser(string name, string login, string password, bool isAdmin,
+            IUnitOfWork uof = null)
+        {
+            if (uof == null) uof = UnitOfWork;
+            var authCommands = new AuthCommands(uof);
+            var userId = authCommands.CreateUser(name, login, password, isAdmin).Result;
+            var userQueries = uof.GetQueryRepository<User>();
+            return userQueries.GetById(userId).Result;
+        }
+
         protected Category CreateCategory(string name, IUnitOfWork uof = null)
         {
             if (uof == null) uof = UnitOfWork;
@@ -98,6 +124,7 @@ namespace Monifier.IntegrationTests.Infrastructure
             var entity = new Category
             {
                 Name = name,
+                OwnerId = CurrentSession.UserId
             };
             commands.Create(entity);
             return entity;
@@ -110,7 +137,8 @@ namespace Monifier.IntegrationTests.Infrastructure
             var entity = new Product
             {
                 CategoryId = categoryId,
-                Name = name
+                Name = name,
+                OwnerId = CurrentSession.UserId
             };
             commands.Create(entity);
             return entity;
@@ -128,6 +156,7 @@ namespace Monifier.IntegrationTests.Infrastructure
                 DateCreated = date,
                 Number = number,
                 Version = 1,
+                OwnerId = CurrentSession.UserId
             };
             commands.Create(entity);
             return entity;
@@ -144,6 +173,7 @@ namespace Monifier.IntegrationTests.Infrastructure
                 Balance = balance,
                 AvailBalance = balance,
                 Number = 1,
+                OwnerId = CurrentSession.UserId
             };
             commands.Create(entity);
             return entity;
@@ -156,6 +186,7 @@ namespace Monifier.IntegrationTests.Infrastructure
             var entity = new IncomeType
             {
                 Name = name,
+                OwnerId = CurrentSession.UserId
             };
             commands.Create(entity);
             return entity;

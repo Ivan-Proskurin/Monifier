@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Monifier.BusinessLogic.Contract.Auth;
 using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Model.Base;
 using Monifier.DataAccess.Contract;
@@ -14,14 +15,17 @@ namespace Monifier.BusinessLogic.Queries.Base
         private readonly IUnitOfWork _unitOfWork;
         private readonly IProductCommands _productCommands;
         private readonly IProductQueries _productQueries;
+        private readonly ICurrentSession _currentSession;
 
         public CategoriesCommands(IUnitOfWork unitOfWork, 
             IProductCommands productCommands, 
-            IProductQueries productQueries)
+            IProductQueries productQueries,
+            ICurrentSession currentSession)
         {
             _unitOfWork = unitOfWork;
             _productCommands = productCommands;
             _productQueries = productQueries;
+            _currentSession = currentSession;
         }
 
         public async Task Delete(int id, bool onlyMark = true)
@@ -51,10 +55,11 @@ namespace Monifier.BusinessLogic.Queries.Base
             var categoryCommands = _unitOfWork.GetCommandRepository<Category>();
             var category = new Category
             {
-                Name = model.Name
+                Name = model.Name,
+                OwnerId = _currentSession.UserId
             };
             var categoriesQueries = _unitOfWork.GetNamedModelQueryRepository<Category>();
-            var other = await categoriesQueries.GetByName(model.Name);
+            var other = await categoriesQueries.GetByName(_currentSession.UserId, model.Name);
             if (other != null)
             {
                 if (other.Id != category.Id)
@@ -84,12 +89,13 @@ namespace Monifier.BusinessLogic.Queries.Base
             var categoryQueries = _unitOfWork.GetNamedModelQueryRepository<Category>();
             var categoryCommands = _unitOfWork.GetCommandRepository<Category>();
             
-            var category = await categoryQueries.GetByName(categoryName);
+            var category = await categoryQueries.GetByName(_currentSession.UserId, categoryName);
             if (category == null)
             {
                 category = new Category
                 {
-                    Name = categoryName
+                    Name = categoryName,
+                    OwnerId = _currentSession.UserId
                 };
                 categoryCommands.Create(category);
                 await _unitOfWork.SaveChangesAsync();

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Monifier.BusinessLogic.Contract.Auth;
 using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Model.Accounts;
 using Monifier.BusinessLogic.Model.Base;
@@ -13,10 +14,12 @@ namespace Monifier.BusinessLogic.Queries.Base
     public class AccountCommands : IAccountCommands
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICurrentSession _currentSession;
 
-        public AccountCommands(IUnitOfWork unitOfWork)
+        public AccountCommands(IUnitOfWork unitOfWork, ICurrentSession currentSession)
         {
             _unitOfWork = unitOfWork;
+            _currentSession = currentSession;
         }
 
         public async Task<AccountModel> Update(AccountModel model)
@@ -24,7 +27,7 @@ namespace Monifier.BusinessLogic.Queries.Base
             var queries = _unitOfWork.GetNamedModelQueryRepository<Account>();
             var commands = _unitOfWork.GetCommandRepository<Account>();
 
-            var other = await queries.GetByName(model.Name);
+            var other = await queries.GetByName(_currentSession.UserId, model.Name);
             if (other != null)
                 if (other.Id != model.Id)
                     throw new ArgumentException("Счет с таким названием уже есть");
@@ -38,7 +41,8 @@ namespace Monifier.BusinessLogic.Queries.Base
                 AvailBalance = model.AvailBalance,
                 DateCreated = model.DateCreated,
                 Number = model.Number,
-                IsDeleted = false
+                IsDeleted = false,
+                OwnerId = _currentSession.UserId
             };
             if (model.Id < 0)
             {

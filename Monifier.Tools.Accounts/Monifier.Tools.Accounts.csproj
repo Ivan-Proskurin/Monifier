@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Monifier.BusinessLogic.Auth\Monifier.BusinessLogic.Auth.csproj" />
+    <ProjectReference Include="..\Monifier.DataAccess.EntityFramework\Monifier.DataAccess.EntityFramework.csproj">
+      <Project>{0976F20E-3919-4148-AA1F-9298C8FCFDE4}</Project>
+      <Name>Monifier.DataAccess.EntityFramework</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

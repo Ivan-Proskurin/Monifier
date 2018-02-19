@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Monifier.BusinessLogic.Contract.Auth;
 using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Model.Base;
 using Monifier.BusinessLogic.Model.Pagination;
@@ -15,6 +16,7 @@ namespace Monifier.BusinessLogic.Queries.Base
     public class ProductQueries : IProductQueries
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICurrentSession _currentSession;
 
         private static ProductModel ToModel(Product product)
         {
@@ -26,9 +28,10 @@ namespace Monifier.BusinessLogic.Queries.Base
             };
         }
 
-        public ProductQueries(IUnitOfWork unitOfWork)
+        public ProductQueries(IUnitOfWork unitOfWork, ICurrentSession currentSession)
         {
             _unitOfWork = unitOfWork;
+            _currentSession = currentSession;
         }
 
         public Task<List<ProductModel>> GetAll(bool includeDeleted = false)
@@ -48,7 +51,7 @@ namespace Monifier.BusinessLogic.Queries.Base
         public async Task<ProductModel> GetByName(string name, bool includeDeleted = false)
         {
             var productRepo = _unitOfWork.GetNamedModelQueryRepository<Product>();
-            var product = await productRepo.GetByName(name);
+            var product = await productRepo.GetByName(_currentSession.UserId, name);
             if (product == null || product.IsDeleted && !includeDeleted) return null;
             return ToModel(product);
         }

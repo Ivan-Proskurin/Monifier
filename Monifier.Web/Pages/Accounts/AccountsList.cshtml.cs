@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Contract.Inventorization;
@@ -8,6 +9,7 @@ using Monifier.BusinessLogic.Model.Inventorization;
 
 namespace Monifier.Web.Pages.Accounts
 {
+    [Authorize]
     public class AccountsListModel : PageModel
     {
         private readonly IAccountQueries _accountQueries;

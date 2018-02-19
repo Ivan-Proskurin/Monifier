@@ -99,7 +99,7 @@ namespace Monifier.DataAccess.EntityFramework
             return null;
         }
 
-        public INamedModelQueryRepository<T> GetNamedModelQueryRepository<T>() where T : class, IHasId, IHasName
+        public INamedModelQueryRepository<T> GetNamedModelQueryRepository<T>() where T : class, IHasId, IHasName, IHasOwnerId
         {
             _namedQueryRepositories.TryGetValue(typeof(T), out object repo);
             if (repo != null) return repo as INamedModelQueryRepository<T>;

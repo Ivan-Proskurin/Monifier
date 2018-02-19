@@ -3,6 +3,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Monifier.BusinessLogic.Auth\Monifier.BusinessLogic.Auth.csproj" />
     <ProjectReference Include="..\Monifier.DataAccess.Contract\Monifier.DataAccess.Contract.csproj" />
     <ProjectReference Include="..\Monifier.DataAccess.EntityFramework\Monifier.DataAccess.EntityFramework.csproj" />
   </ItemGroup>

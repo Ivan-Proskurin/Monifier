@@ -1,11 +1,12 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using Monifier.DataAccess.Model.Auth;
 using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Contracts;
 
 namespace Monifier.DataAccess.Model.Incomes
 {
-    public class IncomeItem : IHasId
+    public class IncomeItem : IHasId, IHasOwnerId
     {
         public int Id { get; set; }
 
@@ -22,5 +23,11 @@ namespace Monifier.DataAccess.Model.Incomes
 
         [ForeignKey("AccountId")]
         public Account Account { get; set; }
+        
+        public int? OwnerId { get; set; }
+        
+        [ForeignKey("OwnerId")]
+        public User Owner { get; set; }
+
     }
 }

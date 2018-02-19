@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Monifier.DataAccess.Model.Auth;
 using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Distribution;
 using Monifier.DataAccess.Model.Expenses;
@@ -25,6 +26,8 @@ namespace Monifier.DataAccess.EntityFramework
         public DbSet<Flow> DistributionFlows { get; set; }
         public DbSet<AccountFlowSettings> AccountFlowSettings { get; set; } 
         public DbSet<ExpenseFlowSettings> ExpenseFlowSettings { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Session> Sessions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,6 +35,10 @@ namespace Monifier.DataAccess.EntityFramework
                 .HasOne(e => e.Product)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Session>()
+                .HasIndex(e => e.Token)
+                .IsUnique();
         }
         
     }

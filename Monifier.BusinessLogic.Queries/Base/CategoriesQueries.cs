@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Monifier.BusinessLogic.Contract.Auth;
 using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Model.Base;
 using Monifier.BusinessLogic.Model.Pagination;
@@ -15,23 +16,27 @@ namespace Monifier.BusinessLogic.Queries.Base
     public class CategoriesQueries : ICategoriesQueries
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICurrentSession _currentSession;
 
-        public CategoriesQueries(IUnitOfWork unitOfWork)
+        public CategoriesQueries(IUnitOfWork unitOfWork, ICurrentSession currentSession)
         {
             _unitOfWork = unitOfWork;
+            _currentSession = currentSession;
         }
 
         public async Task<List<CategoryModel>> GetAll(bool includeDeleted = false)
         {
             var repo = _unitOfWork.GetQueryRepository<Category>();
             var query = includeDeleted ? repo.Query : repo.Query.Where(x => !x.IsDeleted);
+            var ownerId = _currentSession.UserId;
             return await query
+                .Where(x => x.OwnerId == ownerId)
                 .Select(x => new CategoryModel
-                {
-                    Id = x.Id,
-                    Name = x.Name,
-                    ProductCount = x.Products.Count
-                }
+                    {
+                        Id = x.Id,
+                        Name = x.Name,
+                        ProductCount = x.Products.Count
+                    }
                 ).ToListAsync();
         }
 
@@ -50,7 +55,7 @@ namespace Monifier.BusinessLogic.Queries.Base
 
         public async Task<CategoryModel> GetByName(string name, bool includeDeleted = false)
         {
-            var category = await _unitOfWork.GetNamedModelQueryRepository<Category>().GetByName(name);
+            var category = await _unitOfWork.GetNamedModelQueryRepository<Category>().GetByName(_currentSession.UserId, name);
             if (category == null || category.IsDeleted && !includeDeleted) return null;
             return new CategoryModel
             {
@@ -61,7 +66,9 @@ namespace Monifier.BusinessLogic.Queries.Base
 
         public async Task<List<ProductModel>> GetProductsByCategoryName(string categoryName, bool includeDeleted = false)
         {
-            var category = await _unitOfWork.GetNamedModelQueryRepository<Category>().GetByName(categoryName);
+            var category = await _unitOfWork.GetNamedModelQueryRepository<Category>().GetByName(
+                _currentSession.UserId, categoryName);
+            
             if (category == null)
                 throw new ArgumentException($"Нет категории с названием \"{categoryName}\"");
 
@@ -81,7 +88,9 @@ namespace Monifier.BusinessLogic.Queries.Base
         public async Task<CategoryList> GetList(PaginationArgs args)
         {
             var repo = _unitOfWork.GetQueryRepository<Category>();
+            var ownerId = _currentSession.UserId;
             var query = args.IncludeDeleted ? repo.Query : repo.Query.Where(x => !x.IsDeleted);
+            query = query.Where(x => x.OwnerId == ownerId);
             var totalCount = await query.CountAsync();
             var pagination = new PaginationInfo(args, totalCount);
             var models = await query

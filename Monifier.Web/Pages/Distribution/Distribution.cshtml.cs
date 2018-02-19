@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Distribution;
@@ -10,6 +11,7 @@ using Monifier.Web.Extensions;
 
 namespace Monifier.Web.Pages.Distribution
 {
+    [Authorize]
     public class DistributionModel : PageModel
     {
         private readonly IDistributionQueries _distributionQueries;
