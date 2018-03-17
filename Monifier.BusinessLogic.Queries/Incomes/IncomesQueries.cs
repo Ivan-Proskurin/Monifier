@@ -68,7 +68,7 @@ namespace Monifier.BusinessLogic.Queries.Incomes
                 .ToListAsync();
 
             var totals = await incomesQueries.Query
-                .Where(x => x.DateTime >= dateFrom && x.DateTime < dateTo)
+                .Where(x => x.OwnerId == ownerId && x.DateTime >= dateFrom && x.DateTime < dateTo)
                 .SumAsync(x => x.Total);
 
             return new IncomesListModel
@@ -122,7 +122,7 @@ namespace Monifier.BusinessLogic.Queries.Incomes
                 .ToListAsync();
 
             var totals = await incomesQueries.Query
-                .Where(x => x.DateTime >= dateFrom && x.DateTime < dateTo)
+                .Where(x => x.OwnerId == ownerId && x.DateTime >= dateFrom && x.DateTime < dateTo)
                 .SumAsync(x => x.Total);
 
             var result = new IncomesListModel

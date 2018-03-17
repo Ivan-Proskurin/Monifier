@@ -90,7 +90,11 @@ namespace Monifier.BusinessLogic.Queries.Base
             if (incomeTypeId == null)
             {
                 var incomeTypeCommands = _unitOfWork.GetCommandRepository<IncomeType>();
-                var incomeType = new IncomeType {Name = topup.AddIncomeTypeName};
+                var incomeType = new IncomeType
+                {
+                    Name = topup.AddIncomeTypeName,
+                    OwnerId = _currentSession.UserId
+                };
                 incomeTypeCommands.Create(incomeType);
                 await _unitOfWork.SaveChangesAsync();
                 incomeTypeId = incomeType.Id;
@@ -100,7 +104,8 @@ namespace Monifier.BusinessLogic.Queries.Base
                 AccountId = account.Id,
                 DateTime = topup.TopupDate,
                 IncomeTypeId = incomeTypeId.Value,
-                Total = topup.Amount
+                Total = topup.Amount,
+                OwnerId = _currentSession.UserId
             });
             if (!topup.Correcting)
             {

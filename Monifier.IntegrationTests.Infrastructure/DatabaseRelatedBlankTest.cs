@@ -192,6 +192,22 @@ namespace Monifier.IntegrationTests.Infrastructure
             return entity;
         }
 
+        protected IncomeItem CreateIncome(int typeId, DateTime dateTime, decimal total, int accountId, IUnitOfWork uow = null)
+        {
+            if (uow == null) uow = UnitOfWork;
+            var commands = uow.GetCommandRepository<IncomeItem>();
+            var entity = new IncomeItem
+            {
+                AccountId = accountId,
+                DateTime = dateTime,
+                IncomeTypeId = typeId,
+                Total = total,
+                OwnerId = CurrentUser.Id
+            };
+            commands.Create(entity);
+            return entity;
+        }
+
         #endregion
     }
 }

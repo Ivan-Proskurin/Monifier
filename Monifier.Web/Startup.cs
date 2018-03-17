@@ -23,8 +23,9 @@ namespace Monifier.Web
         {          
             services.AddDbContext<MonifierDbContext>(options =>
                 options.UseSqlServer(
-                        Configuration.GetConnectionString("MoneyflowContext"),
-//                        Configuration.GetConnectionString("MonifierContext"),
+                    //Configuration.GetConnectionString("MoneyflowContext"),
+                    //Configuration.GetConnectionString("MonifierContext"),
+                    Configuration.GetConnectionString("ReleaseContext"),
                     b => b.MigrationsAssembly("Monifier.Web")));
             
             services.AddMvc();
@@ -52,15 +53,16 @@ namespace Monifier.Web
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             app.UseAuthentication();
-            
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Error");
-            }
+
+            //if (env.IsDevelopment())
+            //{
+            //    app.UseDeveloperExceptionPage();
+            //}
+            //else
+            //{
+            //    app.UseExceptionHandler("/Error");
+            //}
+            app.UseDeveloperExceptionPage();
 
             app.UseStaticFiles();
 

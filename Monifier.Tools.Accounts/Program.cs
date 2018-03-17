@@ -22,10 +22,10 @@ namespace Monifier.Tools.Accounts
 
         private static readonly AccountInfo Account = new AccountInfo
         {
-            Name = "Иван",
-            Login = "crusader",
-            Password = "kjdrbqgfhjkm",
-            IsAdmin = true,
+            Name = "Света",
+            Login = "svetika",
+            Password = "patupa",
+            IsAdmin = false,
         };
         
         static void Main()
