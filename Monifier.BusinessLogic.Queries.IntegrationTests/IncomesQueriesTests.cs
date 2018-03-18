@@ -8,34 +8,42 @@ using Xunit;
 
 namespace Monifier.BusinessLogic.Queries.IntegrationTests
 {
-    public class IncomesQueriesTests : DatabaseRelatedEntitiesTest
+    public class IncomesQueriesTests : QueryTestBase
     {
         [Fact]
         public async void GetIncomesList_BaseTest()
         {
-            var queries = new IncomesQueries(UnitOfWork, CurrentSession);
-            var from = Incomes.First().DateTime.AddMilliseconds(-1);
-            var to = Incomes.Last().DateTime.AddMilliseconds(1);
-            var list = await queries.GetIncomesList(from, to, new PaginationArgs
+            using (var session = await CreateDefaultSession())
             {
-                ItemsPerPage = 10,
-                PageNumber = 1
-            });
-            list.Totals.Total.ShouldBeEquivalentTo(Incomes.Sum(x => x.Total));
+                session.CreateDefaultEntities();
+                var queries = new IncomesQueries(session.UnitOfWork, session.UserSession);
+                var from = session.Incomes.First().DateTime.AddMilliseconds(-1);
+                var to = session.Incomes.Last().DateTime.AddMilliseconds(1);
+                var list = await queries.GetIncomesList(from, to, new PaginationArgs
+                {
+                    ItemsPerPage = 10,
+                    PageNumber = 1
+                });
+                list.Totals.Total.ShouldBeEquivalentTo(session.Incomes.Sum(x => x.Total));
+            }
         }
 
         [Fact]
         public async void GetIncomesByMonth_BaseTest()
         {
-            var queries = new IncomesQueries(UnitOfWork, CurrentSession);
-            var from = Incomes.First().DateTime.StartOfTheMonth();
-            var to = Incomes.Last().DateTime.EndOfTheMonth();
-            var list = await queries.GetIncomesByMonth(from, to, new PaginationArgs
+            using (var session = await CreateDefaultSession())
             {
-                ItemsPerPage = 10,
-                PageNumber = 1
-            });
-            list.Totals.Total.ShouldBeEquivalentTo(Incomes.Sum(x => x.Total));
+                session.CreateDefaultEntities();
+                var queries = new IncomesQueries(session.UnitOfWork, session.UserSession);
+                var from = session.Incomes.First().DateTime.StartOfTheMonth();
+                var to = session.Incomes.Last().DateTime.EndOfTheMonth();
+                var list = await queries.GetIncomesByMonth(from, to, new PaginationArgs
+                {
+                    ItemsPerPage = 10,
+                    PageNumber = 1
+                });
+                list.Totals.Total.ShouldBeEquivalentTo(session.Incomes.Sum(x => x.Total));
+            }
         }
     }
 }

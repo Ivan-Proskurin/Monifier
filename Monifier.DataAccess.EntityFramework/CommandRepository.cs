@@ -27,7 +27,13 @@ namespace Monifier.DataAccess.EntityFramework
 
         public void Update(T model)
         {
-            _dbSet.Attach(model);
+            if (_context.Entry(model).State == EntityState.Detached)
+            {
+                var entity = _dbSet.Find(model.Id);
+                if (entity != null)
+                    _context.Entry(entity).State = EntityState.Detached;
+                _dbSet.Attach(model);
+            }
             _context.Entry(model).State = EntityState.Modified;
         }
 

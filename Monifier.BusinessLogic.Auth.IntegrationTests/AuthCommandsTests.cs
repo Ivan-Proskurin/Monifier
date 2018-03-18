@@ -7,51 +7,62 @@ using Xunit;
 
 namespace Monifier.BusinessLogic.Auth.IntegrationTests
 {
-    public class AuthCommandsTests : DatabaseRelatedBlankTest
+    public class AuthCommandsTests : QueryTestBase
     {
         [Fact]
         public async void CreateUser_NullUserName_ThrowsArgumentException()
         {
-            var commands = new AuthCommands(UnitOfWork);
-            await Assert.ThrowsAsync<ArgumentException>(
-                async () => await commands.CreateUser(null, "login", "pass", false));
+            using (var session = CreateUnauthorizedSession())
+            {
+                var commands = new AuthCommands(session.UnitOfWork);
+                await Assert.ThrowsAsync<ArgumentException>(
+                    async () => await commands.CreateUser(null, "login", "pass", false));
+            }
         }
 
         [Fact]
         public async void CreateUser_EmptyPassword_ThrowsArgumentException()
         {
-            var commands = new AuthCommands(UnitOfWork);
-            await Assert.ThrowsAsync<ArgumentException>(
-                async () => await commands.CreateUser("user", "login", string.Empty, false));
+            using (var session = CreateUnauthorizedSession())
+            {
+                var commands = new AuthCommands(session.UnitOfWork);
+                await Assert.ThrowsAsync<ArgumentException>(
+                    async () => await commands.CreateUser("user", "login", string.Empty, false));
+            }
         }
 
         [Fact]
         public async void CreateUser_EmptyLogin_ThrowsArgumentException()
         {
-            var commands = new AuthCommands(UnitOfWork);
-            await Assert.ThrowsAsync<ArgumentException>(
-                async () => await commands.CreateUser("user", string.Empty, "pass", false));
+            using (var session = CreateUnauthorizedSession())
+            {
+                var commands = new AuthCommands(session.UnitOfWork);
+                await Assert.ThrowsAsync<ArgumentException>(
+                    async () => await commands.CreateUser("user", string.Empty, "pass", false));
+            }
         }
 
         [Fact]
         public async void CreateUser_CorrectNameAndPass_CorrectHash()
         {
-            var name = "user";
-            var login = "login";
-            var pass = "mywordismypassword";
-            var userId = await UseUnitOfWorkAsync(async uof =>
+            const string name = "user";
+            const string login = "login";
+            const string pass = "mywordismypassword";
+            int userId;
+
+            using (var session = CreateUnauthorizedSession())
             {
-                var commands = new AuthCommands(uof);
-                return await commands.CreateUser(name, login, pass, false);
-            });
+                var commands = new AuthCommands(session.UnitOfWork);
+                userId = await commands.CreateUser(name, login, pass, false);
+            }
             
             userId.Should().BePositive();
 
-            await UseUnitOfWorkAsync(async uof =>
+            using (var session = CreateUnauthorizedSession())
             {
-                var queries = uof.GetQueryRepository<User>();
+                var queries = session.UnitOfWork.GetQueryRepository<User>();
                 var user = await queries.GetById(userId);
-                
+
                 user.Should().NotBeNull();
                 user.Name.ShouldBeEquivalentTo(name);
                 user.Login.ShouldBeEquivalentTo(login);
@@ -59,41 +70,42 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
 
                 var hash = HashHelper.ComputeHash(pass, user.Salt);
                 user.Hash.ShouldBeEquivalentTo(hash);
-            });
+            }
         }
 
         [Fact]
         public async void CreateUser_DuplicateLogin_ThrowsAuthException()
         {
-            await UseUnitOfWorkAsync(async uof =>
+            using (var session = CreateUnauthorizedSession())
             {
-                var commands = new AuthCommands(uof);
+                var commands = new AuthCommands(session.UnitOfWork);
                 await commands.CreateUser("user", "login", "pass", false);
-            });
+            }
 
-            await UseUnitOfWorkAsync(async uof =>
+            using (var session = CreateUnauthorizedSession())
             {
-                var commands = new AuthCommands(uof);
+                var commands = new AuthCommands(session.UnitOfWork);
                 await Assert.ThrowsAsync<AuthException>(
                     async () => await commands.CreateUser("new user", "login", "new pass", true));
-            });
+            }
         }
 
         [Fact]
         public async void CreateUser_DuplicateNameDifferentLogin_Ok()
         {
-            var userId = await UseUnitOfWorkAsync(async uof =>
+            int userId;
+            using (var session = CreateUnauthorizedSession())
             {
-                var commands = new AuthCommands(uof);
-                return await commands.CreateUser("user", "login", "pass", false);
-            });
+                var commands = new AuthCommands(session.UnitOfWork);
+                userId = await commands.CreateUser("user", "login", "pass", false);
+            }
 
-            await UseUnitOfWorkAsync(async uof =>
+            using (var session = CreateUnauthorizedSession())
             {
-                var commands = new AuthCommands(uof);
+                var commands = new AuthCommands(session.UnitOfWork);
                 var newUserId = await commands.CreateUser("user", "new login", "new pass", true);
                 userId.Should().NotBe(newUserId);
-            });
+            }
         }
     }
 }
