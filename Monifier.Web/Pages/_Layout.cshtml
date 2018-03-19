@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -27,36 +27,37 @@
     @RenderSection("Styles", required: false)
 </head>
 <body>
-@if (User.Identity.IsAuthenticated)
-{
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
-        <a asp-page="/Index" class="navbar-brand">Monifier</a>
-        <button class="navbar-toggler cursor-pointer" type="button" data-toggle="collapse" data-target="#navbarText"
-                aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarText">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
-                    <a id="accountsLink" asp-page="/Accounts/AccountsList" class="nav-link">Счета</a>
-                </li>
-                <li class="nav-item">
-                    <a id="flowsLink" asp-page="/Expenses/ExpenseFlows" asp-route-pageNumber="1" class="nav-link">Статьи расходов</a>
-                </li>
-                <li class="nav-item">
-                    <a id="expensesLink" asp-page="/Expenses/ExpensesTable" class="nav-link">Расходы</a>
-                </li>
-                <li class="nav-item">
-                    <a id="incomesLink" asp-page="/Incomes/IncomesByMonth" class="nav-link">Доходы</a>
-                </li>
-                <li class="nav-item">
-                    <a id="productsLink" asp-page="/Products/Categories" asp-route-pageNumber="1" class="nav-link">Товары</a>
-                </li>
-            </ul>
-        </div>
-    </nav>
-}
+
 <div class="container body-content">
+    @if (User.Identity.IsAuthenticated)
+    {
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+            <a asp-page="/Index" class="navbar-brand">Monifier</a>
+            <button class="navbar-toggler cursor-pointer" type="button" data-toggle="collapse" data-target="#navbarText"
+                    aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarText">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <a id="accountsLink" asp-page="/Accounts/AccountsList" class="nav-link">Счета</a>
+                    </li>
+                    <li class="nav-item">
+                        <a id="flowsLink" asp-page="/Expenses/ExpenseFlows" asp-route-pageNumber="1" class="nav-link">Статьи расходов</a>
+                    </li>
+                    <li class="nav-item">
+                        <a id="expensesLink" asp-page="/Expenses/ExpensesTable" class="nav-link">Расходы</a>
+                    </li>
+                    <li class="nav-item">
+                        <a id="incomesLink" asp-page="/Incomes/IncomesByMonth" class="nav-link">Доходы</a>
+                    </li>
+                    <li class="nav-item">
+                        <a id="productsLink" asp-page="/Products/Categories" asp-route-pageNumber="1" class="nav-link">Товары</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    }
     @RenderBody()
     <hr/>
     <footer>

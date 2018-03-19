@@ -1,6 +1,9 @@
 ﻿.body-content {
-    margin-top: 25px;
     min-width: 800px;
+}
+
+.navbar {
+    margin-bottom: 30px;
 }
 
 .navbar-nav .nav-item {
