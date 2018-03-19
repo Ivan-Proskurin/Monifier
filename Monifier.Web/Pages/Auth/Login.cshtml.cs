@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
@@ -42,12 +43,11 @@ namespace Monifier.Web.Pages.Auth
                 {
                     try
                     {
-                        var session = await _sessionCommands.CreateSession(Login.UserName, Login.Password);
+                        var user = await _sessionCommands.CheckUser(Login.UserName, Login.Password);
                         var claims = new List<Claim>
                         {
-                            new Claim(MonifierClaimTypes.SessionId, session.Token.ToString()),
-                            new Claim(MonifierClaimTypes.UserId, session.UserId.ToString()),
-                            new Claim(ClaimTypes.Name, session.User.Name)
+                            new Claim(MonifierClaimTypes.UserId, user.Id.ToString()),
+                            new Claim(ClaimTypes.Name, user.Name)
                         };
                         var identity = new ClaimsIdentity(claims, AuthConsts.AuthenticationScheme);
                         var principal = new ClaimsPrincipal(identity);
@@ -55,8 +55,8 @@ namespace Monifier.Web.Pages.Auth
                         await HttpContext.SignInAsync(AuthConsts.AuthenticationScheme, principal,
                             new AuthenticationProperties
                             {
-                                IsPersistent = session.Expiration != null,
-                                ExpiresUtc = session.Expiration
+                                IsPersistent = true,
+                                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(2)
                             });
                     }
                     catch (AuthException exc)

@@ -16,23 +16,29 @@ namespace Monifier.BusinessLogic.Auth
         {
             _unitOfWork = unitOfWork;
         }
-        
-        public async Task<Session> CreateSession(string login, string password)
+
+        public async Task<User> CheckUser(string login, string password)
         {
             if (login.IsNullOrEmpty())
                 throw new ArgumentException("Login must be a non empty string", nameof(login));
             if (password.IsNullOrEmpty())
                 throw new ArgumentException("Password must be a non empty sttring", nameof(password));
-            
+
             var userQueries = _unitOfWork.GetQueryRepository<User>();
             var user = await userQueries.GetByLogin(login);
-            if (user == null) 
+            if (user == null)
                 throw new AuthException($"Неверный логин или пароль");
 
             var hash = HashHelper.ComputeHash(password, user.Salt);
             if (hash != user.Hash)
                 throw new AuthException($"Неверный логин или пароль");
-            
+            return user;
+        }
+
+        public async Task<Session> CreateSession(string login, string password)
+        {
+            var user = await CheckUser(login, password);
+
             var session = new Session
             {
                 Token = Guid.NewGuid(),
