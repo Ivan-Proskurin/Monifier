@@ -14,14 +14,12 @@
         <link rel="stylesheet" href="~/css/validation.css"/>
     </environment>
     <environment exclude="Development">
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"
-              asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
-              asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
-        <link rel="stylesheet" href="~/lib/font-awesome/css/font-awesome.min.css"/>
-        <link rel="stylesheet" href="~/css/jquery.datetimepicker.min.css"/>
-        <link rel="stylesheet" href="~/css/awesomplete.css" />    
-        <link rel="stylesheet" href="~/css/main.css"/>
-        <link rel="stylesheet" href="~/css/validation.css"/>
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="~/lib/font-awesome/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="~/css/jquery.datetimepicker.min.css" />
+        <link rel="stylesheet" href="~/css/awesomplete.css" />
+        <link rel="stylesheet" href="~/css/main.css" />
+        <link rel="stylesheet" href="~/css/validation.css" />
     </environment>
     
     @RenderSection("Styles", required: false)
@@ -59,8 +57,8 @@
         </nav>
     }
     @RenderBody()
-    <hr/>
     <footer>
+        <hr/>
         <p>&copy; crusader, @DateTime.Now.Year - Приложение учета личных финансов</p>
     </footer>
 </div>
@@ -77,20 +75,10 @@
     <script src="~/js/inventorization.js"></script>
 </environment>
 <environment exclude="Development">
-    <script src="https://code.jquery.com/jquery-3.2.1.js"
-            asp-fallback-src="~/lib/jquery/dist/jquery.min.js"
-            asp-fallback-test="window.jQuery"
-            crossorigin="anonymous"
-            integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35Eouy‌​E=">
-    </script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/popper.js/dist/umd/popper-utils.min.js"></script>
     <script src="~/lib/popper.js/dist/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"
-            asp-fallback-src="~/lib/bootstrap/dist/js/bootstrap.min.js"
-            asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.fn.modal"
-            integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ"
-            crossorigin="anonymous">
-    </script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="~/js/awesomplete.js"></script>
     <script src="~/js/jquery.datetimepicker.full.js"></script>
     <script src="~/js/helpers.js"></script>

@@ -14,6 +14,10 @@
     font-size: 24px;
 }
 
+footer {
+    margin-top: 50px;
+}
+
 a.edit-item-link {
     color: #444;
 }
@@ -141,10 +145,9 @@ a.edit-item-link {
     cursor: pointer;
 }
 
-.centered-form {
+.left-aligned-form {
     width: 800px;
-    margin-left: auto;
-    margin-right: auto;
+    margin-left: 0;
 }
 
 .money-cell {
@@ -199,4 +202,8 @@ a.edit-item-link {
 
 .hidden {
     display: none;
+}
+
+.login-form {
+    margin-top: 40px;
 }

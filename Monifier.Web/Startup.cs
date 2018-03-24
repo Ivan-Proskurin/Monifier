@@ -23,12 +23,15 @@ namespace Monifier.Web
         {          
             services.AddDbContext<MonifierDbContext>(options =>
                 options.UseSqlServer(
-                    //Configuration.GetConnectionString("MoneyflowContext"),
+                    Configuration.GetConnectionString("MoneyflowContext"),
                     //Configuration.GetConnectionString("MonifierContext"),
-                    Configuration.GetConnectionString("ReleaseContext"),
+                    //Configuration.GetConnectionString("ReleaseContext"),
                     b => b.MigrationsAssembly("Monifier.Web")));
             
-            services.AddMvc();
+            services.AddMvc().AddRazorPagesOptions(options =>
+                {
+                    options.Conventions.AddPageRoute("/Accounts/AccountsList", "");
+                });
             services.AddAntiforgery(o => o.HeaderName = "XSRF-TOKEN");
             
             services.AddBusinessServices();
@@ -72,7 +75,6 @@ namespace Monifier.Web
                     name: "default",
                     template: "{controller}/{action=Index}/{id?}");
             });
-            
         }
     }
 }

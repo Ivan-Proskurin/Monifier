@@ -36,7 +36,7 @@ namespace Monifier.Web.Pages.Auth
         public async Task<IActionResult> OnPostAsync()
         {
             return await Login.ProcessAsync(ModelState,
-                () => Task.FromResult<IActionResult>(RedirectToPage(Login.ReturnUrl)),
+                () => Task.FromResult<IActionResult>(Redirect(Login.ReturnUrl)),
                 () => Task.FromResult<IActionResult>(Page()),
 
                 async vrList =>
