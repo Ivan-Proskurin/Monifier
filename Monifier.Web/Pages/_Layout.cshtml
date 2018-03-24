@@ -56,7 +56,11 @@
                     </li>
                 </ul>
             </div>
-            <div class="navbar-text" style="text-align: right;">
+            <div class="navbar-text user-link">
+                @*<i class="fa fa-user"></i>*@
+                @User.Identity.Name
+            </div>
+            <div class="navbar-text">
                 <a asp-page="/Auth/Logout" class="nav-link logout-link">
                     <i class="fa fa-power-off"></i>&nbsp;Выход
                 </a>
