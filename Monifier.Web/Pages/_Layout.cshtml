@@ -30,7 +30,9 @@
     @if (User.Identity.IsAuthenticated)
     {
         <nav class="navbar navbar-expand-md navbar-dark bg-dark">
-            <a asp-page="/Index" class="navbar-brand">Monifier</a>
+            <a asp-page="/Index" class="navbar-brand">
+                <i class="fa fa-shekel"></i>
+            </a>
             <button class="navbar-toggler cursor-pointer" type="button" data-toggle="collapse" data-target="#navbarText"
                     aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -53,6 +55,11 @@
                         <a id="productsLink" asp-page="/Products/Categories" asp-route-pageNumber="1" class="nav-link">Товары</a>
                     </li>
                 </ul>
+            </div>
+            <div class="navbar-text" style="text-align: right;">
+                <a asp-page="/Auth/Logout" class="nav-link logout-link">
+                    <i class="fa fa-power-off"></i>&nbsp;Выход
+                </a>
             </div>
         </nav>
     }
