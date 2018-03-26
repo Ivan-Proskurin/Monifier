@@ -249,6 +249,13 @@ namespace Monifier.IntegrationTests.Infrastructure
             Incomes = (await LoadEntities<IncomeItem>()).OrderBy(x => x.DateTime).ToList();
         }
 
+        public async Task UpdateEntity<T>(T entity) where T : class, IHasId
+        {
+            var commands = _unitOfWork.GetCommandRepository<T>();
+            commands.Update(entity);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
         public IncomeType SalaryIncome { get; private set; }
         public IncomeType GiftsIncome { get; private set; }
 

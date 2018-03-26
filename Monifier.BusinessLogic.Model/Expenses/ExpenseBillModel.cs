@@ -157,18 +157,31 @@ namespace Monifier.BusinessLogic.Model.Expenses
                 });
             }
 
+            Account account = null;
+            if (AccountId != null)
+            {
+                var accountQueries = unitOfWork.GetQueryRepository<Account>();
+                account = await accountQueries.GetById(AccountId.Value);
+            }
+
             var flowQieries = unitOfWork.GetQueryRepository<ExpenseFlow>();
             var flowCommands = unitOfWork.GetCommandRepository<ExpenseFlow>();
             var flow = await flowQieries.GetById(bill.ExpenseFlowId);
-            flow.Balance -= bill.SumPrice;
+            var lack = bill.SumPrice - Math.Max(flow.Balance, 0);
+            var withdrawTotal = bill.SumPrice;
+            if (lack > 0 && account != null && !correcting)
+            {
+                var compensation = Math.Min(Math.Max(account.AvailBalance, 0), lack);
+                withdrawTotal -= compensation;
+                account.AvailBalance -= compensation;
+            }
+            flow.Balance -= withdrawTotal;
             flow.Version++;
             flowCommands.Update(flow);
 
-            if (AccountId != null && !correcting)
+            if (account != null && !correcting)
             {
-                var accountQueries = unitOfWork.GetQueryRepository<Account>();
                 var accountCommands = unitOfWork.GetCommandRepository<Account>();
-                var account = await accountQueries.GetById(AccountId.Value);
                 account.Balance -= bill.SumPrice;
                 account.LastWithdraw = DateTime.Now;
                 accountCommands.Update(account);
@@ -236,12 +249,24 @@ namespace Monifier.BusinessLogic.Model.Expenses
 
             var flowQueries = unitOfWork.GetQueryRepository<ExpenseFlow>();
             var flowCommands = unitOfWork.GetCommandRepository<ExpenseFlow>();
-            var flow = await flowQueries.GetById(bill.ExpenseFlowId);
-            flow.Balance = flow.Balance + oldsum - Cost;
-            flowCommands.Update(flow);
-
             var accountQueries = unitOfWork.GetQueryRepository<Account>();
             var accountCommands = unitOfWork.GetCommandRepository<Account>();
+
+            var flow = await flowQueries.GetById(bill.ExpenseFlowId);
+            var newAccount = bill.AccountId != null ? await accountQueries.GetById(bill.AccountId.Value) : null;
+            flow.Balance = flow.Balance + oldsum;
+            var lack = bill.SumPrice - Math.Max(flow.Balance, 0);
+            var withdrawTotal = bill.SumPrice;
+            if (lack > 0 && newAccount != null)
+            {
+                var compensation = Math.Min(Math.Max(newAccount.AvailBalance, 0), lack);
+                withdrawTotal -= compensation;
+                newAccount.AvailBalance -= compensation;
+            }
+            flow.Balance -= withdrawTotal;
+            flow.Version++;
+            flowCommands.Update(flow);
+
             if (oldAccountId != bill.AccountId)
             {
                 if (oldAccountId != null)
@@ -251,19 +276,17 @@ namespace Monifier.BusinessLogic.Model.Expenses
                     accountCommands.Update(oldAccount);
                 }
 
-                if (bill.AccountId != null)
+                if (newAccount != null)
                 {
-                    var newAccount = await accountQueries.GetById(bill.AccountId.Value);
                     newAccount.Balance -= bill.SumPrice;
                     newAccount.LastWithdraw = DateTime.Now;
                     accountCommands.Update(newAccount);
                 }
             }
-            else if (AccountId != null)
+            else if (newAccount != null)
             {
-                var account = await accountQueries.GetById(AccountId.Value);
-                account.Balance += oldsum - Cost;
-                accountCommands.Update(account);
+                newAccount.Balance += oldsum - Cost;
+                accountCommands.Update(newAccount);
             }
 
             await unitOfWork.SaveChangesAsync();
