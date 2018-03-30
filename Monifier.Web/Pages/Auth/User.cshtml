@@ -1,0 +1,43 @@
+﻿@page
+@model Monifier.Web.Pages.Auth.UserModel
+
+@{
+    ViewBag.Title = "Смена пароля";
+}
+
+<div class="login-form">
+    <form method="post">
+        <input type="hidden" asp-for="User.Login"/>
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <h4>@Model.User.Login</h4>
+        <br/>
+        <div class="row">
+            <div class="form-group col-sm-6">
+                <label asp-for="User.Name" class="control-label"></label>
+                <input asp-for="User.Name" class="form-control" autocomplete="off" />
+                <span asp-validation-for="User.Name" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-sm-6">
+                <label asp-for="User.Password" class="control-label"></label>
+                <input type="password" asp-for="User.Password" class="form-control" autocomplete="off" />
+                <span asp-validation-for="User.Password" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-sm-6">
+                <label asp-for="User.PasswordConfirmation" class="control-label"></label>
+                <input type="password" asp-for="User.PasswordConfirmation" class="form-control" autocomplete="off" />
+                <span asp-validation-for="User.PasswordConfirmation" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="row" style="margin-top: 15px;">
+            <div class="form-group col-sm-6">
+                <input type="submit" value="Сохранить" class="btn btn-outline-danger cursor-pointer" style="padding: 5px 30px;"/>
+                <a asp-page="/Accounts/AccountsList" class="btn btn-outline-primary gapped">Отмена</a>
+            </div>
+        </div>
+    </form>
+</div>

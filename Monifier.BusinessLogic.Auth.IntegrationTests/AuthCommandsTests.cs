@@ -107,5 +107,96 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
                 userId.Should().NotBe(newUserId);
             }
         }
+
+        [Fact]
+        public async void UpdateUser_OnlyNewPassProvided_PassAndSaltUpdatedNameNotChanged()
+        {
+            const string name = "user";
+            const string login = "login";
+            const string pass = "mywordismypassword";
+            const string newpass = "newpassword";
+            int userId;
+            string salt;
+
+            using (var session = CreateUnauthorizedSession())
+            {
+                var commands = new AuthCommands(session.UnitOfWork);
+                userId = await commands.CreateUser(name, login, pass, false);
+                var user = await session.LoadEntity<User>(userId);
+                salt = user.Salt;
+            }
+
+            using (var session = CreateUnauthorizedSession())
+            {
+                var commands = new AuthCommands(session.UnitOfWork);
+                await commands.UpdateUser(userId, null, newpass);
+                var user = await session.LoadEntity<User>(userId);
+                user.Name.ShouldBeEquivalentTo(name);
+                user.Salt.Should().NotBe(salt);
+                var hash = HashHelper.ComputeHash(newpass, user.Salt);
+                user.Hash.ShouldBeEquivalentTo(hash);
+            }
+        }
+
+        [Fact]
+        public async void UpdateUser_OnlyNameProvided_NameUpdatedSaltAndPassNotChanged()
+        {
+            const string name = "user";
+            const string newName = "vovka";
+            const string login = "login";
+            const string pass = "mywordismypassword";
+            int userId;
+            string salt, hash;
+
+            using (var session = CreateUnauthorizedSession())
+            {
+                var commands = new AuthCommands(session.UnitOfWork);
+                userId = await commands.CreateUser(name, login, pass, false);
+                var user = await session.LoadEntity<User>(userId);
+                salt = user.Salt;
+                hash = user.Hash;
+            }
+
+            using (var session = CreateUnauthorizedSession())
+            {
+                var commands = new AuthCommands(session.UnitOfWork);
+                await commands.UpdateUser(userId, newName, null);
+                var user = await session.LoadEntity<User>(userId);
+                user.Name.ShouldBeEquivalentTo(newName);
+                user.Hash.ShouldBeEquivalentTo(hash);
+                user.Salt.ShouldBeEquivalentTo(salt);
+            }
+        }
+
+        [Fact]
+        public async void UpdateUser_UserIsNotExist_ThrowsException()
+        {
+            using (var session = CreateUnauthorizedSession())
+            {
+                var commands = new AuthCommands(session.UnitOfWork);
+                await Assert.ThrowsAsync<ArgumentException>(async () => await commands.UpdateUser(3, "new name", null));
+            }
+        }
+
+        [Fact]
+        public async void UpdateUser_UserAndPassAreNull_ThrowsException()
+        {
+            const string name = "user";
+            const string login = "login";
+            const string pass = "mywordismypassword";
+            int userId;
+
+            using (var session = CreateUnauthorizedSession())
+            {
+                var commands = new AuthCommands(session.UnitOfWork);
+                userId = await commands.CreateUser(name, login, pass, false);
+            }
+
+            using (var session = CreateUnauthorizedSession())
+            {
+                var commands = new AuthCommands(session.UnitOfWork);
+                await Assert.ThrowsAsync<ArgumentException>(async () => await commands.UpdateUser(userId, null, null));
+            }
+        }
     }
 }

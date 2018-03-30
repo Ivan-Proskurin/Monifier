@@ -37,10 +37,10 @@ namespace Monifier.BusinessLogic.Auth
                 Name = name,
                 Login = login,
                 IsAdmin = isAdmin,
-                IsDeleted = false
+                IsDeleted = false,
+                Salt = HashHelper.CreateSalt()
             };
 
-            user.Salt = HashHelper.CreateSalt();
             user.Hash = HashHelper.ComputeHash(password, user.Salt);
             
             _unitOfWork.GetCommandRepository<User>().Create(user);
@@ -48,6 +48,28 @@ namespace Monifier.BusinessLogic.Auth
             await _unitOfWork.SaveChangesAsync();
             
             return user.Id;
+        }
+
+        public async Task UpdateUser(int userId, string newName, string newPassword)
+        {
+            if (newName == null && newPassword == null)
+                throw new ArgumentException("Provide either newName or newPassword");
+            var userQueries = _unitOfWork.GetQueryRepository<User>();
+            var user = await userQueries.GetById(userId);
+            if (user == null)
+                throw new ArgumentException($"Threre is no user with id {userId}", nameof(userId));
+
+            if (newName != null)
+                user.Name = newName;
+            if (newPassword != null)
+            {
+                user.Salt = HashHelper.CreateSalt();
+                user.Hash = HashHelper.ComputeHash(newPassword, user.Salt);
+            }
+
+            var commands = _unitOfWork.GetCommandRepository<User>();
+            commands.Update(user);
+            await _unitOfWork.SaveChangesAsync();
         }
     }
 }

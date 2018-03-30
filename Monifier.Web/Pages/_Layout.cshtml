@@ -57,8 +57,7 @@
                 </ul>
             </div>
             <div class="navbar-text user-link">
-                @*<i class="fa fa-user"></i>*@
-                @User.Identity.Name
+                <a asp-page="/Auth/User">@User.Identity.Name</a>
             </div>
             <div class="navbar-text">
                 <a asp-page="/Auth/Logout" class="nav-link logout-link">

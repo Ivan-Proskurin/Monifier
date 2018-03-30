@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -44,20 +40,7 @@ namespace Monifier.Web.Pages.Auth
                     try
                     {
                         var user = await _sessionCommands.CheckUser(Login.UserName, Login.Password);
-                        var claims = new List<Claim>
-                        {
-                            new Claim(MonifierClaimTypes.UserId, user.Id.ToString()),
-                            new Claim(ClaimTypes.Name, user.Name)
-                        };
-                        var identity = new ClaimsIdentity(claims, AuthConsts.AuthenticationScheme);
-                        var principal = new ClaimsPrincipal(identity);
-
-                        await HttpContext.SignInAsync(AuthConsts.AuthenticationScheme, principal,
-                            new AuthenticationProperties
-                            {
-                                IsPersistent = true,
-                                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(2)
-                            });
+                        await HttpContext.SignInAsync(user);
                     }
                     catch (AuthException exc)
                     {

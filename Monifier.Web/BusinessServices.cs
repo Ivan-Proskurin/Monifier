@@ -47,6 +47,7 @@ namespace Monifier.Web
             services.AddTransient<IFlowDistributor, DefaultFlowDistributor>();
             services.AddTransient<IInventorizationQueries, InventorizationQueries>();
             services.AddTransient<ISessionCommands, SessionCommands>();
+            services.AddTransient<IAuthCommands, AuthCommands>();
         }
     }
 }
