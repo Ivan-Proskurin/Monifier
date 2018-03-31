@@ -125,7 +125,7 @@ namespace Monifier.Web.Pages.Expenses
 
         public async Task<IActionResult> OnPostAddAsync()
         {
-            return await Good.ProcessAsync(ModelState,
+            return await Good.ProcessAsync(ModelState, nameof(Good),
                 async () =>
                 {
                     await PrepareModelsAsync(Good.ExpenseFlowId);

@@ -104,7 +104,7 @@ namespace Monifier.Web.Pages.Expenses
 
         public async Task<IActionResult> OnPostAsync()
         {
-            return await Expense.ProcessAsync(ModelState,
+            return await Expense.ProcessAsync(ModelState, nameof(Expense),
                 async () =>
                 {
                     await _expenseFlowCommands.AddExpense(Expense.ToModel());

@@ -18,7 +18,7 @@ namespace Monifier.Web.Models.Expenses
 
         public IEnumerable<ModelValidationResult> Validate()
         {
-            var amountResult = Amount.ValidateMoney("Transfer.Amount");
+            var amountResult = Amount.ValidateMoney(nameof(Amount));
             if (amountResult != null) yield return amountResult;
         }
     }

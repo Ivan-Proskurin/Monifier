@@ -55,7 +55,7 @@ namespace Monifier.Web.Pages.Expenses
 
         public async Task<IActionResult> OnPostCommitAsync()
         {
-            return await ExpenseFlow.ProcessAsync(ModelState,
+            return await ExpenseFlow.ProcessAsync(ModelState, nameof(ExpenseFlow),
                 async () =>
                 {
                     var model = await _expenseFlowQueries.GetById(ExpenseFlow.Id);

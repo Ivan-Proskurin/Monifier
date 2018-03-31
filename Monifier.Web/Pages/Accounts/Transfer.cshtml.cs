@@ -58,7 +58,7 @@ namespace Monifier.Web.Pages.Accounts
         {
             Accounts = await _accountQueries.GetAll();
             
-            return await Transfer.ProcessAsync(ModelState,
+            return await Transfer.ProcessAsync(ModelState, nameof(Transfer),
                 async () =>
                 {
                     var accountFrom = await _accountQueries.GetByName(Transfer.AccountFrom);

@@ -35,7 +35,7 @@ namespace Monifier.Web.Models.Expenses
 
         public IEnumerable<ModelValidationResult> Validate()
         {
-            var dateResult = CreationDate.ValidateDateTime("EditExpense.CreationDate");
+            var dateResult = CreationDate.ValidateDateTime(nameof(CreationDate));
             if (dateResult != null) yield return dateResult;
         }
     }

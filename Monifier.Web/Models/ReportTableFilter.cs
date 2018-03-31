@@ -65,17 +65,17 @@ namespace Monifier.Web.Models
 
         public IEnumerable<ModelValidationResult> Validate()
         {
-            var fromResult = DateFrom.ValidateDateTime("Filter.DateFrom");
+            var fromResult = DateFrom.ValidateDateTime(nameof(DateFrom));
             if (fromResult != null) yield return fromResult;
-            var toResult = DateTo.ValidateDateTime("Filter.DateTo");
+            var toResult = DateTo.ValidateDateTime(nameof(DateTo));
             if (toResult != null) yield return toResult;
             
             if (!string.IsNullOrEmpty(DateFrom) && fromResult == null && 
                 !string.IsNullOrEmpty(DateTo) && toResult == null && 
                 DateFromAsDateTime > DateToAsDateTime)
             {
-                yield return new ModelValidationResult("Filter.DateFrom", "Дата \"от\" не может быть больше даты \"до\"");
-                yield return new ModelValidationResult("Filter.DateTo", "Дата \"до\" не может быть меньше даты \"от\"");
+                yield return new ModelValidationResult(nameof(DateFrom), "Дата \"от\" не может быть больше даты \"до\"");
+                yield return new ModelValidationResult(nameof(DateTo), "Дата \"до\" не может быть меньше даты \"от\"");
             }
         }
     }

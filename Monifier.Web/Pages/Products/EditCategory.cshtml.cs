@@ -62,7 +62,7 @@ namespace Monifier.Web.Pages.Products
 
         public async Task<IActionResult> OnPostEditAsync()
         {
-            return await Category.ProcessAsync(ModelState,
+            return await Category.ProcessAsync(ModelState, nameof(Category),
                 async () =>
                 {
                     var category = await _categoriesQueries.GetByName(Category.Category);
@@ -87,7 +87,7 @@ namespace Monifier.Web.Pages.Products
         {
             const string prop = "Category.AddProduct";
             
-            return await Category.ProcessAsync(ModelState,
+            return await Category.ProcessAsync(ModelState, nameof(Category),
                 async () =>
                 {
                     await _productCommands.AddProductToCategory(Category.Id, Category.AddProduct);

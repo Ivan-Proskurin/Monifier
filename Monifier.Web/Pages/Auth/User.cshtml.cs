@@ -35,7 +35,7 @@ namespace Monifier.Web.Pages.Auth
 
         public async Task<IActionResult> OnPostAsync()
         {
-            return await User.ProcessAsync(ModelState,
+            return await User.ProcessAsync(ModelState, nameof(User),
                 async () =>
                 {
                     var user = await _unitOfWork.GetQueryRepository<User>().GetById(_currentSession.UserId);

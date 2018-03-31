@@ -66,7 +66,7 @@ namespace Monifier.Web.Pages.Expenses
 
         public async Task<IActionResult> OnPostAsync()
         {
-            return await Transfer.ProcessAsync(ModelState,
+            return await Transfer.ProcessAsync(ModelState, nameof(Transfer),
                 async () =>
                 {
                     var account = await _accountQueries.GetByName(Transfer.AccountFrom);

@@ -23,12 +23,12 @@ namespace Monifier.Web.Models.Auth
         public IEnumerable<ModelValidationResult> Validate()
         {
             if (Name.IsNullOrEmpty())
-                yield return new ModelValidationResult("User.Name", "Введите имя");
+                yield return new ModelValidationResult(nameof(Name), "Введите имя");
             if (Password.IsNullOrEmpty() && PasswordConfirmation.IsNullOrEmpty()) yield break;
             if (Password == PasswordConfirmation) yield break;
             const string message = "Пароль и подтверждение должны совпадать";
-            yield return new ModelValidationResult("User.Password", message);
-            yield return new ModelValidationResult("User.PasswordConfirmation", message);
+            yield return new ModelValidationResult(nameof(Password), message);
+            yield return new ModelValidationResult(nameof(PasswordConfirmation), message);
         }
     }
 

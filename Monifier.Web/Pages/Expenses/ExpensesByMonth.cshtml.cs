@@ -70,7 +70,7 @@ namespace Monifier.Web.Pages.Expenses
 
         public async Task<IActionResult> OnPostRefreshAsync()
         {
-            return await Filter.ProcessAsync(ModelState,
+            return await Filter.ProcessAsync(ModelState, nameof(Filter),
                 async () =>
                 {
                     Expenses = await LoadExpensesAsync();

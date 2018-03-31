@@ -42,12 +42,12 @@ namespace Monifier.Web.Models.Expenses
 
         public IEnumerable<ModelValidationResult> Validate()
         {
-            var priceResult = Price.ValidateMoney("Good.Price");
+            var priceResult = Price.ValidateMoney(nameof(Price));
             if (priceResult != null) yield return priceResult;
             if (Category == null && Product == null)
             {
-                yield return new ModelValidationResult("Good.Category", "Укажите категорию или товар");
-                yield return new ModelValidationResult("Good.Product", "Укажите категорию или товар");
+                yield return new ModelValidationResult(nameof(Category), "Укажите категорию или товар");
+                yield return new ModelValidationResult(nameof(Product), "Укажите категорию или товар");
             }
         }
 

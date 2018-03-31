@@ -31,7 +31,7 @@ namespace Monifier.Web.Pages.Products
 
         public async Task<IActionResult> OnPostCommitAsync()
         {
-            return await Product.ProcessAsync(ModelState,
+            return await Product.ProcessAsync(ModelState, nameof(Product),
                 async () =>
                 {
                     await _productCommands.Update(Product.ToModel());

@@ -20,10 +20,13 @@ namespace Monifier.Web.Models.Accounts
 
         public IEnumerable<ModelValidationResult> Validate()
         {
-            var amountResult = Amount.ValidateMoney("Transfer.Amount");
+            var amountResult = Amount.ValidateMoney(nameof(Amount));
             if (amountResult != null) yield return amountResult;
-            if (!string.IsNullOrEmpty(AccountFrom) && AccountFrom == AccountTo) 
-                yield return new ModelValidationResult("Счета не должны совпадать");
+            if (!string.IsNullOrEmpty(AccountFrom) && AccountFrom == AccountTo)
+            {
+                yield return new ModelValidationResult(nameof(AccountFrom), "Счета не должны совпадать");
+                yield return new ModelValidationResult(nameof(AccountTo), "Счета не должны совпадать");
+            }
         }
     }
 }

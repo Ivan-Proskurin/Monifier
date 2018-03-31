@@ -32,9 +32,9 @@ namespace Monifier.Web.Models.Accounts
         
         public IEnumerable<ModelValidationResult> Validate()
         {
-            var balanceResult = Balance.ValidateMoney("Account.Balance");
+            var balanceResult = Balance.ValidateMoney(nameof(Balance));
             if (balanceResult != null) yield return balanceResult;
-            var dateResult = CreationDate.ValidateDateTime("Account.CreationDate");
+            var dateResult = CreationDate.ValidateDateTime(nameof(CreationDate));
             if (dateResult != null) yield return dateResult;
         }
     }

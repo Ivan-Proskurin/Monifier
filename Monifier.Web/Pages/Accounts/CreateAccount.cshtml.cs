@@ -38,7 +38,7 @@ namespace Monifier.Web.Pages.Accounts
 
         public async Task<IActionResult> OnPostAsync()
         {
-            return await Account.ProcessAsync(ModelState,
+            return await Account.ProcessAsync(ModelState, nameof(Account),
                 async () =>
                 {
                     var model = new AccountModel {Id = -1};

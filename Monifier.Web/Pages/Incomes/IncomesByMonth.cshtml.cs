@@ -70,7 +70,7 @@ namespace Monifier.Web.Pages.Incomes
         
         public async Task<IActionResult> OnPostRefreshAsync()
         {
-            return await Filter.ProcessAsync(ModelState,
+            return await Filter.ProcessAsync(ModelState, nameof(Filter),
                 async () =>
                 {
                     Incomes = await LoadIncomesAsync();

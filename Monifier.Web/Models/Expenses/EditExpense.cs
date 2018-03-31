@@ -40,15 +40,15 @@ namespace Monifier.Web.Models.Expenses
 
         public IEnumerable<ModelValidationResult> Validate()
         {
-            var dateTimeResult = DateTime.ValidateDateTime("Expense.DateTime");
+            var dateTimeResult = DateTime.ValidateDateTime(nameof(DateTime));
             if (dateTimeResult != null) yield return dateTimeResult;
-            var costResult = Cost.ValidateMoney("Expense.Cost");
+            var costResult = Cost.ValidateMoney(nameof(Cost));
             if (costResult != null) yield return costResult;
             if (Category == null && Product == null)
             {
                 const string message = "Укажите категорию или товар";
-                yield return new ModelValidationResult("Expense.Category", message);
-                yield return new ModelValidationResult("Expense.Product", message);
+                yield return new ModelValidationResult(nameof(Category), message);
+                yield return new ModelValidationResult(nameof(Product), message);
             }
         }
 
