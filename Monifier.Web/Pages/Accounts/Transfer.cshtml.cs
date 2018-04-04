@@ -78,8 +78,8 @@ namespace Monifier.Web.Pages.Accounts
                 {
                     var accountFrom = await _accountQueries.GetByName(Transfer.AccountFrom);
                     var accountTo = await _accountQueries.GetByName(Transfer.AccountTo);
-                    if (accountFrom == null) vrList.Add(new ModelValidationResult("Transfer.AccountFrom", "Такого счета нет"));
-                    if (accountTo == null) vrList.Add(new ModelValidationResult("Transfer.AccountTo", "Такого счета нет"));
+                    if (accountFrom == null) vrList.Add(new ModelValidationResult(nameof(Transfer.AccountFrom), "Такого счета нет"));
+                    if (accountTo == null) vrList.Add(new ModelValidationResult(nameof(Transfer.AccountTo), "Такого счета нет"));
                 });
         }
 

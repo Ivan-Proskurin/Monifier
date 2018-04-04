@@ -85,7 +85,7 @@ namespace Monifier.Web.Pages.Products
 
         public async Task<IActionResult> OnPostAddProductAsync()
         {
-            const string prop = "Category.AddProduct";
+            const string prop = nameof(Category.AddProduct);
             
             return await Category.ProcessAsync(ModelState, nameof(Category),
                 async () =>

@@ -43,7 +43,7 @@ namespace Monifier.Web.Pages.Products
                     if (string.IsNullOrEmpty(Product.Name)) return;
                     var product = await _productQueries.GetByName(Product.Name);
                     if (product != null && product.Id != Product.Id)
-                        vrList.Add(new ModelValidationResult("Product.Name", "Товар с таким именем уже есть"));
+                        vrList.Add(new ModelValidationResult(nameof(Product.Name), "Товар с таким именем уже есть"));
                 }
             );
         }

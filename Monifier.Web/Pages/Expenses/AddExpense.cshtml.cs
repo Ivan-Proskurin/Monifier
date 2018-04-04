@@ -125,7 +125,7 @@ namespace Monifier.Web.Pages.Expenses
                     var account = await _accountQueries.GetByName(Expense.Account);
                     if (account == null)
                     {
-                        vrList.Add(new ModelValidationResult("Expense.Account", "Нет такого счета"));
+                        vrList.Add(new ModelValidationResult(nameof(Expense.Account), "Нет такого счета"));
                     }
 
                     if (Expense.Correcting)
@@ -133,7 +133,7 @@ namespace Monifier.Web.Pages.Expenses
                         var flow = await _expenseFlowQueries.GetByName(Expense.FlowName);
                         if (flow == null)
                         {
-                            vrList.Add(new ModelValidationResult("Expense.FlowName", "Нет такой статьи расхода"));
+                            vrList.Add(new ModelValidationResult(nameof(Expense.FlowName), "Нет такой статьи расхода"));
                         }
                         else
                         {
@@ -154,7 +154,7 @@ namespace Monifier.Web.Pages.Expenses
                             }
                             else
                             {
-                                vrList.Add(new ModelValidationResult("Expense.Category", 
+                                vrList.Add(new ModelValidationResult(nameof(Expense.Category),
                                     "Нет такой категории, добавить ее?"));
                                 Expense.CategoryToAdd = Expense.Category;
                             }
@@ -172,7 +172,7 @@ namespace Monifier.Web.Pages.Expenses
                             }
                             else
                             {
-                                vrList.Add(new ModelValidationResult("Expense.Product", 
+                                vrList.Add(new ModelValidationResult(nameof(Expense.Product),
                                     "Нет такого товара, добавить его?"));
                                 Expense.ProductToAdd = Expense.Product;
                             }

@@ -99,14 +99,14 @@ namespace Monifier.Web.Pages.Accounts
                         var account = await _accountQueries.GetByName(Topup.AccountName);
                         if (account == null)
                         {
-                            vrList.Add(new ModelValidationResult("Topup.AccountName", "Нет такого счета"));
+                            vrList.Add(new ModelValidationResult(nameof(Topup.AccountName), "Нет такого счета"));
                         }
                     }
                     
                     var incomeType = await _incomeTypeQueries.GetByName(Topup.IncomeType);
                     if (incomeType == null && !Topup.AddNonexistentIncomeType)
                     {
-                        vrList.Add(new ModelValidationResult("Topup.IncomeType", "Нет такой статьи"));
+                        vrList.Add(new ModelValidationResult(nameof(Topup.IncomeType), "Нет такой статьи"));
                         SuggestAddIncomeType = true;
                         Topup.AddNonexistentIncomeType = true;
                     }

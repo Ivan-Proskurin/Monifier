@@ -157,7 +157,7 @@ namespace Monifier.Web.Pages.Expenses
                             }
                             else
                             {
-                                vrList.Add(new ModelValidationResult("Good.Category", 
+                                vrList.Add(new ModelValidationResult(nameof(Good.Category),
                                     "Нет такой категории, добавить ее?"));
                                 Good.CategoryToAdd = Good.Category;
                             }
@@ -175,7 +175,7 @@ namespace Monifier.Web.Pages.Expenses
                             }
                             else
                             {
-                                vrList.Add(new ModelValidationResult("Good.Product", 
+                                vrList.Add(new ModelValidationResult(nameof(Good.Product),
                                     "Нет такого товара, добавить его?"));
                                 Good.ProductToAdd = Good.Product;
                             }
