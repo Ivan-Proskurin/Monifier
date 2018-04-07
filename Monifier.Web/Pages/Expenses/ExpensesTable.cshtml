@@ -1,17 +1,22 @@
-@page "{dateFrom?}/{dateTo?}/{pageNumber:int?}"
+@page "{dateFrom?}/{dateTo?}/{pageNumber:int?}/{flowId:int?}"
 @using Common.Extensions
 @using TagHelpers
 @model Expenses.ExpensesTableModel
 @{
     ViewBag.Title = "Расходы";
+    var flows = Model.Flows.Select(x => x.Name).ToList();
 }
 
 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
 <form method="post">
     <div class="input-group">
-        <div class="input-group-addon addon-caption-container">
-            Расходы
+        <div class="input-group-addon addon-terminator-container">
+            &nbsp;
+        </div>
+        <div class="input-group-addon addon-select-container">
+            <autocomplete asp-for="Filter.Flow" value-list="@flows" value="@Model.Filter.Flow"
+                          hide-button="true" placeholder="Статья расходов"/>
         </div>
         <div class="input-group-addon addon-label-container">
             От:
@@ -40,6 +45,7 @@
                    asp-route-dateFrom="@Model.Filter.DateFromAsDateTime.Value.StartOfTheYear().ToStandardString()"
                    asp-route-dateTo="@Model.Filter.DateToAsDateTime.Value.EndOfTheYear().ToStandardString()"
                    asp-route-pageNumber="1"
+                   asp-route-flowId="@Model.Filter.FlowId"
                    class="btn btn-outline-secondary cursor-pointer">
                     По месяцам
                 </a>
@@ -77,18 +83,21 @@
                  <td>
                      <a asp-page="./ExpensesForDay"
                         asp-route-day="@item.DateFrom"
+                        asp-route-flowId="@Model.Filter.FlowId"
                         class="edit-item-link">
                          @item.Period</a>
                  </td>
                  <td>
                      <a asp-page="./ExpensesForDay"
                         asp-route-day="@item.DateFrom"
+                        asp-route-flowId="@Model.Filter.FlowId"
                         class="edit-item-link">
                          @item.Caption</a>
                  </td>
                  <td>
                      <a asp-page="./ExpensesForDay"
                         asp-route-day="@item.DateFrom"
+                        asp-route-flowId="@Model.Filter.FlowId"
                         class="edit-item-link">
                          @item.Goods</a>
                  </td>
@@ -117,7 +126,7 @@
 @if (Model.IsDataValid)
 {
     <report-pagination asp-page="./ExpensesTable" date-from="@Model.Filter.DateFrom" date-to="@Model.Filter.DateTo"
-                       pagination="@Model.Expenses.Pagination">
+                       flow-id="@Model.Filter.FlowId" pagination="@Model.Expenses.Pagination">
     </report-pagination>
 }
 
@@ -126,6 +135,7 @@
     <script type="text/javascript">
         activateLink("#expensesLink");
 
+        makeInputAutocomplete("Filter.Flow", null, refresh, 100);
         makeInputDatetimePicker("Filter.DateFrom", refresh);
         makeInputDatetimePicker("Filter.DateTo", refresh);
 

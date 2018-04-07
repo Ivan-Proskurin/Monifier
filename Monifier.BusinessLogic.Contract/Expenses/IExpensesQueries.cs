@@ -7,8 +7,8 @@ namespace Monifier.BusinessLogic.Contract.Expenses
 {
     public interface IExpensesQueries
     {
-        Task<ExpensesListModel> GetExpensesByDay(DateTime dateFrom, DateTime dateTo, PaginationArgs paginationArgs);
-        Task<ExpensesListModel> GetExpensesByMonth(DateTime dateFrom, DateTime dateTo, PaginationArgs paginationArgs);
-        Task<ExpensesListModel> GetExpensesForDay(DateTime day);
+        Task<ExpensesListModel> GetExpensesByDay(ExpensesFilter filter, PaginationArgs paginationArgs);
+        Task<ExpensesListModel> GetExpensesByMonth(ExpensesFilter filter, PaginationArgs paginationArgs);
+        Task<ExpensesListModel> GetExpensesForDay(ExpensesFilter filter);
     }
 }

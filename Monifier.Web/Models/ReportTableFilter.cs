@@ -12,11 +12,16 @@ namespace Monifier.Web.Models
         {
         }
 
-        public ReportTableFilter(string dateFrom, string dateTo)
+        public ReportTableFilter(string dateFrom, string dateTo, int? flowId = null)
         {
             DateFrom = dateFrom;
             DateTo = dateTo;
+            FlowId = flowId;
         }
+
+        public int? FlowId { get; set; }
+
+        public string Flow { get; set; }
         
         [Required(ErrorMessage = "Укажите начальную дату")]
         public string DateFrom { get; set; }
@@ -60,6 +65,15 @@ namespace Monifier.Web.Models
             {
                 DateFromAsDateTime = DateTime.Now.StartOfTheYear(),
                 DateToAsDateTime = DateTime.Now.EndOfTheYear()
+            };
+        }
+
+        public static ReportTableFilter CurrentDay()
+        {
+            return new ReportTableFilter
+            {
+                DateFromAsDateTime = DateTime.Today,
+                DateToAsDateTime = DateTime.Today
             };
         }
 

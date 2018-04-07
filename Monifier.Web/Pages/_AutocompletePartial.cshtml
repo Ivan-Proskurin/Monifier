@@ -4,6 +4,7 @@
     var id = Model.Name.Replace(".", "_");
     var btnId = id + "_Btn";
     var listId = id + "_list";
+    var placeholder = string.IsNullOrEmpty(Model.Value) ? Model.Placeholder : null;
 }
 <div class="input-group">
     <datalist id="@listId">
@@ -12,8 +13,12 @@
             <option>@value</option>
         }
     </datalist>    
-    <input id="@id" name="@Model.Name" class="form-control" type="text" list="@listId" autocomplete="off" value="@Model.Value"/>
-    <span class="input-group-addon btn btn-secondary cursor-pointer" id="@btnId">
-        <i class="fa fa-chevron-down"></i>
-    </span>
+    <input id="@id" name="@Model.Name" class="form-control" type="text" list="@listId" autocomplete="off" 
+           value="@Model.Value" placeholder="@placeholder"/>
+    @if (!Model.HideButton)
+    {
+        <span class="input-group-addon btn btn-secondary cursor-pointer" id="@btnId">
+            <i class="fa fa-chevron-down"></i>
+        </span>
+    }
 </div>

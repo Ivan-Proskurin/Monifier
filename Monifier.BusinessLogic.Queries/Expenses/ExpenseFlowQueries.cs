@@ -6,6 +6,7 @@ using Monifier.BusinessLogic.Contract.Auth;
 using Monifier.BusinessLogic.Contract.Expenses;
 using Monifier.BusinessLogic.Model.Expenses;
 using Monifier.BusinessLogic.Model.Pagination;
+using Monifier.Common.Extensions;
 using Monifier.DataAccess.Contract;
 using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Expenses;
@@ -85,6 +86,16 @@ namespace Monifier.BusinessLogic.Queries.Expenses
         {
             return (await _unitOfWork.GetNamedModelQueryRepository<ExpenseFlow>().GetByName(
                 _currentSession.UserId, name)).ToModel();
+        }
+
+        public async Task<int?> GetIdByName(string name)
+        {
+            return name.IsNullOrEmpty() ? null : (await GetByName(name))?.Id;
+        }
+
+        public async Task<string> GetNameById(int? id)
+        {
+            return id == null ? null : (await GetById(id.Value))?.Name;
         }
 
         public async Task<int> GetNextNumber()

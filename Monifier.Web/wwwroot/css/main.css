@@ -191,6 +191,13 @@ a.edit-item-link {
     border-right: none;
 }
 
+.addon-select-container {
+    padding: 5px;
+    border-left: none;
+    border-right: none;
+    text-align: left;
+}
+
 .addon-label-container {
     border-left: none;
     border-right: none;

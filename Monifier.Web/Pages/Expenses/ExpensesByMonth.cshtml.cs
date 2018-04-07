@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -15,15 +16,20 @@ namespace Monifier.Web.Pages.Expenses
     {
         private readonly IExpensesQueries _expensesQueries;
         private readonly IUserSettings _userSettings;
+        private readonly IExpenseFlowQueries _expenseFlowQueries;
 
-        public ExpensesByMonthModel(IExpensesQueries expensesQueries, IUserSettings userSettings)
+        public ExpensesByMonthModel(IExpensesQueries expensesQueries, IUserSettings userSettings,
+            IExpenseFlowQueries expenseFlowQueries)
         {
             _expensesQueries = expensesQueries;
             _userSettings = userSettings;
+            _expenseFlowQueries = expenseFlowQueries;
         }
 
         [BindProperty]
         public ReportTableFilter Filter { get; set; }
+
+        public List<ExpenseFlowModel> Flows { get; private set; }
 
         public ExpensesListModel Expenses { get; private set; }
 
@@ -31,10 +37,17 @@ namespace Monifier.Web.Pages.Expenses
 
         private async Task<ExpensesListModel> LoadExpensesAsync(int pageNumber = 1)
         {
+            Flows = await _expenseFlowQueries.GetAll();
             if (Filter.DateFromAsDateTime != null && Filter.DateToAsDateTime != null)
             {
                 var expenses = await _expensesQueries.GetExpensesByMonth(
-                    Filter.DateFromAsDateTime.Value, Filter.DateToAsDateTime.Value, new PaginationArgs
+                    new ExpensesFilter
+                    {
+                        FlowId = Filter.FlowId,
+                        DateFrom = Filter.DateFromAsDateTime.Value,
+                        DateTo = Filter.DateToAsDateTime.Value
+                    },
+                    new PaginationArgs
                     {
                         IncludeDeleted = false,
                         ItemsPerPage = _userSettings.ItemsPerPage,
@@ -50,13 +63,16 @@ namespace Monifier.Web.Pages.Expenses
             return null;
         }
 
-        public async Task OnGetAsync(string dateFrom, string dateTo, int pageNumber = 1)
+        public async Task OnGetAsync(string dateFrom, string dateTo, int pageNumber = 1, int? flowId = null)
         {
             if (string.IsNullOrEmpty(dateFrom) || string.IsNullOrEmpty(dateTo))
                 Filter = ReportTableFilter.CurrentYear();
             else
             {
-                Filter = new ReportTableFilter(dateFrom, dateTo);
+                Filter = new ReportTableFilter(dateFrom, dateTo, flowId)
+                {
+                    Flow = await _expenseFlowQueries.GetNameById(flowId)
+                };
                 foreach (var error in Filter.Validate())
                 {
                     ModelState.AddModelError(error.PropertyName, error.Message);
@@ -73,6 +89,7 @@ namespace Monifier.Web.Pages.Expenses
             return await Filter.ProcessAsync(ModelState, nameof(Filter),
                 async () =>
                 {
+                    Filter.FlowId = await _expenseFlowQueries.GetIdByName(Filter.Flow);
                     Expenses = await LoadExpensesAsync();
                     return Page();
                 },

@@ -13,6 +13,7 @@ namespace Monifier.Web.Pages.TagHelpers
         public string AspPage { get; set; }
         public string DateFrom { get; set; }
         public string DateTo { get; set; }
+        public int? FlowId { get; set; }
         
         public PaginationInfo Pagination { get; set; }
 
@@ -24,7 +25,8 @@ namespace Monifier.Web.Pages.TagHelpers
                 Page = AspPage,
                 Pagination = Pagination,
                 DateFrom = DateFrom,
-                DateTo = DateTo
+                DateTo = DateTo,
+                FlowId = FlowId
             };
         }
     }

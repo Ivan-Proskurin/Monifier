@@ -15,6 +15,10 @@ namespace Monifier.Web.Pages.TagHelpers
         
         public IEnumerable<string> ValueList { get; set; } 
 
+        public bool HideButton { get; set; }
+
+        public string Placeholder { get; set; }
+
         protected override void Setup()
         {
             Name = "_AutocompletePartial";
@@ -22,7 +26,9 @@ namespace Monifier.Web.Pages.TagHelpers
             {
                 Name = AspFor,
                 Value = Value,
-                ValueList = ValueList
+                ValueList = ValueList,
+                HideButton = HideButton,
+                Placeholder = Placeholder
             };
         }
     }

@@ -1,36 +1,50 @@
-@page "{day?}"
+@page "{day?}/{flowId:int?}"
 @using System.Linq
 @using Common.Extensions
 @model Expenses.BillExpensesForDayModel
 @{
     ViewBag.Title = "Расходы";
+    var flows = Model.Flows?.Select(x => x.Name).ToList() ?? new List<string>();
 }
 
-@*<div asp-validation-summary="ModelOnly" class="text-danger"></div>*@
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
 <form id="navForm" method="post">
+    <input type="hidden" asp-for="Filter.DateTo"/>
     <div class="container">
         <div class="row">
             <div class="form-group row col-md-12 col-sm-10 col-10">
                 <div class="input-group">
-                    <span class="input-group-addon" style="font-size: 18px;">Расходы&nbsp;за</span>
-                    <div class="form-group input-group-addon">
-                        <date-time-picker asp-for="Day" value="@Model.Day"/>
+                    <div class="input-group-addon addon-select-container">
+                        <autocomplete asp-for="Filter.Flow" value-list="@flows" value="@Model.Filter.Flow"
+                                      hide-button="true" placeholder="Статья расходов" />
                     </div>
-                    <button type="submit" asp-page-handler="refresh"
-                            class="input-group-addon btn btn-secondary cursor-pointer" id="refresh-button">
-                        <i class="fa fa-refresh gapped"></i>
-                    </button>
+                    <div class="form-group input-group-addon">
+                        <date-time-picker asp-for="Filter.DateFrom" class="form-control" autocomplete="off"
+                                          value="@Model.Filter.DateFrom" />
+                    </div>
+                    <div class="input-group-addon addon-button-container">
+                        <button type="submit" asp-page-handler="refresh"
+                                class="btn btn-outline-secondary cursor-pointer" id="refresh-button">
+                            <i class="fa fa-refresh"></i>
+                        </button>
+                    </div>
                     @if (Model.IsDataValid)
                     {
-                        <a asp-page="./ExpensesTable"
-                           asp-route-dateFrom="@Model.Day.ParseDtFromStandardString().StartOfTheWeek().ToStandardString()"
-                           asp-route-dateTo="@Model.Day.ParseDtFromStandardString().EndOfTheWeek().ToStandardString()"
-                           asp-route-pageNumber="1"
-                           class="input-group-addon btn btn-secondary cursor-pointer">
-                            По дням
-                        </a>
+                        <div class="input-group-addon addon-button-container">
+                            <a asp-page="./ExpensesTable"
+                                asp-route-dateFrom="@Model.Filter.DateFrom.ParseDtFromStandardString().StartOfTheWeek().ToStandardString()"
+                                asp-route-dateTo="@Model.Filter.DateFrom.ParseDtFromStandardString().EndOfTheWeek().ToStandardString()"
+                                asp-route-pageNumber="1"
+                                asp-route-flowId="@Model.Filter.FlowId"
+                                class="btn btn-outline-secondary cursor-pointer">
+                                По дням
+                            </a>
+                        </div>
                     }
+                    <div class="input-group-addon addon-terminator-container">
+                        &nbsp;
+                    </div>
                 </div>
             </div>
         </div>
@@ -108,9 +122,11 @@
 {
     <script type="text/javascript">
         activateLink("#expensesLink");
-        makeInputDatetimePicker("Day",
-            function() {
-                document.getElementById("refresh-button").click();
-            });
+        makeInputAutocomplete("Filter.Flow", null, refresh, 100);
+        makeInputDatetimePicker("Filter.DateFrom", refresh);
+
+        function refresh() {
+            document.getElementById("refresh-button").click();
+        }
     </script>
 }

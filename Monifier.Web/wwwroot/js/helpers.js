@@ -3,14 +3,16 @@
     $(linkId).addClass("active");
 }
 
-function makeInputAutocomplete(inputId, list, onSelect) {
+function makeInputAutocomplete(inputId, list, onSelect, maxItems) {
     inputId = inputId.replace(".", "_");
     var input = document.getElementById(inputId);
+    var itemsCount = maxItems ? maxItems : 10;
 
     var comboplete = new Awesomplete(input, {
         minChars: 0,
         autoFirst: true,
-        sort: false
+        sort: false,
+        maxItems: itemsCount
     });
     if (list) {
         comboplete.list = list;

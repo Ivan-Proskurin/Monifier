@@ -10,5 +10,7 @@ namespace Monifier.BusinessLogic.Contract.Expenses
         Task<int> GetNextNumber();
         Task<ExpenseFlowModel> GetWithCategories(int id);
         Task<ExpenseFlowList> GetList(PaginationArgs args);
+        Task<int?> GetIdByName(string name);
+        Task<string> GetNameById(int? id);
     }
 }
