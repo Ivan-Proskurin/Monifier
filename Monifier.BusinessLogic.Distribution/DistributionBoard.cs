@@ -23,21 +23,21 @@ namespace Monifier.BusinessLogic.Distribution
         public bool Distributed { get; set; }
         public decimal BaseAmount { get; set; }
 
-        public async Task Load(IUnitOfWork unitOfWork)
+        public async Task Load(IUnitOfWork unitOfWork, int userId)
         {
-            Accounts = await GetAccounts(unitOfWork);;
-            ExpenseFlows = await GetFlows(unitOfWork);
+            Accounts = await GetAccounts(unitOfWork, userId);
+            ExpenseFlows = await GetFlows(unitOfWork, userId);
             Distributed = false;
             BaseAmount = Accounts.Sum(x => x.Balance);
         }
         
-        private static async Task<List<DistributionSource>> GetAccounts(IUnitOfWork unitOfWork)
+        private static async Task<List<DistributionSource>> GetAccounts(IUnitOfWork unitOfWork, int userId)
         {
             var accountQueries = unitOfWork.GetQueryRepository<Account>();
             var settingsQueries = unitOfWork.GetQueryRepository<AccountFlowSettings>();
             
             var accounts = await accountQueries.Query
-                .Where(x => !x.IsDeleted && x.AvailBalance > 0)
+                .Where(x => x.OwnerId == userId && !x.IsDeleted && x.AvailBalance > 0)
                 .OrderBy(x => x.Number)
                 .ToListAsync();
 
@@ -59,13 +59,13 @@ namespace Monifier.BusinessLogic.Distribution
             }).ToList();
         }
 
-        private static async Task<List<DistributionRecipient>> GetFlows(IUnitOfWork unitOfWork) 
+        private static async Task<List<DistributionRecipient>> GetFlows(IUnitOfWork unitOfWork, int userId)
         {
             var flowQueries = unitOfWork.GetQueryRepository<ExpenseFlow>();
             var settingsQueries = unitOfWork.GetQueryRepository<ExpenseFlowSettings>();
 
             var flows = await flowQueries.Query
-                .Where(x => !x.IsDeleted)
+                .Where(x => x.OwnerId == userId && !x.IsDeleted)
                 .OrderByDescending(x => x.Version)
                 .ThenBy(x => x.Id)
                 .ToListAsync();

@@ -15,6 +15,7 @@ namespace Monifier.IntegrationTests.Infrastructure
         public int TvId { get; set; }
 
         public int FoodExpenseFlowId { get; set; }
+        public int TechExpenseFlowId { get; set; }
 
         public int DebitCardAccountId { get; set; }
         public int CashAccountId { get; set; }

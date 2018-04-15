@@ -1,0 +1,135 @@
+﻿@page "{dateFrom}/{dateTo}/{pageNumber:int?}"
+@using Common.Extensions
+@model Expenses.ExpensesByFlowsPageModel
+@{
+    ViewBag.Title = "Расходы";
+}
+
+<form method="post">
+    <div class="input-group">
+        <div class="input-group-addon addon-label-container">
+            От:
+        </div>
+        <div class="input-group-addon addon-dtpicker-container">
+            <date-time-picker asp-for="Filter.DateFrom" class="form-control" autocomplete="off"
+                              value="@Model.Filter.DateFrom" />
+        </div>
+        <div class="input-group-addon addon-label-container">
+            До:
+        </div>
+        <div class="input-group-addon addon-dtpicker-container">
+            <date-time-picker asp-for="Filter.DateTo" class="form-control"
+                              autocomplete="off" value="@Model.Filter.DateTo" />
+        </div>
+        <div class="input-group-addon addon-button-container">
+            <button type="submit" asp-page-handler="refresh"
+                    class="btn btn-outline-secondary cursor-pointer" id="refresh-button">
+                <i class="fa fa-refresh"></i>
+            </button>
+        </div>
+        @if (Model.IsDataValid)
+        {        
+            <div class="input-group-addon addon-button-container">
+                    <a asp-page="./ExpensesTable"
+                       asp-route-dateFrom="@Model.Filter.DateFrom"
+                       asp-route-dateTo="@Model.Filter.DateTo"
+                       asp-route-pageNumber="1"
+                       class="btn btn-outline-secondary cursor-pointer">
+                        По дням
+                    </a>
+            </div>
+        }
+        <div class="input-group-addon addon-terminator-container"></div>
+    </div>
+</form>
+
+@if (!Model.IsDataValid)
+{
+    <div class="text-danger align-center validation-summary-errors">Введите корректные даты!</div>
+}
+
+<table class="cashed-table table table-striped table-hover">
+    <thead class="thead-dark">
+        <tr>
+            <th width="35%">Статья</th>
+            <th width="47%">Последний чек</th>
+            <th width="18%" class="align-right">Сумма</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.IsDataValid)
+        {
+            @for (var i = 0; i < Model.Expenses.Items.Count; i++)
+            {
+                var item = Model.Expenses.Items[i];
+                var trClass = item.IsDangerExpense ? "table-danger" : "table-default";
+
+                <tr class="@trClass">
+                    <td>
+                        <a asp-page="./ExpensesTable"
+                           asp-route-dateFrom="@Model.Filter.DateFrom"
+                           asp-route-dateTo="@Model.Filter.DateTo"
+                           asp-route-flowId="@item.FlowId"
+                           class="edit-item-link">
+                            @item.Flow
+                        </a>
+                    </td>
+                    <td>
+                        <a asp-page="./ExpensesTable"
+                           asp-route-dateFrom="@Model.Filter.DateFrom"
+                           asp-route-dateTo="@Model.Filter.DateTo"
+                           asp-route-flowId="@item.FlowId"
+                           class="edit-item-link">
+                            @item.LastBill.ToStandardString()
+                        </a>
+                    </td>
+                    <td class="align-right">
+                        <a asp-page="./ExpensesTable"
+                           asp-route-dateFrom="@Model.Filter.DateFrom"
+                           asp-route-dateTo="@Model.Filter.DateTo"
+                           asp-route-flowId="@item.FlowId"
+                           class="edit-item-link">
+                            @item.Total.ToMoney()
+                        </a>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+    <tfoot>
+        <tr class="table-info">
+            @if (@Model.IsDataValid)
+            {
+                <td colspan="2" class="totals-caption-left">@Model.Expenses.Totals.Caption</td>
+                <td class="totals-caption">@Model.Expenses.Totals.Total.ToMoney()</td>
+            }
+            else
+            {
+                <td colspan="2" class="totals-caption-left">Итого за период:</td>
+                <td class="totals-caption">-</td>
+            }
+        </tr>
+    </tfoot>
+</table>
+
+@if (Model.IsDataValid)
+{
+    <report-pagination asp-page="./ExpensesByFlows" date-from="@Model.Filter.DateFrom" date-to="@Model.Filter.DateTo"
+                       pagination="@Model.Expenses.Pagination">
+    </report-pagination>
+}
+
+@section Scripts
+{
+    <script type="text/javascript">
+        activateLink("#expensesLink");
+
+        makeInputDatetimePicker("Filter.DateFrom", refresh);
+        makeInputDatetimePicker("Filter.DateTo", refresh);
+
+        function refresh() {
+            document.getElementById("refresh-button").click();
+        }
+
+    </script>
+}

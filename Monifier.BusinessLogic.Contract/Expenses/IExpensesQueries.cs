@@ -10,5 +10,6 @@ namespace Monifier.BusinessLogic.Contract.Expenses
         Task<ExpensesListModel> GetExpensesByDay(ExpensesFilter filter, PaginationArgs paginationArgs);
         Task<ExpensesListModel> GetExpensesByMonth(ExpensesFilter filter, PaginationArgs paginationArgs);
         Task<ExpensesListModel> GetExpensesForDay(ExpensesFilter filter);
+        Task<ExpensesByFlowsModel> GetExpensesByFlows(DateTime dateFrom, DateTime dateTo, PaginationArgs paginationArgs);
     }
 }

@@ -82,7 +82,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                     DateTime = x.Key
                 });
 
-            var totalCount = goodsGroupQuery.Count();
+            var totalCount = await goodsGroupQuery.CountAsync();
             var pagination = new PaginationInfo(paginationArgs, totalCount);
             var goodsGroups = await goodsGroupQuery
                 .Skip(pagination.Skipped).Take(pagination.Taken)
@@ -112,7 +112,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                     DateTime = new DateTime(x.Key.Year, x.Key.Month, 1)
                 });
 
-            var totalCount = goodsGroupQuery.Count();
+            var totalCount = await goodsGroupQuery.CountAsync();
             var pagination = new PaginationInfo(paginationArgs, totalCount);
             var goodsGroups = await goodsGroupQuery
                 .Skip(pagination.Skipped).Take(pagination.Taken)
@@ -295,6 +295,52 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                                                          && x.DateTime >= today && x.DateTime < tomorrow)
                         .SumAsync(x => x.SumPrice)
                 }
+            };
+
+            return expenses;
+        }
+
+        public async Task<ExpensesByFlowsModel> GetExpensesByFlows(DateTime dateFrom, DateTime dateTo, PaginationArgs paginationArgs)
+        {
+            // отбираем нужные счета          
+            var expensesQueries = _unitOfWork.GetQueryRepository<ExpenseBill>();
+
+            var ownerId = _currentSession.UserId;
+
+            var billByFlowsQuery = expensesQueries.Query
+                .Where(x => x.OwnerId == ownerId && x.DateTime >= dateFrom && x.DateTime < dateTo)
+                .GroupBy(x => x.ExpenseFlowId)
+                .Select(x => new ExpenseByFlowsItemModel
+                {
+                    FlowId = x.Key,
+                    Total = x.Sum(e => e.SumPrice),
+                    Flow = x.First().ExpenseFlow.Name,
+                    LastBill = x.Max(e => e.DateTime),
+                    IsDangerExpense = false
+                })
+                .OrderByDescending(x => x.Total);
+
+            var totalCount = await billByFlowsQuery.CountAsync();
+            var pagination = new PaginationInfo(paginationArgs, totalCount);
+
+            // финальное преобразование из внутренних моделей
+            var expenses = new ExpensesByFlowsModel
+            {
+                Items = await billByFlowsQuery
+                    .Skip(pagination.Skipped)
+                    .Take(pagination.Taken)
+                    .ToListAsync(),
+
+                // считаем тоталы
+                Totals = new TotalsInfoModel
+                {
+                    Caption = $"Итого за период с {dateFrom.ToStandardString()} по {dateTo.ToStandardString()}",
+                    Total = await expensesQueries.Query
+                        .Where(x => x.OwnerId == ownerId && x.DateTime >= dateFrom && x.DateTime < dateTo)
+                        .SumAsync(x => x.SumPrice)
+                },
+
+                Pagination = pagination
             };
 
             return expenses;

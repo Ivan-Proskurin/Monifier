@@ -11,9 +11,6 @@
 
 <form method="post">
     <div class="input-group">
-        <div class="input-group-addon addon-terminator-container">
-            &nbsp;
-        </div>
         <div class="input-group-addon addon-select-container">
             <autocomplete asp-for="Filter.Flow" value-list="@flows" value="@Model.Filter.Flow"
                           hide-button="true" placeholder="Статья расходов"/>
@@ -48,6 +45,18 @@
                    asp-route-flowId="@Model.Filter.FlowId"
                    class="btn btn-outline-secondary cursor-pointer">
                     По месяцам
+                </a>
+            }
+        </div>
+        <div class="input-group-addon addon-button-container">
+            @if (Model.IsDataValid)
+            {
+                <a asp-page="./ExpensesByFlows"
+                   asp-route-dateFrom="@Model.Filter.DateFrom"
+                   asp-route-dateTo="@Model.Filter.DateTo"
+                   asp-route-pageNumber="1"
+                   class="btn btn-outline-secondary cursor-pointer">
+                    По статьям
                 </a>
             }
         </div>

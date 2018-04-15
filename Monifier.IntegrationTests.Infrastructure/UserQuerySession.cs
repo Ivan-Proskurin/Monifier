@@ -5,12 +5,14 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Monifier.BusinessLogic.Auth;
 using Monifier.BusinessLogic.Contract.Auth;
+using Monifier.BusinessLogic.Model.Expenses;
 using Monifier.Common.Extensions;
 using Monifier.DataAccess.Contract;
 using Monifier.DataAccess.EntityFramework;
 using Monifier.DataAccess.Model.Auth;
 using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Contracts;
+using Monifier.DataAccess.Model.Distribution;
 using Monifier.DataAccess.Model.Expenses;
 using Monifier.DataAccess.Model.Incomes;
 
@@ -175,6 +177,52 @@ namespace Monifier.IntegrationTests.Infrastructure
             return entity;
         }
 
+        public async Task<int> CreateExpenseBill(int accountId, int flowId, DateTime dateTime, 
+            Product product, decimal cost)
+        {
+            var bill = new ExpenseBillModel
+            {
+                AccountId = accountId,
+                OwnerId = UserSession.UserId,
+                ExpenseFlowId = flowId,
+                DateTime = dateTime
+            };
+            bill.AddItem(new ExpenseItemModel
+            {
+                CategoryId = product.CategoryId,
+                ProductId = product.Id,
+                Cost = cost
+            });
+            await bill.Save(_unitOfWork);
+            return bill.Id;
+        }
+
+        public AccountFlowSettings CreateAccountFlowSettinsg(int accountId, bool canFlow)
+        {
+            var commands = _unitOfWork.GetCommandRepository<AccountFlowSettings>();
+            var entity = new AccountFlowSettings
+            {
+                AccountId = accountId,
+                CanFlow = canFlow
+            };
+            commands.Create(entity);
+            return entity;
+        }
+
+        public ExpenseFlowSettings CreateExpenseFlowSettings(int flowId, bool canFlow, FlowRule rule, decimal amount)
+        {
+            var commands = _unitOfWork.GetCommandRepository<ExpenseFlowSettings>();
+            var entity = new ExpenseFlowSettings
+            {
+                ExpenseFlowId = flowId,
+                CanFlow = canFlow,
+                Rule = rule,
+                Amount = amount
+            };
+            commands.Create(entity);
+            return entity;
+        }
+
         #endregion
 
         #region Entities
@@ -192,6 +240,7 @@ namespace Monifier.IntegrationTests.Infrastructure
             Tv = CreateProduct(TechCategory.Id, "Телевизор");
 
             FoodExpenseFlow = CreateExpenseFlow("Продукты питания", 1000, DateTime.Today, 1);
+            TechExpenseFlow = CreateExpenseFlow("Техника", 30000, DateTime.Today, 2);
 
             DebitCardAccount = CreateAccount("Дебетовая карта", 15000, DateTime.Today);
             CashAccount = CreateAccount("Наличные", 30000, DateTime.Today);
@@ -215,6 +264,7 @@ namespace Monifier.IntegrationTests.Infrastructure
                 MeatId = Meat.Id,
                 TvId = Tv.Id,
                 FoodExpenseFlowId = FoodExpenseFlow.Id,
+                TechExpenseFlowId = TechExpenseFlow.Id,
                 DebitCardAccountId = DebitCardAccount.Id,
                 CashAccountId = CashAccount.Id,
                 IncomeIds = Incomes.Select(x => x.Id).ToList(),
@@ -243,6 +293,7 @@ namespace Monifier.IntegrationTests.Infrastructure
             Meat = await LoadEntity<Product>(idSet.MeatId);
             Tv = await LoadEntity<Product>(idSet.TvId);
             FoodExpenseFlow = await LoadEntity<ExpenseFlow>(idSet.FoodExpenseFlowId);
+            TechExpenseFlow = await LoadEntity<ExpenseFlow>(idSet.TechExpenseFlowId);
             DebitCardAccount = await LoadEntity<Account>(idSet.DebitCardAccountId);
             CashAccount = await LoadEntity<Account>(idSet.CashAccountId);
 
@@ -267,6 +318,7 @@ namespace Monifier.IntegrationTests.Infrastructure
         public Product Tv { get; private set; }
 
         public ExpenseFlow FoodExpenseFlow { get; private set; }
+        public ExpenseFlow TechExpenseFlow { get; private set; }
 
         public Account DebitCardAccount { get; private set; }
         public Account CashAccount { get; private set; }
