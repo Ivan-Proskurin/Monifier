@@ -10,7 +10,7 @@
 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
 <form id="navForm" method="post">
-    <input type="hidden" asp-for="Filter.DateTo"/>
+    <input type="hidden" asp-for="Filter.DateTo" />
     <div class="container">
         <div class="row">
             <div class="form-group row col-md-12 col-sm-10 col-10">
@@ -33,11 +33,11 @@
                     {
                         <div class="input-group-addon addon-button-container">
                             <a asp-page="./ExpensesTable"
-                                asp-route-dateFrom="@Model.Filter.DateFrom.ParseDtFromStandardString().StartOfTheWeek().ToStandardString()"
-                                asp-route-dateTo="@Model.Filter.DateFrom.ParseDtFromStandardString().EndOfTheWeek().ToStandardString()"
-                                asp-route-pageNumber="1"
-                                asp-route-flowId="@Model.Filter.FlowId"
-                                class="btn btn-outline-secondary cursor-pointer">
+                               asp-route-dateFrom="@Model.Filter.DateFrom.ParseDtFromStandardString().StartOfTheWeek().ToStandardString()"
+                               asp-route-dateTo="@Model.Filter.DateFrom.ParseDtFromStandardString().EndOfTheWeek().ToStandardString()"
+                               asp-route-pageNumber="1"
+                               asp-route-flowId="@Model.Filter.FlowId"
+                               class="btn btn-outline-secondary cursor-pointer">
                                 По дням
                             </a>
                         </div>
@@ -56,70 +56,68 @@
     <div class="text-danger larger-text align-center validation-summary-errors">Переданная дата некорректна!</div>
 }
 
-<table class="cashed-table table table-striped table-hover">
-    <thead class="thead-dark">
-    <tr>
-        <th>Статья расходов</th>
-        <th>Счет</th>
-        <th>Дата/время счета</th>
-        <th>Товары</th>
-        <th class="align-right">Сумма</th>
-    </tr>
-    </thead>
-    <tbody>
-    @if (Model.IsDataValid)
-    {
-        @for (int i = 0; i < Model.Expenses.Expenses.Count; i++)
-         {
-             var item = Model.Expenses.Expenses[i];
-             var trClass = item.IsDangerExpense ? "table-danger" : "table-default";
-             var billId = @item.BillIds.FirstOrDefault();
+@if (Model.IsDataValid)
+{
+    <table class="cashed-table table table-striped table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th>Статья расходов</th>
+                <th>Счет</th>
+                <th>Дата/время счета</th>
+                <th>Товары</th>
+                <th class="align-right">Сумма</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.Expenses.Expenses.Count; i++)
+            {
+                var item = Model.Expenses.Expenses[i];
+                var trClass = item.IsDangerExpense ? "table-danger" : "table-default";
+                var billId = @item.BillIds.FirstOrDefault();
 
-             <tr class="@trClass">
-                 <td>@item.Period</td>
-                 <td>
-                     <a asp-page="./ViewExpenseBill" asp-route-billId="@billId"
-                        class="edit-item-link">
-                         #@billId</a>
-                 </td>
-                 <td>
-                     <a asp-page="./ViewExpenseBill" asp-route-billId="@billId"
-                        class="edit-item-link">
-                         @item.Caption</a>
-                 </td>
-                 <td>
-                     <a asp-page="./ViewExpenseBill" asp-route-billId="@billId"
-                        class="edit-item-link">
-                         @item.Goods</a>
-                 </td>
-                 <td class="align-right">
-                     <a asp-page="./ViewExpenseBill" asp-route-billId="@billId"
-                        class="edit-item-link">
-                         @item.Sum.ToMoney()</a>
-                 </td>
-             </tr>
-         }
-    }
-    </tbody>
-    <tfoot>
-    <tr class="table-info">
-        <td></td><td></td><td></td>
-        @if (Model.IsDataValid)
-        {
-            <td class="totals-caption-left">@Model.Expenses.Totals.Caption</td>
-            <td class="totals-caption">@Model.Expenses.Totals.Total.ToMoney()</td>
-        }
-        else
-        {
-            <td class="totals-caption-left">Итого за день:</td>
-            <td class="totals-caption">-</td>
-        }
-    </tr>
-    </tfoot>
-</table>
+                <tr class="@trClass">
+                    <td>@item.Period</td>
+                    <td>
+                        <a asp-page="./ViewExpenseBill" asp-route-billId="@billId"
+                            class="edit-item-link">
+                            #@billId
+                        </a>
+                    </td>
+                    <td>
+                        <a asp-page="./ViewExpenseBill" asp-route-billId="@billId"
+                            class="edit-item-link">
+                            @item.Caption
+                        </a>
+                    </td>
+                    <td>
+                        <a asp-page="./ViewExpenseBill" asp-route-billId="@billId"
+                            class="edit-item-link">
+                            @item.Goods
+                        </a>
+                    </td>
+                    <td class="align-right">
+                        <a asp-page="./ViewExpenseBill" asp-route-billId="@billId"
+                            class="edit-item-link">
+                            @item.Sum.ToMoney()
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr class="table-info">
+                <td></td>
+                <td></td>
+                <td></td>
+                <td class="totals-caption-left">@Model.Expenses.Totals.Caption</td>
+                <td class="totals-caption">@Model.Expenses.Totals.Total.ToMoney()</td>
+            </tr>
+        </tfoot>
+    </table>
+}
 
 @section Scripts
-{
+    {
     <script type="text/javascript">
         activateLink("#expensesLink");
         makeInputAutocomplete("Filter.Flow", null, refresh, 100);

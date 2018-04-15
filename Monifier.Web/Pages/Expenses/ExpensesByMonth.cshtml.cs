@@ -37,7 +37,6 @@ namespace Monifier.Web.Pages.Expenses
 
         private async Task<ExpensesListModel> LoadExpensesAsync(int pageNumber = 1)
         {
-            Flows = await _expenseFlowQueries.GetAll();
             if (Filter.DateFromAsDateTime != null && Filter.DateToAsDateTime != null)
             {
                 var expenses = await _expensesQueries.GetExpensesByMonth(
@@ -65,6 +64,7 @@ namespace Monifier.Web.Pages.Expenses
 
         public async Task OnGetAsync(string dateFrom, string dateTo, int pageNumber = 1, int? flowId = null)
         {
+            Flows = await _expenseFlowQueries.GetAll();
             if (string.IsNullOrEmpty(dateFrom) || string.IsNullOrEmpty(dateTo))
                 Filter = ReportTableFilter.CurrentYear();
             else
@@ -86,6 +86,7 @@ namespace Monifier.Web.Pages.Expenses
 
         public async Task<IActionResult> OnPostRefreshAsync()
         {
+            Flows = await _expenseFlowQueries.GetAll();
             return await Filter.ProcessAsync(ModelState, nameof(Filter),
                 async () =>
                 {

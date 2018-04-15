@@ -33,7 +33,6 @@ namespace Monifier.Web.Pages.Expenses
 
         private async Task<ExpensesListModel> LoadExpensesAsync()
         {
-            Flows = await _expenseFlowQueries.GetAll();
             if (Filter.DateFromAsDateTime != null && Filter.DateToAsDateTime != null)
             {
                 var expenses = await _expensesQueries.GetExpensesForDay(
@@ -56,6 +55,7 @@ namespace Monifier.Web.Pages.Expenses
 
         public async Task OnGetAsync(string day, int? flowId = null)
         {
+            Flows = await _expenseFlowQueries.GetAll();
             if (day.IsNullOrEmpty())
                 Filter = ReportTableFilter.CurrentDay();
             else
@@ -77,6 +77,7 @@ namespace Monifier.Web.Pages.Expenses
 
         public async Task<IActionResult> OnPostRefreshAsync()
         {
+            Flows = await _expenseFlowQueries.GetAll();
             Filter.DateTo = Filter.DateFrom;
             return await Filter.ProcessAsync(ModelState, nameof(Filter),
                 async () =>

@@ -31,13 +31,13 @@ namespace Monifier.Web.Models
 
         public DateTime? DateFromAsDateTime
         {
-            get => DateFrom?.ParseDtFromStandardString();
+            get => DateFrom?.TryParseDtFromStandardString();
             set => DateFrom = value?.ToStandardString();
         }
 
         public DateTime? DateToAsDateTime
         {
-            get => DateTo?.ParseDtFromStandardString();
+            get => DateTo?.TryParseDtFromStandardString();
             set => DateTo = value?.ToStandardString();
         }
 

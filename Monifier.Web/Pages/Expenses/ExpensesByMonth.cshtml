@@ -42,82 +42,76 @@
 
 @if (!Model.IsDataValid)
 {
+    <br/>
     <div class="text-danger larger-text align-center validation-summary-errors">Введите корректные даты!</div>
 }
 
-<table class="cashed-table table table-striped table-hover">
-    <thead class="thead-dark">
-    <tr>
-        <th>Период</th>
-        <th>Месяц</th>
-        <th>Товары</th>
-        <th class="align-right">Общая сумма</th>
-    </tr>
-    </thead>
-    <tbody>
-    @if (Model.IsDataValid)
-    {
-        @for (int i = 0; i < Model.Expenses.Expenses.Count; i++)
-         {
-             var item = Model.Expenses.Expenses[i];
-             var trClass = item.IsDangerExpense ? "table-danger" : "table-default";
-
-             <tr class="@trClass">
-                 <td>
-                     <a asp-page="./ExpensesTable" class="edit-item-link"
-                        asp-route-dateFrom="@item.DateFrom"
-                        asp-route-dateTo="@item.DateTo"
-                        asp-route-pageNumber="1"
-                        asp-route-flowId="@Model.Filter.FlowId">
-                         @item.Period</a>
-                 </td>
-                 <td class="edit-item-link">
-                     <a asp-page="./ExpensesTable" class="edit-item-link"
-                        asp-route-dateFrom="@item.DateFrom"
-                        asp-route-dateTo="@item.DateTo"
-                        asp-route-pageNumber="1"
-                        asp-route-flowId="@Model.Filter.FlowId">
-                         @item.Caption</a>
-                 </td>
-                 <td>
-                     <a asp-page="./ExpensesTable" class="edit-item-link"
-                        asp-route-dateFrom="@item.DateFrom"
-                        asp-route-dateTo="@item.DateTo"
-                        asp-route-pageNumber="1"
-                        asp-route-flowId="@Model.Filter.FlowId">
-                         @item.Goods</a>
-                 </td>
-                 <td class="edit-item-link align-right">@item.Sum.ToMoney()</td>
-             </tr>
-         }
-    }
-    </tbody>
-    <tfoot>
-    <tr class="table-info">
-        <td></td><td></td>
-        @if (Model.IsDataValid)
-        {
-            <td class="totals-caption-left">@Model.Expenses.Totals.Caption</td>
-            <td class="totals-caption">@Model.Expenses.Totals.Total.ToMoney()</td>
-        }
-        else
-        {
-            <td class="totals-caption-left">Итого за период:</td>
-            <td class="totals-caption">-</td>
-        }
-    </tr>
-    </tfoot>
-</table>
-
 @if (Model.IsDataValid)
 {
+    <table class="cashed-table table table-striped table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th>Период</th>
+                <th>Месяц</th>
+                <th>Товары</th>
+                <th class="align-right">Общая сумма</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.Expenses.Expenses.Count; i++)
+            {
+                var item = Model.Expenses.Expenses[i];
+                var trClass = item.IsDangerExpense ? "table-danger" : "table-default";
+
+                <tr class="@trClass">
+                    <td>
+                        <a asp-page="./ExpensesTable" class="edit-item-link"
+                            asp-route-dateFrom="@item.DateFrom"
+                            asp-route-dateTo="@item.DateTo"
+                            asp-route-pageNumber="1"
+                            asp-route-flowId="@Model.Filter.FlowId">
+                            @item.Period
+                        </a>
+                    </td>
+                    <td class="edit-item-link">
+                        <a asp-page="./ExpensesTable" class="edit-item-link"
+                            asp-route-dateFrom="@item.DateFrom"
+                            asp-route-dateTo="@item.DateTo"
+                            asp-route-pageNumber="1"
+                            asp-route-flowId="@Model.Filter.FlowId">
+                            @item.Caption
+                        </a>
+                    </td>
+                    <td>
+                        <a asp-page="./ExpensesTable" class="edit-item-link"
+                            asp-route-dateFrom="@item.DateFrom"
+                            asp-route-dateTo="@item.DateTo"
+                            asp-route-pageNumber="1"
+                            asp-route-flowId="@Model.Filter.FlowId">
+                            @item.Goods
+                        </a>
+                    </td>
+                    <td class="edit-item-link align-right">@item.Sum.ToMoney()</td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr class="table-info">
+                <td></td>
+                <td></td>
+                <td class="totals-caption-left">@Model.Expenses.Totals.Caption</td>
+                <td class="totals-caption">@Model.Expenses.Totals.Total.ToMoney()</td>
+            </tr>
+        </tfoot>
+    </table>
+
     <report-pagination asp-page="./ExpensesByMonth" date-from="@Model.Filter.DateFrom" date-to="@Model.Filter.DateTo"
                        flow-id="@Model.Filter.FlowId" pagination="@Model.Expenses.Pagination">
     </report-pagination>
 }
 
 @section Scripts
-{
+    {
     <script type="text/javascript">
         activateLink("#expensesLink");
 
