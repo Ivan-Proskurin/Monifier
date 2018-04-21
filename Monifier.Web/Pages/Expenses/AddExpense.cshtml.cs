@@ -78,7 +78,7 @@ namespace Monifier.Web.Pages.Expenses
             Expense = new EditExpense
             {
                 Correcting = correcting,
-                Account = Accounts.GetLastUsedAccount()?.Name,
+                Account = Accounts.GetDefaultAccount()?.Name,
                 ExpenseFlowId = flowId,
                 FlowName = flow?.Name,
                 DateTime = DateTime.Now.ToStandardString(),

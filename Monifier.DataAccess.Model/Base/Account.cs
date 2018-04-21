@@ -32,5 +32,6 @@ namespace Monifier.DataAccess.Model.Base
         [ForeignKey("OwnerId")]
         public User Owner { get; set; }
 
+        public bool IsDefault { get; set; }
     }
 }

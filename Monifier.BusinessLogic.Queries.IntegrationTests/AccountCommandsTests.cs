@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using FluentAssertions;
 using Monifier.BusinessLogic.Model.Accounts;
 using Monifier.BusinessLogic.Model.Base;
@@ -180,6 +181,42 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 account.Should().NotBeNull();
                 account.Balance.ShouldBeEquivalentTo(model.Balance);
                 account.AvailBalance.ShouldBeEquivalentTo(model.Balance);
+            }
+        }
+
+        [Fact]
+        public async void Update_DefaultAccountMakeOtherUndefault()
+        {
+            EntityIdSet ids;
+            using (var session = await CreateDefaultSession())
+            {
+                ids = session.CreateDefaultEntities();
+                session.DebitCardAccount.IsDefault = true;
+                await session.UnitOfWork.SaveChangesAsync();
+            }
+
+            using (var session = await CreateDefaultSession(ids))
+            {
+                var model = new AccountModel
+                {
+                    Id = -1,
+                    Balance = 3000m,
+                    AvailBalance = 3000m,
+                    DateCreated = DateTime.Today,
+                    Name = "test",
+                    Number = 1,
+                    IsDefault = true
+                };
+                var commands = new AccountCommands(session.UnitOfWork, session.UserSession);
+                model = await commands.Update(model);
+
+                var queries = new AccountQueries(session.UnitOfWork, session.UserSession);
+                var accounts = await queries.GetAll();
+
+                var expected = accounts.FirstOrDefault(x => x.Id == model.Id);
+                expected.Should().NotBeNull();
+                expected.ShouldBeEquivalentTo(model);
+                accounts.Where(x => x.Id != model.Id).Select(x => x.IsDefault).ShouldAllBeEquivalentTo(false);
             }
         }
     }

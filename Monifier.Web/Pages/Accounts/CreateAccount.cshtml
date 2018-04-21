@@ -39,6 +39,12 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="form-group form-check col-md-7 col-sm-7 col-7">
+                <input asp-for="Account.IsDefault"/>
+                <label asp-for="Account.IsDefault" class="form-check-label"></label>
+            </div>
+        </div>
         <div class="form-group bottom-buttons-row">
             <input type="submit" value="Создать счет" class="btn btn-outline-danger cursor-pointer"/>
             <a asp-page="./AccountsList" class="btn btn-outline-primary gapped">Отмена</a>

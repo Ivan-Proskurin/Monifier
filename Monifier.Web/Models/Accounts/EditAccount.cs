@@ -29,6 +29,9 @@ namespace Monifier.Web.Models.Accounts
         [Display(Name = "Баланс")]
         [Required(ErrorMessage = "Введите баланс")]
         public string Balance { get; set; }
+
+        [Display(Name = "Использовать по умолчанию")]
+        public bool IsDefault { get; set; }
         
         public IEnumerable<ModelValidationResult> Validate()
         {
@@ -50,12 +53,14 @@ namespace Monifier.Web.Models.Accounts
                 OriginalName = account.Name,
                 Name = account.Name,
                 CreationDate = account.DateCreated.ToStandardString(),
-                Balance = account.Balance.ToStandardString()
+                Balance = account.Balance.ToStandardString(),
+                IsDefault = account.IsDefault
             };
         }
 
         public static void ToAccountModel(this EditAccount account, AccountModel model)
         {
+            model.IsDefault = account.IsDefault;
             model.Number = account.Number;
             model.DateCreated = account.CreationDate.ParseDtFromStandardString();
             model.Name = account.Name;

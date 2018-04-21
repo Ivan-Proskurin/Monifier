@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Monifier.BusinessLogic.Contract.Auth;
 using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Model.Accounts;
@@ -42,8 +43,20 @@ namespace Monifier.BusinessLogic.Queries.Base
                 DateCreated = model.DateCreated,
                 Number = model.Number,
                 IsDeleted = false,
-                OwnerId = _currentSession.UserId
+                OwnerId = _currentSession.UserId,
+                IsDefault = model.IsDefault
             };
+
+            if (account.IsDefault)
+            {
+                var all = await queries.Query.ToListAsync();
+                all.ForEach(x =>
+                {
+                    x.IsDefault = false;
+                    commands.Update(x);
+                });
+            }
+
             if (model.Id < 0)
             {
                 account.AvailBalance = model.Balance;

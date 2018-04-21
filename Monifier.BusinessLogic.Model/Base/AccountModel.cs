@@ -16,6 +16,7 @@ namespace Monifier.BusinessLogic.Model.Base
         public decimal Balance { get; set; }
         public decimal AvailBalance { get; set; }
         public DateTime? LastWithdraw { get; set; }
+        public bool IsDefault { get; set; }
         
         #region IFlowEndPoint
 
@@ -60,13 +61,16 @@ namespace Monifier.BusinessLogic.Model.Base
                 Name = account.Name,
                 Balance = account.Balance,
                 AvailBalance = account.AvailBalance,
-                LastWithdraw = account.LastWithdraw
+                LastWithdraw = account.LastWithdraw,
+                IsDefault = account.IsDefault
             };
         }
         
-        public static AccountModel GetLastUsedAccount(this IEnumerable<AccountModel> accounts)
+        public static AccountModel GetDefaultAccount(this IEnumerable<AccountModel> accounts)
         {
-            return accounts.OrderByDescending(x => x.LastWithdraw).FirstOrDefault();
+            return accounts
+                .OrderByDescending(x => x.IsDefault)
+                .ThenByDescending(x => x.LastWithdraw).FirstOrDefault();
         }
     }
 }

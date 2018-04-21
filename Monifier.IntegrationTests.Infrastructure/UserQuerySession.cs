@@ -134,7 +134,7 @@ namespace Monifier.IntegrationTests.Infrastructure
             return entity;
         }
 
-        public Account CreateAccount(string name, decimal balance, DateTime date)
+        public Account CreateAccount(string name, decimal balance, DateTime date, bool isDefault = false)
         {
             var commands = _unitOfWork.GetCommandRepository<Account>();
             var entity = new Account
@@ -144,7 +144,8 @@ namespace Monifier.IntegrationTests.Infrastructure
                 Balance = balance,
                 AvailBalance = balance,
                 Number = 1,
-                OwnerId = UserSession.UserId
+                OwnerId = UserSession.UserId,
+                IsDefault = isDefault
             };
             commands.Create(entity);
             return entity;

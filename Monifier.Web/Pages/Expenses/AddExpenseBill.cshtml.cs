@@ -92,7 +92,7 @@ namespace Monifier.Web.Pages.Expenses
         private async Task PrepareInputNewBill(int flowId)
         {
             await PrepareEditBill(flowId, () => Task.FromResult(new ExpenseBillModel {ExpenseFlowId = flowId}));
-            Good.Account = Accounts.GetLastUsedAccount()?.Name;
+            Good.Account = Accounts.GetDefaultAccount()?.Name;
         }
 
         private async Task PrepareEditExistingBill(int flowId, int billId)
