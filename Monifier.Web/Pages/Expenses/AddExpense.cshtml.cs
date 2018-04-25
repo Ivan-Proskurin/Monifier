@@ -52,11 +52,20 @@ namespace Monifier.Web.Pages.Expenses
             _inventorizationQueries = inventorizationQueries;
         }
 
-        private async Task PrepareModels(int expenseId)
+        private async Task PrepareModels(int flowId)
         {
             Accounts = await _accountQueries.GetAll();
-            Categories = await _categoriesQueries.GetFlowCategories(expenseId);
-            Products = await _productQueries.GetExpensesFlowProducts(expenseId);
+            if (flowId > 0)
+            {
+                Categories = await _categoriesQueries.GetFlowCategories(flowId);
+                Products = await _productQueries.GetExpensesFlowProducts(flowId);
+            }
+            else
+            {
+                Categories = new List<CategoryModel>();
+                Products = new List<ProductModel>();
+            }
+
             Flows = await _expenseFlowQueries.GetAll();
         }
         
@@ -74,12 +83,12 @@ namespace Monifier.Web.Pages.Expenses
         private async Task PrepareToInputNewExpense(int flowId, bool correcting)
         {
             await PrepareModels(flowId);
-            var flow = correcting ? null : await _expenseFlowQueries.GetById(flowId);
+            var flow = correcting || flowId == 0 ? null : await _expenseFlowQueries.GetById(flowId);
             Expense = new EditExpense
             {
-                Correcting = correcting,
+                Correction = correcting,
+                FlowId = flowId,
                 Account = Accounts.GetDefaultAccount()?.Name,
-                ExpenseFlowId = flowId,
                 FlowName = flow?.Name,
                 DateTime = DateTime.Now.ToStandardString(),
                 Cost = string.Empty,
@@ -97,9 +106,9 @@ namespace Monifier.Web.Pages.Expenses
             }
         }
 
-        public async Task OnGetAsync(int expenseId, bool correcting = false)
+        public async Task OnGetAsync(int flowId, bool correcting = false)
         {
-            await PrepareToInputNewExpense(expenseId, correcting);
+            await PrepareToInputNewExpense(flowId, correcting);
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -112,23 +121,21 @@ namespace Monifier.Web.Pages.Expenses
                 },
                 async () =>
                 {
-                    if (Expense.Correcting)
-                    {
-                        var flow = await _expenseFlowQueries.GetByName(Expense.FlowName);
-                        if (flow != null) Expense.ExpenseFlowId = flow.Id;
-                    }
-                    await PrepareModels(Expense.ExpenseFlowId);
+                    await PrepareModels(Expense.FlowId);
                     return Page();
                 },
                 async vrList =>
                 {
-                    var account = await _accountQueries.GetByName(Expense.Account);
-                    if (account == null)
+                    if (!Expense.Account.IsNullOrEmpty())
                     {
-                        vrList.Add(new ModelValidationResult(nameof(Expense.Account), "Нет такого счета"));
+                        var account = await _accountQueries.GetByName(Expense.Account);
+                        if (account == null)
+                        {
+                            vrList.Add(new ModelValidationResult(nameof(Expense.Account), "Нет такого счета"));
+                        }
                     }
 
-                    if (Expense.Correcting)
+                    if (!Expense.FlowName.IsNullOrEmpty())
                     {
                         var flow = await _expenseFlowQueries.GetByName(Expense.FlowName);
                         if (flow == null)
@@ -137,19 +144,20 @@ namespace Monifier.Web.Pages.Expenses
                         }
                         else
                         {
-                            Expense.ExpenseFlowId = flow.Id;
+                            Expense.FlowId = flow.Id;
                         }
                     }
+
                     CategoryModel category = null;
                     if (!string.IsNullOrEmpty(Expense.Category))
                     {
-                        category = await _categoriesQueries.GetFlowCategoryByName(Expense.ExpenseFlowId, Expense.Category);
+                        category = await _categoriesQueries.GetFlowCategoryByName(Expense.FlowId, Expense.Category);
                         if (category == null)
                         {
                             if (Expense.Category == Expense.CategoryToAdd)
                             {
                                 category = await _categoriesCommands.CreateNewOrBind(
-                                    Expense.ExpenseFlowId, Expense.Category);
+                                    Expense.FlowId, Expense.Category);
                                 Expense.CategoryToAdd = null;
                             }
                             else
@@ -162,7 +170,7 @@ namespace Monifier.Web.Pages.Expenses
                     }
                     if (!string.IsNullOrEmpty(Expense.Product))
                     {
-                        var product = await _productQueries.GetFlowProductByName(Expense.ExpenseFlowId, Expense.Product);
+                        var product = await _productQueries.GetFlowProductByName(Expense.FlowId, Expense.Product);
                         if (product == null)
                         {
                             if (Expense.Product == Expense.ProductToAdd && category != null)

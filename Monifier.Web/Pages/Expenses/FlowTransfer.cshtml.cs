@@ -82,8 +82,11 @@ namespace Monifier.Web.Pages.Expenses
                 },
                 async vrList =>
                 {
-                    var account = await _accountQueries.GetByName(Transfer.AccountFrom); 
-                    if (account == null) vrList.Add(new ModelValidationResult(nameof(Transfer.AccountFrom), "Нет такого счета"));
+                    if (!Transfer.AccountFrom.IsNullOrEmpty())
+                    {
+                        var account = await _accountQueries.GetByName(Transfer.AccountFrom);
+                        if (account == null) vrList.Add(new ModelValidationResult(nameof(Transfer.AccountFrom), "Нет такого счета"));
+                    }
                 }
             );
         }

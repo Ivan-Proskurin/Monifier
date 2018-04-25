@@ -23,15 +23,11 @@ namespace Monifier.Web.Models
                 throw new ArgumentNullException(nameof(modelState));
             if (propertyName.IsNullOrEmpty())
                 throw new ArgumentNullException(nameof(propertyName));
-
-            if (!modelState.IsValid) return await failure();
-            
+        
             foreach (var vr in model.Validate())
             {
                 modelState.AddModelError($"{propertyName}.{vr.PropertyName}", vr.Message);
             }
-            
-            if (!modelState.IsValid) return await failure();
             
             if (validate != null)
             {

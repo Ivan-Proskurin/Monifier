@@ -102,13 +102,16 @@ namespace Monifier.Web.Pages.Accounts
                             vrList.Add(new ModelValidationResult(nameof(Topup.AccountName), "Нет такого счета"));
                         }
                     }
-                    
-                    var incomeType = await _incomeTypeQueries.GetByName(Topup.IncomeType);
-                    if (incomeType == null && !Topup.AddNonexistentIncomeType)
+
+                    if (!Topup.IncomeType.IsNullOrEmpty())
                     {
-                        vrList.Add(new ModelValidationResult(nameof(Topup.IncomeType), "Нет такой статьи"));
-                        SuggestAddIncomeType = true;
-                        Topup.AddNonexistentIncomeType = true;
+                        var incomeType = await _incomeTypeQueries.GetByName(Topup.IncomeType);
+                        if (incomeType == null && !Topup.AddNonexistentIncomeType)
+                        {
+                            vrList.Add(new ModelValidationResult(nameof(Topup.IncomeType), "Нет такой статьи"));
+                            SuggestAddIncomeType = true;
+                            Topup.AddNonexistentIncomeType = true;
+                        }
                     }
                 });
         }

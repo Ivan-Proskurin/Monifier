@@ -40,10 +40,12 @@ namespace Monifier.Web.Pages.Products
                 async () => await Task.FromResult(Page()),
                 async vrList =>
                 {
-                    if (string.IsNullOrEmpty(Product.Name)) return;
-                    var product = await _productQueries.GetByName(Product.Name);
-                    if (product != null && product.Id != Product.Id)
-                        vrList.Add(new ModelValidationResult(nameof(Product.Name), "Товар с таким именем уже есть"));
+                    if (!string.IsNullOrEmpty(Product.Name))
+                    {
+                        var product = await _productQueries.GetByName(Product.Name);
+                        if (product != null && product.Id != Product.Id)
+                            vrList.Add(new ModelValidationResult(nameof(Product.Name), "Товар с таким именем уже есть"));
+                    }
                 }
             );
         }

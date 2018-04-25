@@ -1,4 +1,4 @@
-@page "{expenseId:int}/{billId:int?}"
+@page "{flowId:int}/{billId:int?}"
 @using System.Linq
 @using Common.Extensions
 @model Expenses.AddExpenseBillModel
@@ -6,6 +6,7 @@
 @{
     ViewBag.Title = "Расходы";
     var accounts = @Model.Accounts.Select(x => x.Name);
+    var flows = @Model.Flows.Select(x => x.Name);
     var billItems = @Model.Bill.GetItems();
 }
 
@@ -21,33 +22,39 @@
                 <h4>Чек #@Model.Bill.Id</h4>
             }
         </div>
-        <div class="col">
-            <h4>@Model.ExpenseFlow.Name</h4>
-        </div>
     </div>
 </div>
 
 
 <form method="post">
+    <input type="hidden" asp-for="Good.FlowId"/>
     <input type="text" id="Good_Bill" name="Good.Bill" value="@Model.Good.Bill" class="form-control"
            style="display: none;"/>
 
     <div asp-validation-summary="ModelOnly" class="text-danger add-bill-validation-summary"></div>
     <div id="error" class="text-danger add-bill-validation-summary hidden"></div>
-      
+
     <div class="container">
-        <div class="row" style="margin-bottom: 35px;">
-            <div class="col-md-2">
+        <div class="row" style="margin-bottom: 15px;">
+            <div class="col-md-3">
                 <h5 style="margin-top: 4px;">Счет:</h5>
             </div>
-            <div class="col-md-10">
-                <autocomplete asp-for="Good.Account" value="@Model.Good.Account" value-list="@accounts"/>
+            <div class="col-md-9">
+                <autocomplete asp-for="Good.Account" value="@Model.Good.Account" value-list="@accounts" />
+                <span asp-validation-for="Good.Account"></span>
+            </div>
+        </div>
+        <div class="row" style="margin-bottom: 35px;">
+            <div class="col-md-3">
+                <h5 style="margin-top: 4px;">Статья расходов:</h5>
+            </div>
+            <div class="col-md-9">
+                <autocomplete asp-for="Good.FlowName" value="@Model.Good.FlowName" value-list="@flows" />
+                <span asp-validation-for="Good.FlowName"></span>
             </div>
         </div>
         <div class="row">
             <div class="col-md-6 col-sm-6">
-                <input asp-for="Good.ExpenseFlowId" hidden/>
-
                 <div class="container">
                     <div class="row">
                         <div class="column-header-col col col-md-8 col-sm-4 col-8">
@@ -66,9 +73,9 @@
                     <div class="col-md-9">
                         <autocomplete asp-for="Good.Category" class="form-control"
                                       value="@Model.Good.Category" autocomplete="off"
-                                      value-list="@Model.Categories.Select(x => x.Name)"/>
+                                      value-list="@Model.Categories.Select(x => x.Name)" />
                         <input type="text" name="Good.CategoryToAdd" value="@Model.Good.CategoryToAdd"
-                               style="display: none;"/>
+                               style="display: none;" />
                         <span asp-validation-for="Good.Category"></span>
                     </div>
                 </div>
@@ -77,9 +84,9 @@
                     <div class="col-md-9">
                         <autocomplete asp-for="Good.Product" class="form-control"
                                       value-list="@Model.Products.Select(x => x.Name)"
-                                      value="@Model.Good.Product" autocomplete="off"/>
+                                      value="@Model.Good.Product" autocomplete="off" />
                         <input type="text" name="Good.ProductToAdd" value="@Model.Good.ProductToAdd"
-                               style="display: none;"/>
+                               style="display: none;" />
                         <span asp-validation-for="Good.Product"></span>
                     </div>
                 </div>
@@ -87,20 +94,20 @@
                     <label asp-for="Good.Price" class="col-form-label col-md-3"></label>
                     <div class="col-md-4">
                         <input asp-for="Good.Price" class="form-control money-input" autocomplete="off"
-                               value="@Model.Good.Price"/>
+                               value="@Model.Good.Price" />
                         <span asp-validation-for="Good.Price"></span>
                     </div>
                     <label asp-for="Good.Quantity" class="col-form-label col-md-3"></label>
                     <div class="col-md-2">
                         <input asp-for="Good.Quantity" class="form-control money-input" autocomplete="off"
-                               value="@Model.Good.Quantity"/>
+                               value="@Model.Good.Quantity" />
                     </div>
                 </div>
                 <div class="form-group row">
                     <label asp-for="Good.Comment" class="col-form-label col-md-3"></label>
                     <div class="col-md-9">
                         <input asp-for="Good.Comment" class="form-control" autocomplete="off"
-                               value="@Model.Good.Comment"/>
+                               value="@Model.Good.Comment" />
                     </div>
                 </div>
             </div>
@@ -130,21 +137,21 @@
                         </div>
                     </div>
                     @for (var i = 0; i < billItems.Count; i++)
-                    {
-                        var item = billItems[i];
+                {
+                    var item = billItems[i];
 
-                        <div class="row expenses-subtotals-row">
-                            <div class="expenses-subtotals col col-sm-4">
-                                <span>#@(i + 1)</span>
-                            </div>
-                            <div class="expenses-subtotals col col-sm-5">
-                                <span>@item.DisplayName</span>
-                            </div>
-                            <div class="expenses-subtotals expenses-sum col col-sm-3">
-                                <span>@item.Cost</span>
-                            </div>
+                    <div class="row expenses-subtotals-row">
+                        <div class="expenses-subtotals col col-sm-4">
+                            <span>#@(i + 1)</span>
                         </div>
-                    }
+                        <div class="expenses-subtotals col col-sm-5">
+                            <span>@item.DisplayName</span>
+                        </div>
+                        <div class="expenses-subtotals expenses-sum col col-sm-3">
+                            <span>@item.Cost</span>
+                        </div>
+                    </div>
+            }
                 </div>
             </div>
         </div>
@@ -165,13 +172,14 @@
 
 @section Scripts {
     <script>
-        var flowId = "@Model.ExpenseFlow.Id";
+        var flowId = "@Model.Good.FlowId";
         var billId = "@Model.Bill.Id";
         var urlPrefix = "/Expenses/AddExpenseBill/" + flowId;
         if (billId !== "0") urlPrefix += "/" + billId;
         
         activateLink("#expensesLink");
         makeInputAutocomplete("Good.Account");
+        makeInputAutocomplete("Good.FlowName", null, updateCategoriesList);
         var categoryAutocomplete = makeInputAutocomplete("Good.Category", null, updateProductsList);
         var productsAutocomplete = makeInputAutocomplete("Good.Product", null, selectCategoryByProduct);
         makeInputNumeric("Good.Price", false);
@@ -195,6 +203,31 @@
                     window.location.replace("/Expenses/ExpenseFlows");
                 });
         });
+
+        function updateCategoriesList() {
+            var url = urlPrefix + "?handler=getflowcategories";
+            var categoryVal = $("#Good_Category").val();
+            sendAjax(url,
+                $("#Good_FlowName").val(),
+                function(response) {
+                    flowId = "" + response.flowId;
+                    categoryAutocomplete.destroy();
+                    categoryAutocomplete = makeInputAutocomplete("Good.Category", response.categories, updateProductsList);
+                    if (response.categories.indexOf(categoryVal) >= 0) {
+                        $("#Good_Category").val(categoryVal);
+                    } else {
+                        if (response.categories.length === 1) {
+                            $("#Good_Category").val(response.categories[0]);
+                            updateProductsList();
+                        } else {
+                            $("#Good_Category").val("");
+                            productsAutocomplete.destroy();
+                            productsAutocomplete = makeInputAutocomplete("Good.Product", null, selectCategoryByProduct);
+                            $("#Good_Category").val("");
+                        }
+                    }
+                });
+        }
 
         function updateProductsList() {
             var url = urlPrefix + "?handler=getcategoryproducts";

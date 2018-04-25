@@ -1,4 +1,4 @@
-@page "{expenseId:int}"
+@page "{flowId:int}"
 @using System.Linq
 @model Expenses.AddExpenseModel
 
@@ -11,47 +11,32 @@
 
 <div class="col-md-7 left-aligned-form">
     <h3 class="form-caption-sm">
-        @if (Model.Expense.Correcting)
-        {
-            <span>Ввод расхода</span>
-        }
-        else
-        {
-            <span>@Model.Expense.FlowName</span>
-        }
+        <span>Ввод расхода</span>
     </h3>
     
     <form method="post">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        <input asp-for="Expense.Correcting" hidden/>
-        <input asp-for="Expense.ExpenseFlowId" hidden/>
-        @if (!Model.Expense.Correcting)
-        {
-            <input asp-for="Expense.FlowName" hidden/>
-        }
+        <input asp-for="Expense.Correction" hidden />
         <div class="row">
             <div class="form-group col-md-12 col-sm-7 col-7">
                 <label asp-for="Expense.Account" class="control-label"></label>
-                <autocomplete asp-for="Expense.Account" value-list="@accounts" value="@Model.Expense.Account"/>
+                <autocomplete asp-for="Expense.Account" value-list="@accounts" value="@Model.Expense.Account" />
                 <span asp-validation-for="Expense.Account" class="text-danger"></span>
             </div>
         </div>
-        @if (Model.Expense.Correcting)
-        {
-            <div class="row">
-                <div class="form-group col-md-12 col-sm-7 col-7">
-                    <label asp-for="Expense.FlowName" class="control-label"></label>
-                    <autocomplete asp-for="Expense.FlowName" value-list="@flows" value="@Model.Expense.FlowName"/>
-                    <span asp-validation-for="Expense.FlowName" class="text-danger"></span>
-                </div>
+        <div class="row">
+            <div class="form-group col-md-12 col-sm-7 col-7">
+                <label asp-for="Expense.FlowName" class="control-label"></label>
+                <autocomplete asp-for="Expense.FlowName" value-list="@flows" value="@Model.Expense.FlowName" />
+                <span asp-validation-for="Expense.FlowName" class="text-danger"></span>
             </div>
-        }
+        </div>        
         <div class="row">
             <div class="form-group col-md-12 col-sm-7 col-7">
                 <label asp-for="Expense.Category" class="control-label"></label>
                 <autocomplete asp-for="Expense.Category" value="@Model.Expense.Category" value-list="@categories"
-                              autocomplete="off"/>
-                <input type="text" name="Expense.CategoryToAdd" value="@Model.Expense.CategoryToAdd" style="display: none;"/>
+                              autocomplete="off" />
+                <input type="text" name="Expense.CategoryToAdd" value="@Model.Expense.CategoryToAdd" style="display: none;" />
                 <span asp-validation-for="Expense.Category" class="text-danger"></span>
             </div>
         </div>
@@ -59,29 +44,29 @@
             <div class="form-group col-md-12 col-sm-7 col-7">
                 <label asp-for="Expense.Product" class="control-label"></label>
                 <autocomplete asp-for="Expense.Product" value="@Model.Expense.Product" value-list="@products"
-                              autocomplete="off"/>
-                <input type="text" name="Expense.ProductToAdd" value="@Model.Expense.ProductToAdd" style="display: none;"/>
+                              autocomplete="off" />
+                <input type="text" name="Expense.ProductToAdd" value="@Model.Expense.ProductToAdd" style="display: none;" />
                 <span asp-validation-for="Expense.Product" class="text-danger"></span>
             </div>
         </div>
         <div class="row">
             <div class="form-group col-md-7 col-sm-7 col-7">
                 <label asp-for="Expense.DateTime" class="control-label"></label>
-                <date-time-picker asp-for="Expense.DateTime" value="@Model.Expense.DateTime"/>
+                <date-time-picker asp-for="Expense.DateTime" value="@Model.Expense.DateTime" />
                 <span asp-validation-for="Expense.DateTime" class="text-danger"></span>
             </div>
             <div class="col-md-5 col-sm-7 col-7">
                 <div class="form-group">
                     <label asp-for="Expense.Cost" class="control-label"></label>
                     <input asp-for="Expense.Cost" class="form-control money-input" autocomplete="off"
-                           value="@Model.Expense.Cost"/>
+                           value="@Model.Expense.Cost" />
                     <span asp-validation-for="Expense.Cost" class="text-danger"></span>
                 </div>
             </div>
         </div>
-        
+
         <div class="form-group bottom-buttons-row">
-            <input type="submit" value="Добавить расход" class="btn btn-outline-danger cursor-pointer"/>
+            <input type="submit" value="Добавить расход" class="btn btn-outline-danger cursor-pointer" />
             <a asp-page="./ExpenseFlows" class="btn btn-outline-primary gapped">Отмена</a>
         </div>
     </form>
@@ -89,15 +74,13 @@
 
 @section Scripts {
     <script type="text/javascript">
-        var flowId = "@Model.Expense.ExpenseFlowId";
+        var flowId = "@Model.Expense.FlowId";
         var urlPrefix = "/Expenses/AddExpense/" + flowId;
-        var correcting = "@Model.Expense.Correcting" === "True"; 
+        var correcting = "@Model.Expense.Correction" === "True"; 
         
         activateLink("#expensesLink");
 
-        if (correcting) {
-            makeInputAutocomplete("Expense.FlowName", null, updateCategoriesList);
-        }
+        makeInputAutocomplete("Expense.FlowName", null, updateCategoriesList);
         makeInputAutocomplete("Expense.Account");
         var categoryAutocomplete = makeInputAutocomplete("Expense.Category", null, updateProductsList);
         var productsAutocomplete = makeInputAutocomplete("Expense.Product", null, selectCategoryByProduct);
@@ -116,10 +99,15 @@
                     if (response.categories.indexOf(categoryVal) >= 0) {
                         $("#Expense_Category").val(categoryVal);
                     } else {
-                        $("#Expense_Category").val("");
-                        productsAutocomplete.destroy();
-                        productsAutocomplete = makeInputAutocomplete("Expense.Product", null, selectCategoryByProduct);
-                        $("#Expense_Product").val("");
+                        if (response.categories.length === 1) {
+                            $("#Expense_Category").val(response.categories[0]);
+                            updateProductsList();
+                        } else {
+                            $("#Expense_Category").val("");
+                            productsAutocomplete.destroy();
+                            productsAutocomplete = makeInputAutocomplete("Expense.Product", null, selectCategoryByProduct);
+                            $("#Expense_Product").val("");
+                        }
                     }
                 });
         }

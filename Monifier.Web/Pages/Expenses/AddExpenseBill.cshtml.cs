@@ -51,24 +51,32 @@ namespace Monifier.Web.Pages.Expenses
             _productCommands = productCommands;
         }
 
-        private async Task PrepareModelsAsync(int expenseId)
+        private async Task PrepareModelsAsync(int flowId)
         {
             Accounts = await _accountQueries.GetAll();
-            ExpenseFlow = await _expenseFlowQueries.GetById(expenseId);
-            Categories = await _categoriesQueries.GetFlowCategories(expenseId);
-            Products = await _productQueries.GetExpensesFlowProducts(expenseId);
+            Flows = await _expenseFlowQueries.GetAll();
+            if (flowId != 0)
+            {
+                Categories = await _categoriesQueries.GetFlowCategories(flowId);
+                Products = await _productQueries.GetExpensesFlowProducts(flowId);
+            }
+            else
+            {
+                Categories = new List<CategoryModel>();
+                Products = new List<ProductModel>();
+            }
         }
 
         [BindProperty]
         public AddExpenseBill Good { get; set; }
-        
-        public ExpenseFlowModel ExpenseFlow { get; private set; }
-        
+             
         public List<AccountModel> Accounts { get; private set; }
 
         public List<CategoryModel> Categories { get; private set; }
 
         public List<ProductModel> Products { get; private set; }
+
+        public List<ExpenseFlowModel> Flows { get; private set; }
 
         public ExpenseBillModel Bill { get; private set; }
 
@@ -80,8 +88,9 @@ namespace Monifier.Web.Pages.Expenses
 
             Good = new AddExpenseBill
             {
-                ExpenseFlowId = flowId,
+                FlowId = flowId,
                 Bill = JsonConvert.SerializeObject(Bill),
+                FlowName = Flows.FirstOrDefault(x => x.Id == flowId)?.Name
             };
             if (Categories.Count == 1)
             {
@@ -101,12 +110,12 @@ namespace Monifier.Web.Pages.Expenses
             Good.Account = Accounts.FirstOrDefault(x => x.Id == Bill.AccountId)?.Name;
         }
 
-        public async Task OnGetAsync(int expenseId, int? billId = null)
+        public async Task OnGetAsync(int flowId, int? billId = null)
         {
             if (billId != null)
-                await PrepareEditExistingBill(expenseId, billId.Value);
+                await PrepareEditExistingBill(flowId, billId.Value);
             else
-                await PrepareInputNewBill(expenseId);
+                await PrepareInputNewBill(flowId);
         }
 
         private async Task<ExpenseItemModel> GetExpenseItem()
@@ -128,7 +137,7 @@ namespace Monifier.Web.Pages.Expenses
             return await Good.ProcessAsync(ModelState, nameof(Good),
                 async () =>
                 {
-                    await PrepareModelsAsync(Good.ExpenseFlowId);
+                    await PrepareModelsAsync(Good.FlowId);
                     Bill = JsonConvert.DeserializeObject<ExpenseBillModel>(Good.Bill);
                     Bill.AddItem(await GetExpenseItem());
                     Good.ClearInput();
@@ -137,22 +146,45 @@ namespace Monifier.Web.Pages.Expenses
                 },
                 async () =>
                 {
-                    await PrepareModelsAsync(Good.ExpenseFlowId);
+                    await PrepareModelsAsync(Good.FlowId);
                     Bill = JsonConvert.DeserializeObject<ExpenseBillModel>(Good.Bill);
                     return Page();
                 },
                 async vrList =>
                 {
+                    if (Good.Account.IsNullOrEmpty())
+                        vrList.Add(new ModelValidationResult(nameof(Good.Account), "Укажите счет"));
+                    else
+                    {
+                        var account = await _accountQueries.GetByName(Good.Account);
+                        if (account == null)
+                            vrList.Add(new ModelValidationResult(nameof(Good.Account), "Нет такого счета"));
+                    }
+
+                    if (Good.FlowName.IsNullOrEmpty())
+                    {
+                        vrList.Add(new ModelValidationResult(nameof(Good.FlowName), "Укажите статью расходов"));
+                        return;
+                    }
+
+                    var flowId = await _expenseFlowQueries.GetIdByName(Good.FlowName);
+                    if (flowId == null)
+                    {
+                        vrList.Add(new ModelValidationResult(nameof(Good.FlowName), "Нет такой статьи расходов"));
+                        return;
+                    }
+
+                    Good.FlowId = flowId.Value;
+
                     CategoryModel category = null;
                     if (!Good.Category.IsNullOrEmpty())
                     {
-                        category = await _categoriesQueries.GetFlowCategoryByName(Good.ExpenseFlowId, Good.Category);
+                        category = await _categoriesQueries.GetFlowCategoryByName(Good.FlowId, Good.Category);
                         if (category == null)
                         {
                             if (Good.Category == Good.CategoryToAdd)
                             {
-                                category = await _categoriesCommands.CreateNewOrBind(
-                                    Good.ExpenseFlowId, Good.Category);
+                                category = await _categoriesCommands.CreateNewOrBind(Good.FlowId, Good.Category);
                                 Good.CategoryToAdd = null;
                             }
                             else
@@ -165,7 +197,7 @@ namespace Monifier.Web.Pages.Expenses
                     }
                     if (!Good.Product.IsNullOrEmpty())
                     {
-                        var product = await _productQueries.GetFlowProductByName(Good.ExpenseFlowId, Good.Product);
+                        var product = await _productQueries.GetFlowProductByName(Good.FlowId, Good.Product);
                         if (product == null)
                         {
                             if (Good.Product == Good.ProductToAdd && category != null)
@@ -199,7 +231,7 @@ namespace Monifier.Web.Pages.Expenses
                 Good.Bill = JsonConvert.SerializeObject(Bill);
                 ModelState.Clear();
             }
-            await PrepareModelsAsync(Good.ExpenseFlowId);
+            await PrepareModelsAsync(Good.FlowId);
             return Page();
         }
         
@@ -215,6 +247,7 @@ namespace Monifier.Web.Pages.Expenses
                     if (account == null) return AjaxResponse.ErrorResponse($"Нет счета с именем \"{args.Account}\"");
                     var bill = args.Bill.FromJson<ExpenseBillModel>();
                     if (bill.Items.Count == 0) return AjaxResponse.ErrorResponse("Добавьте в чек хотя бы один товар");
+                    bill.ExpenseFlowId = Good.FlowId;
                     bill.AccountId = account.Id;
                     await _expensesBillCommands.Save(bill);
                     return AjaxResponse.SuccessResponse();
@@ -225,7 +258,18 @@ namespace Monifier.Web.Pages.Expenses
                 }
             });
         }
-        
+
+        public async Task<JsonResult> OnPostGetFlowCategoriesAsync()
+        {
+            return await this.ProcessAjaxPostRequestAsync(async name =>
+            {
+                var flow = await _expenseFlowQueries.GetByName(name);
+                if (flow == null) return new { flowId = 0, categories = Enumerable.Empty<string>() };
+                var categories = await _categoriesQueries.GetFlowCategories(flow.Id);
+                return new { flowId = flow.Id, categories = categories.Select(x => x.Name) };
+            });
+        }
+
         public async Task<JsonResult> OnPostGetCategoryProductsAsync()
         {
             return await this.ProcessAjaxPostRequestAsync(async name =>

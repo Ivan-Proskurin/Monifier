@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Monifier.Web.Models.Expenses
+namespace Monifier.Web.Extensions
 {
-    public static class ExpenseFlowCategoriesMapper
+    public static class IdsExtension
     {
         public static string ToCsvString(this IEnumerable<int> ids)
         {
@@ -13,10 +13,10 @@ namespace Monifier.Web.Models.Expenses
 
         public static List<int> ToIntList(this string ids)
         {
-            var _ids = new List<int>();
-            if (string.IsNullOrEmpty(ids)) return _ids;
-            _ids.AddRange(ids.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(int.Parse));
-            return _ids;
+            var idList = new List<int>();
+            if (string.IsNullOrEmpty(ids)) return idList;
+            idList.AddRange(ids.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(int.Parse));
+            return idList;
         }
     }
 }

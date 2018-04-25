@@ -8,6 +8,7 @@ using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Contract.Expenses;
 using Monifier.BusinessLogic.Model.Base;
 using Monifier.BusinessLogic.Model.Extensions;
+using Monifier.Web.Extensions;
 using Monifier.Web.Models;
 using Monifier.Web.Models.Expenses;
 

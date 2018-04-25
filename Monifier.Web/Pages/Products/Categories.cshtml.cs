@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Model.Base;
 using Monifier.BusinessLogic.Model.Pagination;
+using Monifier.Common.Extensions;
 using Monifier.Web.Models;
 using Monifier.Web.Models.Products;
 using Monifier.Web.Models.Validation;
@@ -63,9 +64,12 @@ namespace Monifier.Web.Pages.Products
                 },
                 async vrList =>
                 {
-                    var category = await _categoriesQueries.GetByName(AddCategory.Category);
-                    if (category != null) vrList.Add(new ModelValidationResult(nameof(AddCategory.Category),
-                        "Категория товаров с таким именем уже есть"));
+                    if (!AddCategory.Category.IsNullOrEmpty())
+                    {
+                        var category = await _categoriesQueries.GetByName(AddCategory.Category);
+                        if (category != null) vrList.Add(new ModelValidationResult(nameof(AddCategory.Category),
+                            "Категория товаров с таким именем уже есть"));
+                    }
                 });
         }
     }

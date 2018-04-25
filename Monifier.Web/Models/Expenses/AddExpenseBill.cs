@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using Monifier.BusinessLogic.Model.Expenses;
@@ -9,11 +10,16 @@ namespace Monifier.Web.Models.Expenses
 {
     public class AddExpenseBill : IValidatable
     {
-        public int ExpenseFlowId { get; set; }
+        public int FlowId { get; set; }
         
         public string Bill { get; set; }
+
+        [Display(Name = "Статья расходов *")]
+        [Required(ErrorMessage = "Укажите статью расхода")]
+        public string FlowName { get; set; }
         
         [DisplayName("Счет")]
+        [Required(ErrorMessage = "Укажите счет")]
         public string Account { get; set; }
 
         [DisplayName("Категория")]
