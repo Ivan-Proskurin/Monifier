@@ -39,7 +39,7 @@ namespace Monifier.Web.Pages.Expenses
         {
             if (Filter.DateFromAsDateTime != null && Filter.DateToAsDateTime != null)
             {
-                var expenses = await _expensesQueries.GetExpensesByDay(
+                var expenses = await _expensesQueries.GetExpensesByDays(
                     new ExpensesFilter
                     {
                         FlowId = Filter.FlowId,

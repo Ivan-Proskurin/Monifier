@@ -59,9 +59,9 @@ namespace Monifier.BusinessLogic.Queries.Expenses
         {
             public int Compare(BillGood x, BillGood y)
             {
-                var result = -x.Sum.CompareTo(y.Sum);
-                if (result == 0) result = -x.IsCategory.CompareTo(y.IsCategory);
-                return result;
+                var result = -x?.Sum.CompareTo(y?.Sum);
+                if (result == 0) result = -x?.IsCategory.CompareTo(y?.IsCategory);
+                return result ?? 0;
             }
         }
 
@@ -207,7 +207,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
 
                     DateTo = byMonth
                         ? x.DateTime.EndOfTheMonth().ToStandardString()
-                        : x.DateTime.AddDays(1).AddMinutes(-1).ToStandardString(),
+                        : x.DateTime.Date.AddDays(1).AddMinutes(-1).ToStandardString(),
 
                     Period = byMonth
                         ? $"{x.DateTime.StartOfTheMonth().ToStandardDateStr()} - {x.DateTime.EndOfTheMonth().ToStandardDateStr()}"
@@ -222,7 +222,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                 // считаем тоталы
                 Totals = new TotalsInfoModel
                 {
-                    Caption = $"Итого за период с {dateFrom.ToStandardString()} по {dateTo.ToStandardString()}",
+                    Caption = $"Итого за период с {dateFrom.ToStandardDateStr()} по {dateTo.ToStandardDateStr()}",
                     Total = await _unitOfWork.GetQueryRepository<ExpenseBill>().Query
                         .Where(x => x.OwnerId == userId && (flowId == null || x.ExpenseFlowId == flowId) 
                                                         && x.DateTime >= dateFrom && x.DateTime < dateTo)
@@ -233,7 +233,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             return expenses;
         }
         
-        public async Task<ExpensesListModel> GetExpensesByDay(ExpensesFilter filter, PaginationArgs paginationArgs)
+        public async Task<ExpensesListModel> GetExpensesByDays(ExpensesFilter filter, PaginationArgs paginationArgs)
         {
             return await GetExpenses(filter, paginationArgs, false);
         }

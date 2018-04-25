@@ -105,7 +105,7 @@ namespace Monifier.BusinessLogic.Model.Tests
         }
 
         [Fact]
-        public void GetDefaultAccount_DifferentAccounts_ReturnsDefaultWithMaxWithdraw()
+        public void GetDefaultAccount_DifferentAccounts_ReturnsDefault()
         {
             var today = DateTime.Today;
             var date1 = today.AddDays(-5);
