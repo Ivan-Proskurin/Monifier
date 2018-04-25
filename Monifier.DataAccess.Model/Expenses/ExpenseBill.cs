@@ -31,5 +31,7 @@ namespace Monifier.DataAccess.Model.Expenses
         
         [ForeignKey("OwnerId")]
         public User Owner { get; set; }
+
+        public bool IsCorrection { get; set; }
     }
 }

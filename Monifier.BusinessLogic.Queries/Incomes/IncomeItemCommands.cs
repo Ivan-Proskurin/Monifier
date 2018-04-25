@@ -1,8 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Monifier.BusinessLogic.Contract.Auth;
 using Monifier.BusinessLogic.Contract.Incomes;
 using Monifier.BusinessLogic.Model.Incomes;
 using Monifier.DataAccess.Contract;
+using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Incomes;
 
 namespace Monifier.BusinessLogic.Queries.Incomes
@@ -18,9 +20,20 @@ namespace Monifier.BusinessLogic.Queries.Incomes
             _currentSession = currentSession;
         }
 
-        public Task Delete(int id, bool onlyMark = true)
+        public async Task Delete(int id, bool onlyMark = true)
         {
-            throw new System.NotImplementedException();
+            if (onlyMark)
+                throw new NotSupportedException("Операция не поддерживается");
+            var incomeCommands = _unitOfWork.GetCommandRepository<IncomeItem>();
+            var accountCommands = _unitOfWork.GetCommandRepository<Account>();
+            var income = await _unitOfWork.LoadEntity<IncomeItem>(id).ConfigureAwait(false);
+            var account = await _unitOfWork.LoadEntity<Account>(income.AccountId).ConfigureAwait(false);
+            account.AvailBalance -= income.Total;
+            if (!income.IsCorrection)
+                account.Balance -= income.Total;
+            accountCommands.Update(account);
+            incomeCommands.Delete(income);
+            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task<IncomeItemModel> Update(IncomeItemModel model)
@@ -32,7 +45,8 @@ namespace Monifier.BusinessLogic.Queries.Incomes
                 DateTime = model.DateTime,
                 IncomeTypeId = model.IncomeTypeId,
                 Total = model.Total,
-                OwnerId = _currentSession.UserId
+                OwnerId = _currentSession.UserId,
+                IsCorrection = model.IsCorrection,
             };
             if (item.Id > 0)
             {
@@ -42,7 +56,7 @@ namespace Monifier.BusinessLogic.Queries.Incomes
             {
                 itemRepo.Create(item);
             }
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
             model.Id = item.Id;
             return model;
         }

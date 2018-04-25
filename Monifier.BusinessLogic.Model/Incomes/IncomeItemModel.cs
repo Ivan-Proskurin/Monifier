@@ -9,5 +9,6 @@ namespace Monifier.BusinessLogic.Model.Incomes
         public string IncomeType { get; set; }
         public DateTime DateTime { get; set; }
         public decimal Total { get; set; }
+        public bool IsCorrection { get; set; }
     }
 }

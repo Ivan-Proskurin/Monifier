@@ -71,7 +71,7 @@ namespace Monifier.BusinessLogic.Model.Expenses
             {
                 Id = Id,
                 DateTime = DateTime,
-                Cost = Cost
+                Cost = Cost,
             };
             if (Items == null) return clone;
             clone.Items = new List<ExpenseItemModel>();
@@ -122,7 +122,7 @@ namespace Monifier.BusinessLogic.Model.Expenses
                 await Update(unitOfWork);
         }
 
-        public async Task Create(IUnitOfWork unitOfWork, bool correcting = false)
+        public async Task Create(IUnitOfWork unitOfWork, bool correction = false)
         {
             if (unitOfWork == null)
                 throw new ArgumentNullException(nameof(unitOfWork));
@@ -137,7 +137,8 @@ namespace Monifier.BusinessLogic.Model.Expenses
                 AccountId = AccountId,
                 DateTime = DateTime,
                 SumPrice = Cost,
-                OwnerId = OwnerId
+                OwnerId = OwnerId,
+                IsCorrection = correction,
             };
 
             billCommands.Create(bill);
@@ -171,7 +172,7 @@ namespace Monifier.BusinessLogic.Model.Expenses
                 throw new InvalidOperationException($"Can't find expense flow with id {bill.ExpenseFlowId}");
             var lack = bill.SumPrice - Math.Max(flow.Balance, 0);
             var withdrawTotal = bill.SumPrice;
-            if (lack > 0 && account != null && !correcting)
+            if (lack > 0 && account != null && !correction)
             {
                 var compensation = Math.Min(Math.Max(account.AvailBalance, 0), lack);
                 withdrawTotal -= compensation;
@@ -181,7 +182,7 @@ namespace Monifier.BusinessLogic.Model.Expenses
             flow.Version++;
             flowCommands.Update(flow);
 
-            if (account != null && !correcting)
+            if (account != null && !correction)
             {
                 var accountCommands = unitOfWork.GetCommandRepository<Account>();
                 account.Balance -= bill.SumPrice;
@@ -269,25 +270,32 @@ namespace Monifier.BusinessLogic.Model.Expenses
             flow.Version++;
             flowCommands.Update(flow);
 
-            if (oldAccountId != bill.AccountId)
+            if (!bill.IsCorrection)
             {
-                if (oldAccountId != null)
+                if (oldAccountId != bill.AccountId)
                 {
-                    var oldAccount = await accountQueries.GetById(oldAccountId.Value);
-                    oldAccount.Balance += oldsum;
-                    accountCommands.Update(oldAccount);
-                }
+                    if (oldAccountId != null)
+                    {
+                        var oldAccount = await accountQueries.GetById(oldAccountId.Value);
+                        oldAccount.Balance += oldsum;
+                        accountCommands.Update(oldAccount);
+                    }
 
-                if (newAccount != null)
+                    if (newAccount != null)
+                    {
+                        newAccount.Balance -= bill.SumPrice;
+                        newAccount.LastWithdraw = DateTime.Now;
+                        accountCommands.Update(newAccount);
+                    }
+                }
+                else if (newAccount != null)
                 {
-                    newAccount.Balance -= bill.SumPrice;
-                    newAccount.LastWithdraw = DateTime.Now;
+                    newAccount.Balance += oldsum - Cost;
                     accountCommands.Update(newAccount);
                 }
             }
             else if (newAccount != null)
             {
-                newAccount.Balance += oldsum - Cost;
                 accountCommands.Update(newAccount);
             }
 
@@ -299,7 +307,7 @@ namespace Monifier.BusinessLogic.Model.Expenses
             var billQueries = unitOfWork.GetQueryRepository<ExpenseBill>();
             var bill = await billQueries.GetById(id);
             if (bill == null)
-                throw new ArgumentException($"Нет счета с Id = {id}");
+                throw new ArgumentException($"Нет чека с Id = {id}");
             
             var billCommands = unitOfWork.GetCommandRepository<ExpenseBill>();
             var flowQueries = unitOfWork.GetQueryRepository<ExpenseFlow>();
@@ -309,7 +317,7 @@ namespace Monifier.BusinessLogic.Model.Expenses
             flow.Balance += bill.SumPrice;
             flowCommands.Update(flow);
 
-            if (bill.AccountId != null)
+            if (bill.AccountId != null && !bill.IsCorrection)
             {
                 var accountQueries = unitOfWork.GetQueryRepository<Account>();
                 var accountCommands = unitOfWork.GetCommandRepository<Account>();

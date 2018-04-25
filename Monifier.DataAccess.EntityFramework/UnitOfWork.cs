@@ -51,7 +51,7 @@ namespace Monifier.DataAccess.EntityFramework
 
         public async Task SaveChangesAsync()
         {
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public void SaveChanges()
@@ -119,5 +119,10 @@ namespace Monifier.DataAccess.EntityFramework
             return null;
         }
 
+        public async Task<T> LoadEntity<T>(int id) where T : class, IHasId
+        {
+            var queries = GetQueryRepository<T>();
+            return await queries.GetById(id);
+        }
     }
 }

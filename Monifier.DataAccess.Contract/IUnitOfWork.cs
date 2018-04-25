@@ -11,5 +11,6 @@ namespace Monifier.DataAccess.Contract
         ICommandRepository<T> GetCommandRepository<T>() where T : class, IHasId;
         Task SaveChangesAsync();
         void SaveChanges();
+        Task<T> LoadEntity<T>(int id) where T : class, IHasId;
     }
 }

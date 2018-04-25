@@ -59,7 +59,7 @@
                 </a>
             </div>
             <div class="col-md-6 col-sm-5 col-3" style="text-align: right;">
-                <delete-button modal-id="#deleteModal" text="Удалить счет"></delete-button>
+                <delete-button modal-id="#deleteModal" text="Удалить расход"></delete-button>
             </div>
         </div>
     </div>
@@ -70,8 +70,8 @@
     <input asp-for="Day" hidden/>
 
     <!-- Deletion modal -->
-    <deletion-modal modal-id="deleteModal" caption="Удаление счета"
-                    text="Удалить счет с удалением всех его пунктов? Внимание! Это действие необратимо!"
+    <deletion-modal modal-id="deleteModal" caption="Удаление расхода"
+                    text="Удалить расход с удалением всех его пунктов? Внимание! Это действие необратимо!"
                     page-handler="delete"
                     button-tought-text="Да, удалить">
     </deletion-modal>

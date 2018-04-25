@@ -1,6 +1,7 @@
 ﻿using System;
 using FluentAssertions;
 using Monifier.BusinessLogic.Model.Expenses;
+using Monifier.BusinessLogic.Queries.Expenses;
 using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Expenses;
 using Monifier.IntegrationTests.Infrastructure;
@@ -242,7 +243,7 @@ namespace Monifier.BusinessLogic.Model.IntegrationTests
         }
 
         [Fact]
-        public async void Create_Correcting_AccountAvailNotUsed()
+        public async void Create_Correction_AccountBalancesNotChanged()
         {
             using (var session = await CreateDefaultSession(_ids))
             {
@@ -252,11 +253,12 @@ namespace Monifier.BusinessLogic.Model.IntegrationTests
 
             using (var session = await CreateDefaultSession(_ids))
             {
-                await _bill.Create(session.UnitOfWork, correcting: true);
+                await _bill.Create(session.UnitOfWork, correction: true);
                 var flow = await session.LoadEntity<ExpenseFlow>(session.FoodExpenseFlow.Id);
                 flow.Balance.ShouldBeEquivalentTo(session.FoodExpenseFlow.Balance - _bill.Cost);
 
                 var account = await session.LoadEntity<Account>(session.DebitCardAccount.Id);
+                account.Balance.ShouldBeEquivalentTo(session.DebitCardAccount.Balance);
                 account.AvailBalance.ShouldBeEquivalentTo(session.DebitCardAccount.AvailBalance);
             }
         }
@@ -293,6 +295,70 @@ namespace Monifier.BusinessLogic.Model.IntegrationTests
                 account.AvailBalance.ShouldBeEquivalentTo(availBalance - (_bill.Cost - flowBalance));
                 account.LastWithdraw.ShouldBeEquivalentTo(lastWithdraw);
                 flow.Balance.ShouldBeEquivalentTo(0);
+            }
+        }
+
+        [Fact]
+        public async void Delete_Correction_AccountBalancesAreNotChanged()
+        {
+            decimal flowBalance;
+            using (var session = await CreateDefaultSession(_ids))
+            {
+                session.FoodExpenseFlow.Balance = _bill.Cost - 10;
+                await session.UpdateEntity(session.FoodExpenseFlow);
+                flowBalance = session.FoodExpenseFlow.Balance;
+            }
+
+            using (var session = await CreateDefaultSession(_ids))
+            {
+                await _bill.Create(session.UnitOfWork, correction: true);
+                var flow = await session.LoadEntity<ExpenseFlow>(session.FoodExpenseFlow.Id);
+                flow.Balance.ShouldBeEquivalentTo(session.FoodExpenseFlow.Balance - _bill.Cost);
+            }
+
+            using (var session = await CreateDefaultSession(_ids))
+            {
+                var commands = new ExpensesBillCommands(session.UnitOfWork, session.UserSession);
+                await commands.Delete(_bill.Id, false);
+                var flow = await session.LoadEntity<ExpenseFlow>(session.FoodExpenseFlow.Id);
+                flow.Balance.ShouldBeEquivalentTo(flowBalance);
+
+                var account = await session.LoadEntity<Account>(session.DebitCardAccount.Id);
+                account.Balance.ShouldBeEquivalentTo(session.DebitCardAccount.Balance);
+                account.AvailBalance.ShouldBeEquivalentTo(session.DebitCardAccount.AvailBalance);
+            }
+        }
+
+        [Fact]
+        public async void Update_Correction_AccountBalancesAreNotChanged()
+        {
+            decimal availBalance, oldBalance, flowBalance;
+            DateTime? lastWithdraw;
+            using (var session = await CreateDefaultSession(_ids))
+            {
+                flowBalance = session.FoodExpenseFlow.Balance;
+                availBalance = session.DebitCardAccount.AvailBalance;
+                await _bill.Create(session.UnitOfWork, correction: true);
+                var account = await session.LoadEntity<Account>(session.DebitCardAccount.Id);
+                lastWithdraw = account.LastWithdraw;
+                oldBalance = account.Balance;
+            }
+
+            using (var session = await CreateDefaultSession(_ids))
+            {
+                _bill.AddItem(new ExpenseItemModel
+                {
+                    Category = session.TechCategory.Name,
+                    Product = session.Tv.Name,
+                    Cost = 10000m
+                });
+                await _bill.Update(session.UnitOfWork);
+                var account = await session.LoadEntity<Account>(session.DebitCardAccount.Id);
+                var flow = await session.LoadEntity<ExpenseFlow>(session.FoodExpenseFlow.Id);
+                flow.Balance.ShouldBeEquivalentTo(0);
+                account.Balance.ShouldBeEquivalentTo(oldBalance);
+                account.AvailBalance.ShouldBeEquivalentTo(availBalance - (_bill.Cost - flowBalance));
+                account.LastWithdraw.ShouldBeEquivalentTo(lastWithdraw);
             }
         }
     }

@@ -29,5 +29,6 @@ namespace Monifier.DataAccess.Model.Incomes
         [ForeignKey("OwnerId")]
         public User Owner { get; set; }
 
+        public bool IsCorrection { get; set; }
     }
 }

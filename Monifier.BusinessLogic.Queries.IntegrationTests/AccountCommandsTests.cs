@@ -4,8 +4,10 @@ using FluentAssertions;
 using Monifier.BusinessLogic.Model.Accounts;
 using Monifier.BusinessLogic.Model.Base;
 using Monifier.BusinessLogic.Queries.Base;
+using Monifier.BusinessLogic.Queries.Incomes;
 using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Expenses;
+using Monifier.DataAccess.Model.Incomes;
 using Monifier.IntegrationTests.Infrastructure;
 using Xunit;
 
@@ -16,6 +18,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
         [Fact]
         public async void Topup_BothBalancesIncreased()
         {
+            const string incomeTypeName = "Новый тип дохода";
             using (var session = await CreateDefaultSession())
             {
                 session.CreateDefaultEntities();
@@ -23,22 +26,28 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 var availBalance = session.DebitCardAccount.AvailBalance;
                 var model = new TopupAccountModel
                 {
-                    Correcting = false,
+                    Correction = false,
                     AccountId = session.DebitCardAccount.Id,
-                    AddIncomeTypeName = session.SalaryIncome.Name,
+                    AddIncomeTypeName = incomeTypeName,
                     TopupDate = DateTime.Today,
                     Amount = 15000,
                 };
                 var commands = new AccountCommands(session.UnitOfWork, session.UserSession);
-                await commands.Topup(model);
-                var account = await session.UnitOfWork.GetQueryRepository<Account>().GetById(session.DebitCardAccount.Id);
+                var income = await commands.Topup(model);
+                var incomeType = await session.UnitOfWork.GetNamedModelQueryRepository<IncomeType>()
+                    .GetByName(session.UserSession.UserId, incomeTypeName);
+                income.Total.ShouldBeEquivalentTo(model.Amount);
+                income.DateTime.ShouldBeEquivalentTo(model.TopupDate);
+                income.AccountId.ShouldBeEquivalentTo(model.AccountId);
+                income.IncomeTypeId.ShouldBeEquivalentTo(incomeType.Id);
+                var account = await session.LoadEntity<Account>(session.DebitCardAccount.Id);
                 account.Balance.ShouldBeEquivalentTo(balance + model.Amount);
                 account.AvailBalance.ShouldBeEquivalentTo(availBalance + model.Amount);
             }
         }
 
         [Fact]
-        public async void Topup_Correcting_OnlyAvailBalanceIncreased()
+        public async void Topup_Correction_OnlyAvailBalanceIncreased()
         {
             using (var session = await CreateDefaultSession())
             {
@@ -47,7 +56,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 var availBalance = session.DebitCardAccount.AvailBalance;
                 var model = new TopupAccountModel
                 {
-                    Correcting = true,
+                    Correction = true,
                     AccountId = session.DebitCardAccount.Id,
                     AddIncomeTypeName = session.SalaryIncome.Name,
                     TopupDate = DateTime.Today,
@@ -58,6 +67,76 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 var account = await session.UnitOfWork.GetQueryRepository<Account>().GetById(session.DebitCardAccount.Id);
                 account.Balance.ShouldBeEquivalentTo(balance);
                 account.AvailBalance.ShouldBeEquivalentTo(availBalance + model.Amount);
+            }
+        }
+
+        [Fact]
+        public async void Delete_AccountBalancesDecreased()
+        {
+            EntityIdSet ids;
+            IncomeItem income;
+            using (var session = await CreateDefaultSession())
+            {
+                ids = session.CreateDefaultEntities();
+                var balance = session.DebitCardAccount.Balance;
+                var availBalance = session.DebitCardAccount.AvailBalance;
+                var model = new TopupAccountModel
+                {
+                    Correction = false,
+                    AccountId = session.DebitCardAccount.Id,
+                    AddIncomeTypeName = session.SalaryIncome.Name,
+                    TopupDate = DateTime.Today,
+                    Amount = 15000,
+                };
+                var commands = new AccountCommands(session.UnitOfWork, session.UserSession);
+                income = await commands.Topup(model);
+                var account = await session.LoadEntity<Account>(ids.DebitCardAccountId);
+                account.Balance.ShouldBeEquivalentTo(balance + model.Amount);
+                account.AvailBalance.ShouldBeEquivalentTo(availBalance + model.Amount);
+            }
+
+            using (var session = await CreateDefaultSession(ids))
+            {
+                var commands = new IncomeItemCommands(session.UnitOfWork, session.UserSession);
+                await commands.Delete(income.Id, false);
+                var account = await session.LoadEntity<Account>(ids.DebitCardAccountId);
+                account.Balance.ShouldBeEquivalentTo(session.DebitCardAccount.Balance - income.Total);
+                account.AvailBalance.ShouldBeEquivalentTo(session.DebitCardAccount.AvailBalance - income.Total);
+            }
+        }
+
+        [Fact]
+        public async void Delete_Correction_OnlyAvailBalanceDecreased()
+        {
+            EntityIdSet ids;
+            IncomeItem income;
+            using (var session = await CreateDefaultSession())
+            {
+                ids = session.CreateDefaultEntities();
+                var balance = session.DebitCardAccount.Balance;
+                var availBalance = session.DebitCardAccount.AvailBalance;
+                var model = new TopupAccountModel
+                {
+                    Correction = true,
+                    AccountId = session.DebitCardAccount.Id,
+                    AddIncomeTypeName = session.SalaryIncome.Name,
+                    TopupDate = DateTime.Today,
+                    Amount = 15000,
+                };
+                var commands = new AccountCommands(session.UnitOfWork, session.UserSession);
+                income = await commands.Topup(model);
+                var account = await session.LoadEntity<Account>(ids.DebitCardAccountId);
+                account.Balance.ShouldBeEquivalentTo(balance);
+                account.AvailBalance.ShouldBeEquivalentTo(availBalance + model.Amount);
+            }
+
+            using (var session = await CreateDefaultSession(ids))
+            {
+                var commands = new IncomeItemCommands(session.UnitOfWork, session.UserSession);
+                await commands.Delete(income.Id, false);
+                var account = await session.LoadEntity<Account>(ids.DebitCardAccountId);
+                account.Balance.ShouldBeEquivalentTo(session.DebitCardAccount.Balance);
+                account.AvailBalance.ShouldBeEquivalentTo(session.DebitCardAccount.AvailBalance - income.Total);
             }
         }
 

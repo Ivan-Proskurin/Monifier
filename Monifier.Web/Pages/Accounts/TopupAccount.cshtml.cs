@@ -72,7 +72,7 @@ namespace Monifier.Web.Pages.Accounts
                     var accountId = Topup.Correcting ? (await _accountQueries.GetByName(Topup.AccountName)).Id : Topup.Id;
                     await _accountCommands.Topup(new BusinessLogic.Model.Accounts.TopupAccountModel
                     {
-                        Correcting = Topup.Correcting,
+                        Correction = Topup.Correcting,
                         AccountId = accountId,
                         IncomeTypeId = incomeType?.Id,
                         AddIncomeTypeName = incomeType == null ? Topup.IncomeType : null,

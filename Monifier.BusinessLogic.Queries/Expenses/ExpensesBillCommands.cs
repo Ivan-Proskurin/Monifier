@@ -21,7 +21,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
         public async Task Delete(int id, bool onlyMark = true)
         {
             if (onlyMark)
-                throw new ArgumentException("Операция не поддерживается", nameof(onlyMark));
+                throw new NotSupportedException("Операция не поддерживается");
 
             await ExpenseBillModel.Delete(id, _unitOfWork);
         }

@@ -93,7 +93,7 @@ namespace Monifier.BusinessLogic.Queries.Base
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task Topup(TopupAccountModel topup)
+        public async Task<IncomeItem> Topup(TopupAccountModel topup)
         {
             var accountQueries = _unitOfWork.GetQueryRepository<Account>();
             var accountCommands = _unitOfWork.GetCommandRepository<Account>();
@@ -112,21 +112,25 @@ namespace Monifier.BusinessLogic.Queries.Base
                 await _unitOfWork.SaveChangesAsync();
                 incomeTypeId = incomeType.Id;
             }
-            incomeCommands.Create(new IncomeItem
+
+            var income = new IncomeItem
             {
                 AccountId = account.Id,
                 DateTime = topup.TopupDate,
                 IncomeTypeId = incomeTypeId.Value,
                 Total = topup.Amount,
-                OwnerId = _currentSession.UserId
-            });
-            if (!topup.Correcting)
+                OwnerId = _currentSession.UserId,
+                IsCorrection = topup.Correction,
+            };
+            incomeCommands.Create(income);
+            if (!topup.Correction)
             {
                 account.Balance += topup.Amount;
             }
             account.AvailBalance += topup.Amount;
             accountCommands.Update(account);
             await _unitOfWork.SaveChangesAsync();
+            return income;
         }
 
         public async Task Transfer(int accountFromId, int accountToId, decimal amount)
