@@ -7,9 +7,18 @@
     var flows = Model.Flows.Select(x => x.Name).ToList();
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/expenses.reports.css" />
+}
+
 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
 <form method="post">
+    <div class="header">
+        <h4 class="form-caption-xs header-caption">Расходы по дням</h4>
+        <a asp-page="./AddExpense" asp-route-flowId="0" asp-route-returnPage="./ExpensesTable" class="btn btn-danger cursor-pointer header-button">Добавить расход</a>
+        <a asp-page="./AddExpenseBill" asp-route-flowId="0" asp-route-returnUrl="/Expenses/ExpensesTable" class="btn btn-danger cursor-pointer header-button">Ввести чек</a>
+    </div>
     <div class="input-group">
         <div class="input-group-addon addon-select-container">
             <autocomplete asp-for="Filter.Flow" value-list="@flows" value="@Model.Filter.Flow"
@@ -19,8 +28,7 @@
             От:
         </div>
         <div class="input-group-addon addon-dtpicker-container">
-            <date-time-picker asp-for="Filter.DateFrom" class="form-control" autocomplete="off"
-                              value="@Model.Filter.DateFrom" />
+            <date-time-picker asp-for="Filter.DateFrom" class="form-control" value="@Model.Filter.DateFrom" />
         </div>
         <div class="input-group-addon addon-label-container">
             До:
@@ -92,25 +100,25 @@
                 <tr class="@trClass">
                     <td>
                         <a asp-page="./ExpensesForDay"
-                            asp-route-day="@item.DateFrom"
-                            asp-route-flowId="@Model.Filter.FlowId"
-                            class="edit-item-link">
+                           asp-route-day="@item.DateFrom"
+                           asp-route-flowId="@Model.Filter.FlowId"
+                           class="edit-item-link">
                             @item.Period
                         </a>
                     </td>
                     <td>
                         <a asp-page="./ExpensesForDay"
-                            asp-route-day="@item.DateFrom"
-                            asp-route-flowId="@Model.Filter.FlowId"
-                            class="edit-item-link">
+                           asp-route-day="@item.DateFrom"
+                           asp-route-flowId="@Model.Filter.FlowId"
+                           class="edit-item-link">
                             @item.Caption
                         </a>
                     </td>
                     <td>
                         <a asp-page="./ExpensesForDay"
-                            asp-route-day="@item.DateFrom"
-                            asp-route-flowId="@Model.Filter.FlowId"
-                            class="edit-item-link">
+                           asp-route-day="@item.DateFrom"
+                           asp-route-flowId="@Model.Filter.FlowId"
+                           class="edit-item-link">
                             @item.Goods
                         </a>
                     </td>

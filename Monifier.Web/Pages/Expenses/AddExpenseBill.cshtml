@@ -27,9 +27,11 @@
 
 
 <form method="post">
-    <input type="hidden" asp-for="Good.FlowId"/>
+    <input asp-for="Good.FlowId" hidden />
+    <input asp-for="Good.ReturnUrl" hidden />
+    <input asp-for="Good.ReturnPage" hidden />
     <input type="text" id="Good_Bill" name="Good.Bill" value="@Model.Good.Bill" class="form-control"
-           style="display: none;"/>
+           style="display: none;" />
 
     <div asp-validation-summary="ModelOnly" class="text-danger add-bill-validation-summary"></div>
     <div id="error" class="text-danger add-bill-validation-summary hidden"></div>
@@ -137,21 +139,21 @@
                         </div>
                     </div>
                     @for (var i = 0; i < billItems.Count; i++)
-                {
-                    var item = billItems[i];
+                    {
+                        var item = billItems[i];
 
-                    <div class="row expenses-subtotals-row">
-                        <div class="expenses-subtotals col col-sm-4">
-                            <span>#@(i + 1)</span>
+                        <div class="row expenses-subtotals-row">
+                            <div class="expenses-subtotals col col-sm-4">
+                                <span>#@(i + 1)</span>
+                            </div>
+                            <div class="expenses-subtotals col col-sm-5">
+                                <span>@item.DisplayName</span>
+                            </div>
+                            <div class="expenses-subtotals expenses-sum col col-sm-3">
+                                <span>@item.Cost</span>
+                            </div>
                         </div>
-                        <div class="expenses-subtotals col col-sm-5">
-                            <span>@item.DisplayName</span>
-                        </div>
-                        <div class="expenses-subtotals expenses-sum col col-sm-3">
-                            <span>@item.Cost</span>
-                        </div>
-                    </div>
-            }
+                    }
                 </div>
             </div>
         </div>
@@ -162,7 +164,7 @@
                 </button>
             </div>
             <div class="col" style="text-align: right;">
-                <a asp-page="./ExpenseFlows" class="btn btn-outline-danger btn-sm cursor-pointer">
+                <a asp-page="@Model.Good.ReturnPage" class="btn btn-outline-danger btn-sm cursor-pointer">
                     Отменить и завершить ввод
                 </a>
             </div>
@@ -200,7 +202,7 @@
                         error.removeClass("hidden");
                         return;
                     }
-                    window.location.replace("/Expenses/ExpenseFlows");
+                    window.location.replace("@Model.Good.ReturnUrl");
                 });
         });
 
@@ -270,11 +272,14 @@
             }
         });
 
-        if ($("#Good_Category").val())
-            $("#Good_Product").focus();
-        else
-            $("#Good_Category").focus();
-
+        if (!$("#Good_FlowName").val())
+            $("#Good_FlowName").focus();
+        else {
+            if ($("#Good_Category").val())
+                $("#Good_Product").focus();
+            else
+                $("#Good_Category").focus();
+        }
 
     </script>
 

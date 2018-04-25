@@ -42,9 +42,9 @@ namespace Monifier.Web.Models.Expenses
         [DisplayName("Комментарий")]
         public string Comment { get; set; }
 
-        public List<string> AvailCategories { get; set; }
+        public string ReturnUrl { get; set; }
 
-        public bool NoItems { get; set; }
+        public string ReturnPage { get; set; }
 
         public IEnumerable<ModelValidationResult> Validate()
         {

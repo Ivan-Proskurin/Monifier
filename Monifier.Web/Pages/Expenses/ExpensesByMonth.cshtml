@@ -6,9 +6,19 @@
     var flows = Model.Flows.Select(x => x.Name).ToList();
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/expenses.reports.css" />
+}
+
 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
 <form method="post">
+    <div class="header">
+        <h4 class="form-caption-xs header-caption">Расходы по месяцам</h4>
+        <a asp-page="./AddExpense" asp-route-flowId="0" asp-route-returnPage="./ExpensesByMonth" class="btn btn-danger cursor-pointer header-button">Добавить расход</a>
+        <a asp-page="./AddExpenseBill" asp-route-flowId="0" asp-route-returnUrl="/Expenses/ExpensesByMonth" class="btn btn-danger cursor-pointer header-button">Ввести чек</a>
+    </div>
+
     <div class="input-group">
         <div class="input-group-addon addon-select-container">
             <autocomplete asp-for="Filter.Flow" value-list="@flows" value="@Model.Filter.Flow"
@@ -42,7 +52,7 @@
 
 @if (!Model.IsDataValid)
 {
-    <br/>
+    <br />
     <div class="text-danger larger-text align-center validation-summary-errors">Введите корректные даты!</div>
 }
 
@@ -66,28 +76,28 @@
                 <tr class="@trClass">
                     <td>
                         <a asp-page="./ExpensesTable" class="edit-item-link"
-                            asp-route-dateFrom="@item.DateFrom"
-                            asp-route-dateTo="@item.DateTo"
-                            asp-route-pageNumber="1"
-                            asp-route-flowId="@Model.Filter.FlowId">
+                           asp-route-dateFrom="@item.DateFrom"
+                           asp-route-dateTo="@item.DateTo"
+                           asp-route-pageNumber="1"
+                           asp-route-flowId="@Model.Filter.FlowId">
                             @item.Period
                         </a>
                     </td>
                     <td class="edit-item-link">
                         <a asp-page="./ExpensesTable" class="edit-item-link"
-                            asp-route-dateFrom="@item.DateFrom"
-                            asp-route-dateTo="@item.DateTo"
-                            asp-route-pageNumber="1"
-                            asp-route-flowId="@Model.Filter.FlowId">
+                           asp-route-dateFrom="@item.DateFrom"
+                           asp-route-dateTo="@item.DateTo"
+                           asp-route-pageNumber="1"
+                           asp-route-flowId="@Model.Filter.FlowId">
                             @item.Caption
                         </a>
                     </td>
                     <td>
                         <a asp-page="./ExpensesTable" class="edit-item-link"
-                            asp-route-dateFrom="@item.DateFrom"
-                            asp-route-dateTo="@item.DateTo"
-                            asp-route-pageNumber="1"
-                            asp-route-flowId="@Model.Filter.FlowId">
+                           asp-route-dateFrom="@item.DateFrom"
+                           asp-route-dateTo="@item.DateTo"
+                           asp-route-pageNumber="1"
+                           asp-route-flowId="@Model.Filter.FlowId">
                             @item.Goods
                         </a>
                     </td>

@@ -7,11 +7,20 @@
     var flows = Model.Flows?.Select(x => x.Name).ToList() ?? new List<string>();
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/expenses.reports.css" />
+}
+
 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
 <form id="navForm" method="post">
     <input type="hidden" asp-for="Filter.DateTo" />
     <div class="container">
+        <div class="header">
+            <h4 class="form-caption-xs header-caption">Расходы в течение дня</h4>
+            <a asp-page="./AddExpense" asp-route-flowId="0" asp-route-returnPage="./ExpensesForDay" class="btn btn-danger cursor-pointer header-button">Добавить расход</a>
+            <a asp-page="./AddExpenseBill" asp-route-flowId="0" asp-route-returnUrl="/Expenses/ExpensesForDay" class="btn btn-danger cursor-pointer header-button">Ввести чек</a>
+        </div>
         <div class="row">
             <div class="form-group row col-md-12 col-sm-10 col-10">
                 <div class="input-group">
@@ -79,25 +88,25 @@
                     <td>@item.Period</td>
                     <td>
                         <a asp-page="./ViewExpenseBill" asp-route-billId="@billId"
-                            class="edit-item-link">
+                           class="edit-item-link">
                             #@billId
                         </a>
                     </td>
                     <td>
                         <a asp-page="./ViewExpenseBill" asp-route-billId="@billId"
-                            class="edit-item-link">
+                           class="edit-item-link">
                             @item.Caption
                         </a>
                     </td>
                     <td>
                         <a asp-page="./ViewExpenseBill" asp-route-billId="@billId"
-                            class="edit-item-link">
+                           class="edit-item-link">
                             @item.Goods
                         </a>
                     </td>
                     <td class="align-right">
                         <a asp-page="./ViewExpenseBill" asp-route-billId="@billId"
-                            class="edit-item-link">
+                           class="edit-item-link">
                             @item.Sum.ToMoney()
                         </a>
                     </td>

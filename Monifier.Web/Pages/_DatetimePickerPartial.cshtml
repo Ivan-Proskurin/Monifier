@@ -9,7 +9,8 @@
     {
         <span class="input-group-addon">@Model.Label</span>
     }
-    <input id="@id" name="@Model.Name" data-val="true" class="form-control" type="text" value="@Model.Value" tabindex="-1"/>
+    <input id="@id" name="@Model.Name" data-val="true" class="form-control" type="text" value="@Model.Value" 
+           tabindex="-1" autocomplete="off"/>
     <span class="input-group-addon btn btn-secondary cursor-pointer" id="@btnId">
         <i class="fa fa-calendar"></i>
     </span>

@@ -80,7 +80,7 @@ namespace Monifier.Web.Pages.Expenses
 
         public ExpenseBillModel Bill { get; private set; }
 
-        private async Task PrepareEditBill(int flowId, Func<Task<ExpenseBillModel>> prepareBill)
+        private async Task PrepareEditBill(int flowId, Func<Task<ExpenseBillModel>> prepareBill, string returnUrl)
         {
             await PrepareModelsAsync(flowId);
 
@@ -90,7 +90,9 @@ namespace Monifier.Web.Pages.Expenses
             {
                 FlowId = flowId,
                 Bill = JsonConvert.SerializeObject(Bill),
-                FlowName = Flows.FirstOrDefault(x => x.Id == flowId)?.Name
+                FlowName = Flows.FirstOrDefault(x => x.Id == flowId)?.Name,
+                ReturnUrl = returnUrl,
+                ReturnPage = returnUrl.Replace("/Expenses/", "./"),
             };
             if (Categories.Count == 1)
             {
@@ -98,24 +100,24 @@ namespace Monifier.Web.Pages.Expenses
             }
         }
 
-        private async Task PrepareInputNewBill(int flowId)
+        private async Task PrepareInputNewBill(int flowId, string returnUrl)
         {
-            await PrepareEditBill(flowId, () => Task.FromResult(new ExpenseBillModel {ExpenseFlowId = flowId}));
+            await PrepareEditBill(flowId, () => Task.FromResult(new ExpenseBillModel {ExpenseFlowId = flowId}), returnUrl);
             Good.Account = Accounts.GetDefaultAccount()?.Name;
         }
 
-        private async Task PrepareEditExistingBill(int flowId, int billId)
+        private async Task PrepareEditExistingBill(int flowId, int billId, string returnUrl)
         {
-            await PrepareEditBill(flowId, async () => await _expensesBillQueries.GetById(billId));
+            await PrepareEditBill(flowId, async () => await _expensesBillQueries.GetById(billId), returnUrl);
             Good.Account = Accounts.FirstOrDefault(x => x.Id == Bill.AccountId)?.Name;
         }
 
-        public async Task OnGetAsync(int flowId, int? billId = null)
+        public async Task OnGetAsync(int flowId, int? billId = null, string returnUrl = "/Expenses/ExpenseFlows")
         {
             if (billId != null)
-                await PrepareEditExistingBill(flowId, billId.Value);
+                await PrepareEditExistingBill(flowId, billId.Value, returnUrl);
             else
-                await PrepareInputNewBill(flowId);
+                await PrepareInputNewBill(flowId, returnUrl);
         }
 
         private async Task<ExpenseItemModel> GetExpenseItem()

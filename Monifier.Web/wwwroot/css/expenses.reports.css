@@ -1,0 +1,14 @@
+﻿.header {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 7px;
+}
+
+.header-caption {
+    margin-right: auto;
+    align-content: flex-start;
+}
+
+.header-button {
+    margin-left: 5px;
+}

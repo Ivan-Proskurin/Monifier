@@ -38,6 +38,8 @@ namespace Monifier.Web.Models.Expenses
         [Required(ErrorMessage = "Введите сумму")]
         public string Cost { get; set; }
 
+        public string ReturnPage { get; set; }
+
         public IEnumerable<ModelValidationResult> Validate()
         {
             var dateTimeResult = DateTime.ValidateDateTime(nameof(DateTime));

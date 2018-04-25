@@ -80,7 +80,7 @@ namespace Monifier.Web.Pages.Expenses
         
         public List<ProductModel> Products { get; private set; }
 
-        private async Task PrepareToInputNewExpense(int flowId, bool correcting)
+        private async Task PrepareToInputNewExpense(int flowId, bool correcting, string returnPage)
         {
             await PrepareModels(flowId);
             var flow = correcting || flowId == 0 ? null : await _expenseFlowQueries.GetById(flowId);
@@ -92,6 +92,7 @@ namespace Monifier.Web.Pages.Expenses
                 FlowName = flow?.Name,
                 DateTime = DateTime.Now.ToStandardString(),
                 Cost = string.Empty,
+                ReturnPage = returnPage,
             };
             if (Categories.Count == 1)
             {
@@ -106,9 +107,9 @@ namespace Monifier.Web.Pages.Expenses
             }
         }
 
-        public async Task OnGetAsync(int flowId, bool correcting = false)
+        public async Task OnGetAsync(int flowId, bool correcting = false, string returnPage = "./ExpenseFlows")
         {
-            await PrepareToInputNewExpense(flowId, correcting);
+            await PrepareToInputNewExpense(flowId, correcting, returnPage);
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -117,7 +118,7 @@ namespace Monifier.Web.Pages.Expenses
                 async () =>
                 {
                     await _expenseFlowCommands.AddExpense(Expense.ToModel());
-                    return RedirectToPage("./ExpenseFlows");
+                    return RedirectToPage(Expense.ReturnPage);
                 },
                 async () =>
                 {

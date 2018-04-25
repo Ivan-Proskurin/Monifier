@@ -16,7 +16,8 @@
     
     <form method="post">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        <input asp-for="Expense.Correction" hidden />
+        <input asp-for="Expense.Correction" hidden/>
+        <input asp-for="Expense.ReturnPage" hidden/>
         <div class="row">
             <div class="form-group col-md-12 col-sm-7 col-7">
                 <label asp-for="Expense.Account" class="control-label"></label>
@@ -67,7 +68,7 @@
 
         <div class="form-group bottom-buttons-row">
             <input type="submit" value="Добавить расход" class="btn btn-outline-danger cursor-pointer" />
-            <a asp-page="./ExpenseFlows" class="btn btn-outline-primary gapped">Отмена</a>
+            <a asp-page="@Model.Expense.ReturnPage" class="btn btn-outline-primary gapped">Отмена</a>
         </div>
     </form>
 </div>
@@ -153,7 +154,7 @@
             }
         });
 
-        if (correcting) {
+        if (!$("#Expense_FlowName").val()) {
             $("#Expense_FlowName").focus();
         } else {
             if ($("#Expense_Category").val())
