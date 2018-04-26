@@ -39,7 +39,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
 
         private class FlowBillGoodsGroup : BillGoodsGroup
         {
-            public string FlowName { get; set; }
+            public string AccountName { get; set; }
         }
 
         private class BillGoodsGroupWithPagination
@@ -264,7 +264,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                     BillIds = new List<int> { x.Id },
                     DateTime = x.DateTime,
                     Sum = x.SumPrice,
-                    FlowName = x.ExpenseFlow.Name
+                    AccountName = x.Account.Name
                 }).ToListAsync();
 
             // группируем категории и товары с сортировкой
@@ -279,7 +279,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                     Sum = x.Sum,
                     DateFrom = today.ToStandardString(),
                     DateTo = tomorrow.ToStandardString(),
-                    Period = x.FlowName,
+                    Period = x.AccountName,
                     Caption = x.DateTime.ToStandardString(),
                     Goods = x.Goods.Select(g => g.Name).ToList().GetLaconicString(),
                     IsDangerExpense = false

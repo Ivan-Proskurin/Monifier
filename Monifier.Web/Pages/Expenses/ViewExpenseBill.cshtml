@@ -6,8 +6,11 @@
 
     <div class="container" style="margin-bottom: 40px;">
         <div class="row">
-            <div class="col-md-12 col-sm-11 col-7">
+            <div class="col-md-6 col-sm-5 col-3">
                 <h4>@Model.ExpenseFlow.Name</h4>
+            </div>
+            <div class="col-md-6 col-sm-5 col-3">
+                <h4>@Model.Account?.Name</h4>
             </div>
         </div>
     </div>
@@ -52,7 +55,7 @@
             <div class="col-md-6 col-sm-6 col-4">
                 <a asp-page="./ExpensesForDay" asp-route-day="@Model.Day" class="btn btn-outline-danger">Назад</a>
                 <a asp-page="./AddExpenseBill"
-                   asp-route-expenseId="@Model.ExpenseFlow.Id"
+                   asp-route-flowId="@Model.ExpenseFlow.Id"
                    asp-route-billId="@Model.Bill.Id"
                    class="btn btn-outline-primary">
                     Редактировать
