@@ -23,9 +23,7 @@ namespace Monifier.Web
         {          
             services.AddDbContext<MonifierDbContext>(options =>
                 options.UseSqlServer(
-                    Configuration.GetConnectionString("MoneyflowContext"),
-                    //Configuration.GetConnectionString("MonifierContext"),
-                    //Configuration.GetConnectionString("ReleaseContext"),
+                    Configuration.GetConnectionString("MonifierContext"),
                     b => b.MigrationsAssembly("Monifier.Web")));
             
             services.AddMvc().AddRazorPagesOptions(options =>
