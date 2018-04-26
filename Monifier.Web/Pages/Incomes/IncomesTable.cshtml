@@ -79,17 +79,36 @@
             for (int i = 0; i < Model.Incomes.Incomes.Count; i++)
             {
                 var item = Model.Incomes.Incomes[i];
+                var id = item.ItemIds.First();
                 <tr>
                     <td>
-                        @item.Interval
+                        <a asp-page="./EditIncome"
+                           asp-route-id="@id"
+                           class="edit-item-link">
+                            @item.Interval
+                        </a>
                     </td>
                     <td>
-                        @item.Types
+                        <a asp-page="./EditIncome"
+                           asp-route-id="@id"
+                           class="edit-item-link">
+                            @item.Types
+                        </a>
                     </td>
                     <td>
-                        @item.Caption
+                        <a asp-page="./EditIncome"
+                           asp-route-id="@id"
+                           class="edit-item-link">
+                            @item.Caption
+                        </a>
                     </td>
-                    <td class="align-right">@item.Sum.ToMoney()</td>
+                    <td class="align-right">
+                        <a asp-page="./EditIncome"
+                           asp-route-id="@id"
+                           class="edit-item-link">
+                            @item.Sum.ToMoney()
+                        </a>
+                    </td>
                 </tr>
             }
         }

@@ -38,10 +38,12 @@ namespace Monifier.BusinessLogic.Queries.Incomes
 
         public async Task<IncomeItemModel> Update(IncomeItemModel model)
         {
-            var itemRepo = _unitOfWork.GetCommandRepository<IncomeItem>();
+            var incomeCommands = _unitOfWork.GetCommandRepository<IncomeItem>();
+            var accountCommands = _unitOfWork.GetCommandRepository<Account>();
             var item = new IncomeItem
             {
                 Id = model.Id,
+                AccountId = model.AccountId,
                 DateTime = model.DateTime,
                 IncomeTypeId = model.IncomeTypeId,
                 Total = model.Total,
@@ -50,11 +52,38 @@ namespace Monifier.BusinessLogic.Queries.Incomes
             };
             if (item.Id > 0)
             {
-                itemRepo.Update(item);
+                var oldItem = await _unitOfWork.LoadEntity<IncomeItem>(item.Id).ConfigureAwait(false);
+                if (oldItem.AccountId == item.AccountId)
+                {
+                    var account = await _unitOfWork.LoadEntity<Account>(item.AccountId).ConfigureAwait(false);
+                    if (!item.IsCorrection)
+                        account.Balance += item.Total - oldItem.Total;
+                    account.AvailBalance += item.Total - oldItem.Total;
+                    accountCommands.Update(account);
+                }
+                else
+                {
+                    var account1 = await _unitOfWork.LoadEntity<Account>(oldItem.AccountId).ConfigureAwait(false);
+                    var account2 = await _unitOfWork.LoadEntity<Account>(item.AccountId).ConfigureAwait(false);
+                    if (!oldItem.IsCorrection)
+                        account1.Balance -= oldItem.Total;
+                    account1.AvailBalance -= oldItem.Total;
+                    if (!item.IsCorrection)
+                        account2.Balance += item.Total;
+                    account2.AvailBalance += item.Total;
+                    accountCommands.Update(account1);
+                    accountCommands.Update(account2);
+                }
+                incomeCommands.Update(item);
             }
             else
             {
-                itemRepo.Create(item);
+                var account = await _unitOfWork.LoadEntity<Account>(item.AccountId).ConfigureAwait(false);
+                if (!item.IsCorrection)
+                    account.Balance += item.Total;
+                account.AvailBalance += item.Total;
+                accountCommands.Update(account);
+                incomeCommands.Create(item);
             }
             await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
             model.Id = item.Id;

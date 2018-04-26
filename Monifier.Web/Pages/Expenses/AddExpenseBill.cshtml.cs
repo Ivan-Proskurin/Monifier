@@ -93,6 +93,7 @@ namespace Monifier.Web.Pages.Expenses
                 FlowName = Flows.FirstOrDefault(x => x.Id == flowId)?.Name,
                 ReturnUrl = returnUrl,
                 ReturnPage = returnUrl.Replace("/Expenses/", "./"),
+                IsCorrection = Bill.IsCorection,
             };
             if (Categories.Count == 1)
             {

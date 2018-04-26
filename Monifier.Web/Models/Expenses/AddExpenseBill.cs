@@ -46,6 +46,8 @@ namespace Monifier.Web.Models.Expenses
 
         public string ReturnPage { get; set; }
 
+        public bool IsCorrection { get; set; }
+
         public IEnumerable<ModelValidationResult> Validate()
         {
             var priceResult = Price.ValidateMoney(nameof(Price));

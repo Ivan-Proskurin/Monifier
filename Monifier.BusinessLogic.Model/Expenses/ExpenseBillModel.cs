@@ -25,6 +25,7 @@ namespace Monifier.BusinessLogic.Model.Expenses
         public decimal Cost { get; set; }
         public int OwnerId { get; set; }
         public List<ExpenseItemModel> Items { get; set; }
+        public bool IsCorection { get; set; }
 
         public bool IsNew => Id <= 0;
 
@@ -140,6 +141,7 @@ namespace Monifier.BusinessLogic.Model.Expenses
                 OwnerId = OwnerId,
                 IsCorrection = correction,
             };
+            IsCorection = correction;
 
             billCommands.Create(bill);
 

@@ -153,5 +153,20 @@ namespace Monifier.BusinessLogic.Queries.Incomes
 
             return result;
         }
+
+        public Task<List<IncomeItem>> GetAll(bool includeDeleted = false)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<IncomeItem> GetById(int id)
+        {
+            return await _unitOfWork.LoadEntity<IncomeItem>(id).ConfigureAwait(false);
+        }
+
+        public Task<IncomeItem> GetByName(string name, bool includeDeleted = false)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

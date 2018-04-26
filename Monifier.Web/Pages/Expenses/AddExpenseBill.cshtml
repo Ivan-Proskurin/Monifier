@@ -30,6 +30,7 @@
     <input asp-for="Good.FlowId" hidden />
     <input asp-for="Good.ReturnUrl" hidden />
     <input asp-for="Good.ReturnPage" hidden />
+    <input asp-for="Good.IsCorrection" hidden />
     <input type="text" id="Good_Bill" name="Good.Bill" value="@Model.Good.Bill" class="form-control"
            style="display: none;" />
 
@@ -55,6 +56,21 @@
                 <span asp-validation-for="Good.FlowName"></span>
             </div>
         </div>
+        @if (Model.Good.IsCorrection)
+        {
+            <div class="row" style="margin-bottom: 20px;">
+                <div class="col-md-3"></div>
+                <div class="col-md-9">
+                        <div class="form-group">
+                            <span aria-disabled="true" data-toggle="tooltip" data-placement="top"
+                                  title="Изменения будут касаться только доступного баланса счета">
+                                <input type="checkbox" checked disabled id="correctionCheckbox" />
+                                <label class="form-check-label" for="correctionCheckbox">Корректирующий доход</label>
+                            </span>
+                        </div>
+                </div>
+            </div>
+        }
         <div class="row">
             <div class="col-md-6 col-sm-6">
                 <div class="container">
@@ -186,6 +202,7 @@
         var productsAutocomplete = makeInputAutocomplete("Good.Product", null, selectCategoryByProduct);
         makeInputNumeric("Good.Price", false);
         makeInputNumeric("Good.Quantity", false);
+        $('[data-toggle="tooltip"]').tooltip();
 
         $("#confirmButton").click(function() {
             var url = urlPrefix + "?handler=confirm";

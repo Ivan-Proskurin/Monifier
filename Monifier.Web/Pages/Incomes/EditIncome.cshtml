@@ -1,0 +1,105 @@
+﻿@page "{id:int}"
+@model EditIncomeModel
+@{
+    var accounts = @Model.Accounts.Select(x => x.Name);
+    var incomeTypes = @Model.IncomeTypes.Select(x => x.Name);
+}
+
+<div class="col-md-7 left-aligned-form">
+    <h3>Редактирование дохода</h3>
+    <br />
+
+    <form method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input asp-for="Income.Id" hidden />
+        <input asp-for="Income.OwnerId" hidden />
+        <input asp-for="Income.IsCorrection" hidden />
+        <div class="form-group">
+            <label asp-for="Income.Account" class="control-label"></label>
+            <autocomplete asp-for="Income.Account" class="form-control" 
+                          value-list="@accounts" value="@Model.Income.Account"/>
+            <span asp-validation-for="Income.Account" class="text-danger"></span>
+        </div>            
+        <div class="form-group">
+            <label asp-for="Income.IncomeType" class="control-label"></label>
+            <autocomplete asp-for="Income.IncomeType" class="form-control"
+                          value-list="@incomeTypes" value="@Model.Income.IncomeType"/>
+            <span asp-validation-for="Income.IncomeType" class="text-danger"></span>
+        </div>
+        <div class="row">
+            <div class="col-md-7 col-sm-7 col-7">
+                <div class="form-group">
+                    <label asp-for="Income.DateTime" class="control-label"></label>
+                    <date-time-picker asp-for="Income.DateTime" value="@Model.Income.DateTime"/>
+                    <span asp-validation-for="Income.DateTime" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-5 col-sm-7 col-7">
+                <div class="form-group">
+                    <label asp-for="Income.Total" class="control-label"></label>
+                    <input asp-for="Income.Total" class="form-control money-input" autocomplete="off"/>
+                    <span asp-validation-for="Income.Total" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        @if (Model.Income.IsCorrection)
+        {
+            <div class="row">
+                <div class="form-group form-check" style="margin-bottom: 20px;">
+                    <div class="col-md-12 col-sm-12 col-12">
+                        <span aria-disabled="true" data-toggle="tooltip" data-placement="top"
+                              title="Изменения будут касаться только доступного баланса счета">
+                            <input type="checkbox" checked disabled id="correctionCheckbox" />
+                            <label class="form-check-label" for="correctionCheckbox">Корректирующий доход</label>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        }
+        <div class="row bottom-buttons-row">
+            <div class="col-md-8 col-sm-4 col-4">
+                <input type="submit" value="Сохранить" class="btn btn-outline-danger cursor-pointer" />
+                <a asp-page="./IncomesTable" class="btn btn-outline-primary gapped">Отмена</a>
+            </div>
+            <div class="col-md-4 col-sm-3 col-3" style="text-align: right;">
+                <button type="button" class="btn btn-danger cursor-pointer" data-toggle="modal" data-target="#deleteModal">Удалить доход</button>
+            </div>
+        </div>
+
+        <!-- Deletion modal -->
+        <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Удаление дохода</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Удалить этот доход? Увеличение баланса счета будет также отменено.
+                    </div>
+                    <div class="modal-footer">
+                        <input type="submit" asp-page-handler="delete" value="Удалить доход" class="btn btn-danger" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+</div>
+
+
+@section Scripts {
+    <script>
+        activateLink("#incomesLink");
+
+        makeInputAutocomplete("Income.Account");
+        makeInputAutocomplete("Income.IncomeType");
+        makeInputDatetimePicker("Income.DateTime");
+        makeInputNumeric('Income.Total');
+        $('[data-toggle="tooltip"]').tooltip();
+
+        $("#Account_Balance").focus();
+    </script>
+}

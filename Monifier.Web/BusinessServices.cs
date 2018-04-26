@@ -48,6 +48,7 @@ namespace Monifier.Web
             services.AddTransient<IInventorizationQueries, InventorizationQueries>();
             services.AddTransient<ISessionCommands, SessionCommands>();
             services.AddTransient<IAuthCommands, AuthCommands>();
+            services.AddTransient<IIncomeItemCommands, IncomeItemCommands>();
         }
     }
 }
