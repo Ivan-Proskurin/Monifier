@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Base;
+using Monifier.BusinessLogic.Contract.Inventorization;
 using Monifier.BusinessLogic.Model.Base;
+using Monifier.BusinessLogic.Model.Inventorization;
 using Monifier.BusinessLogic.Model.Pagination;
 using Monifier.Common.Extensions;
 using Monifier.Web.Models;
@@ -17,17 +19,24 @@ namespace Monifier.Web.Pages.Products
     {
         private readonly ICategoriesQueries _categoriesQueries;
         private readonly ICategoriesCommands _categoriesCommands;
+        private readonly IInventorizationQueries _inventorizationQueries;
 
-        public CategoriesModel(ICategoriesQueries categoriesQueries, ICategoriesCommands categoriesCommands)
+        public CategoriesModel(
+            ICategoriesQueries categoriesQueries, 
+            ICategoriesCommands categoriesCommands,
+            IInventorizationQueries inventorizationQueries)
         {
             _categoriesQueries = categoriesQueries;
             _categoriesCommands = categoriesCommands;
+            _inventorizationQueries = inventorizationQueries;
         }
         
         public CategoryList Categories { get; private set; }
         
         [BindProperty]
         public AddCategory AddCategory { get; set; }
+
+        public BalanceState BalanceState { get; private set; }
 
         private async Task LoadCategoriesAsync(int pageNumber)
         {
@@ -46,11 +55,13 @@ namespace Monifier.Web.Pages.Products
 
         public async Task OnGetAsync(int pageNumber = 1)
         {
+            BalanceState = await _inventorizationQueries.GetBalanceState();
             await LoadCategoriesAsync(pageNumber);
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
+            BalanceState = await _inventorizationQueries.GetBalanceState();
             return await AddCategory.ProcessAsync(ModelState, nameof(AddCategory),
                 async () =>
                 {

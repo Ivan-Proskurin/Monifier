@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Incomes;
+using Monifier.BusinessLogic.Contract.Inventorization;
 using Monifier.BusinessLogic.Contract.Settings;
 using Monifier.BusinessLogic.Model.Incomes;
+using Monifier.BusinessLogic.Model.Inventorization;
 using Monifier.BusinessLogic.Model.Pagination;
 using Monifier.Web.Models;
 
@@ -15,11 +17,16 @@ namespace Monifier.Web.Pages.Incomes
     {
         private readonly IIncomesQueries _incomesQueries;
         private readonly IUserSettings _userSettings;
+        private readonly IInventorizationQueries _inventorizationQueries;
 
-        public IncomesByMonthModel(IIncomesQueries incomesQueries, IUserSettings userSettings)
+        public IncomesByMonthModel(
+            IIncomesQueries incomesQueries, 
+            IUserSettings userSettings,
+            IInventorizationQueries inventorizationQueries)
         {
             _incomesQueries = incomesQueries;
             _userSettings = userSettings;
+            _inventorizationQueries = inventorizationQueries;
         }
         
         [BindProperty]
@@ -28,6 +35,8 @@ namespace Monifier.Web.Pages.Incomes
         public bool IsDataValid { get; private set; }
         
         public IncomesListModel Incomes { get; private set; }
+
+        public BalanceState BalanceState { get; private set; }
         
         private async Task<IncomesListModel> LoadIncomesAsync(int pageNumber = 1)
         {
@@ -52,6 +61,7 @@ namespace Monifier.Web.Pages.Incomes
 
         public async Task OnGetAsync(string dateFrom, string dateTo, int pageNumber = 1)
         {
+            BalanceState = await _inventorizationQueries.GetBalanceState();
             if (string.IsNullOrEmpty(dateFrom) || string.IsNullOrEmpty(dateTo))
                 Filter = ReportTableFilter.CurrentYear();
             else
@@ -70,6 +80,7 @@ namespace Monifier.Web.Pages.Incomes
         
         public async Task<IActionResult> OnPostRefreshAsync()
         {
+            BalanceState = await _inventorizationQueries.GetBalanceState();
             return await Filter.ProcessAsync(ModelState, nameof(Filter),
                 async () =>
                 {

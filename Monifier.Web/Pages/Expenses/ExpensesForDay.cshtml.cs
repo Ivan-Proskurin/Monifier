@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Expenses;
+using Monifier.BusinessLogic.Contract.Inventorization;
 using Monifier.BusinessLogic.Model.Expenses;
+using Monifier.BusinessLogic.Model.Inventorization;
 using Monifier.Common.Extensions;
 using Monifier.Web.Models;
 
@@ -15,11 +17,16 @@ namespace Monifier.Web.Pages.Expenses
     {
         private readonly IExpensesQueries _expensesQueries;
         private readonly IExpenseFlowQueries _expenseFlowQueries;
+        private readonly IInventorizationQueries _inventorizationQueries;
 
-        public BillExpensesForDayModel(IExpensesQueries expensesQueries, IExpenseFlowQueries expenseFlowQueries)
+        public BillExpensesForDayModel(
+            IExpensesQueries expensesQueries, 
+            IExpenseFlowQueries expenseFlowQueries,
+            IInventorizationQueries inventorizationQueries)
         {
             _expensesQueries = expensesQueries;
             _expenseFlowQueries = expenseFlowQueries;
+            _inventorizationQueries = inventorizationQueries;
         }
         
         [BindProperty]
@@ -28,8 +35,16 @@ namespace Monifier.Web.Pages.Expenses
         public List<ExpenseFlowModel> Flows { get; private set; }
         
         public ExpensesListModel Expenses { get; private set; }
+
+        public BalanceState BalanceState { get; private set; }
         
         public bool IsDataValid { get; private set; }
+
+        private async Task PrepareModelsAsync()
+        {
+            BalanceState = await _inventorizationQueries.GetBalanceState();
+            Flows = await _expenseFlowQueries.GetAll();
+        }
 
         private async Task<ExpensesListModel> LoadExpensesAsync()
         {
@@ -55,7 +70,7 @@ namespace Monifier.Web.Pages.Expenses
 
         public async Task OnGetAsync(string day, int? flowId = null)
         {
-            Flows = await _expenseFlowQueries.GetAll();
+            await PrepareModelsAsync();
             if (day.IsNullOrEmpty())
                 Filter = ReportTableFilter.CurrentDay();
             else
@@ -77,7 +92,7 @@ namespace Monifier.Web.Pages.Expenses
 
         public async Task<IActionResult> OnPostRefreshAsync()
         {
-            Flows = await _expenseFlowQueries.GetAll();
+            await PrepareModelsAsync();
             Filter.DateTo = Filter.DateFrom;
             return await Filter.ProcessAsync(ModelState, nameof(Filter),
                 async () =>

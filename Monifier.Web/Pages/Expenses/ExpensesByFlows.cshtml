@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="~/css/expenses.reports.css" />
 }
 
+@Html.Partial("_Inventorization", Model.BalanceState)
+
 <form method="post">
     <div class="header">
         <h4 class="form-caption-xs header-caption">Расходы по категориям</h4>
@@ -22,14 +24,14 @@
         </div>
         <div class="input-group-addon addon-dtpicker-container">
             <date-time-picker asp-for="Filter.DateFrom" class="form-control" autocomplete="off"
-                              value="@Model.Filter.DateFrom"/>
+                              value="@Model.Filter.DateFrom" />
         </div>
         <div class="input-group-addon addon-label-container">
             До:
         </div>
         <div class="input-group-addon addon-dtpicker-container">
             <date-time-picker asp-for="Filter.DateTo" class="form-control"
-                              autocomplete="off" value="@Model.Filter.DateTo"/>
+                              autocomplete="off" value="@Model.Filter.DateTo" />
         </div>
         <div class="input-group-addon addon-button-container">
             <button type="submit" asp-page-handler="refresh"

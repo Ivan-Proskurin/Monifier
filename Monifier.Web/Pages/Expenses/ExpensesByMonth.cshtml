@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="~/css/expenses.reports.css" />
 }
 
+@Html.Partial("_Inventorization", Model.BalanceState)
+
 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
 <form method="post">

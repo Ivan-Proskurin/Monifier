@@ -10,12 +10,14 @@
     <link rel="stylesheet" href="~/css/income.reports.css" />
 }
 
+@Html.Partial("_Inventorization", Model.BalanceState)
+
 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
 <form method="post">
     <div class="header">
         <h4 class="form-caption-xs header-caption">Доходы по месяцам</h4>
-        <a asp-page="/Accounts/TopupAccount" asp-route-id="0" asp-route-returnPage="/Incomes/IncomesByMonth" 
+        <a asp-page="/Accounts/TopupAccount" asp-route-id="0" asp-route-returnPage="/Incomes/IncomesByMonth"
            class="btn btn-primary cursor-pointer header-button">Добавить доход</a>
     </div>
 

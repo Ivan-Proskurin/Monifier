@@ -5,55 +5,57 @@
     ViewBag.Title = "Товары";
 }
 
+@Html.Partial("_Inventorization", Model.BalanceState)
+
 <h4 class="form-caption-sm">Категории</h4>
 
 <table class="cashed-table table table-striped table-hover">
     <thead class="thead-dark">
-    <tr>
-        <th>
-            Номер
-        </th>
-        <th>
-            Название
-        </th>
-        <th>
-            Продуктов
-        </th>
-    </tr>
+        <tr>
+            <th>
+                Номер
+            </th>
+            <th>
+                Название
+            </th>
+            <th>
+                Продуктов
+            </th>
+        </tr>
     </thead>
     <tbody>
 
-    @for (int i = 0; i < Model.Categories.List.Count; i++)
-    {
-        var category = Model.Categories.List[i];
-        <tr>
-            <td>@(i + 1)</td>
-            <td>
-                <a asp-page="./EditCategory" 
-                   asp-route-id="@category.Id" asp-route-pageNumber="1" 
-                   class="edit-item-link">@category.Name</a>
-            </td>
-            <td>
-                @category.ProductCount
-            </td>
-        </tr>
-    }
+        @for (int i = 0; i < Model.Categories.List.Count; i++)
+        {
+            var category = Model.Categories.List[i];
+            <tr>
+                <td>@(i + 1)</td>
+                <td>
+                    <a asp-page="./EditCategory"
+                       asp-route-id="@category.Id" asp-route-pageNumber="1"
+                       class="edit-item-link">@category.Name</a>
+                </td>
+                <td>
+                    @category.ProductCount
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
 
-<pagination asp-page="./Categories" pagination="@Model.Categories.Pagination"/>
+<pagination asp-page="./Categories" pagination="@Model.Categories.Pagination" />
 
-<br/>
+<br />
 <form method="post">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-    <input asp-for="AddCategory.PageNumber" class="hidden"/>
+    <input asp-for="AddCategory.PageNumber" class="hidden" />
     <div class="row">
         <div class="col-md-8 col-sm-12 col-12">
             <div class="form-group">
                 <div class="input-group">
-                    <input asp-for="AddCategory.Category" placeholder="Введите название новой категории" 
-                           class="form-control" autocomplete="off"/>
-                    <input type="submit" class="input-group-addon btn btn-outline-danger cursor-pointer" value="Добавить"/>
+                    <input asp-for="AddCategory.Category" placeholder="Введите название новой категории"
+                           class="form-control" autocomplete="off" />
+                    <input type="submit" class="input-group-addon btn btn-outline-danger cursor-pointer" value="Добавить" />
                 </div>
                 <span asp-validation-for="AddCategory.Category"></span>
             </div>
