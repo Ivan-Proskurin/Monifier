@@ -6,9 +6,19 @@
     ViewBag.Title = "Доходы";
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/expenses.reports.css" />
+}
+
 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
 <form method="post">
+    <div class="header">
+        <h4 class="form-caption-xs header-caption">Доходы по дням</h4>
+        <a asp-page="/Accounts/TopupAccount" asp-route-id="0" asp-route-returnPage="/Incomes/IncomesTable" 
+           class="btn btn-primary cursor-pointer header-button">Добавить доход</a>
+    </div>
+
     <div class="input-group">
         <div class="input-group-addon addon-caption-container">
             Доходы
@@ -17,15 +27,13 @@
             От:
         </div>
         <div class="input-group-addon addon-dtpicker-container">
-            <date-time-picker asp-for="Filter.DateFrom" class="form-control" autocomplete="off"
-                              value="@Model.Filter.DateFrom"/>
+            <date-time-picker asp-for="Filter.DateFrom" class="form-control" value="@Model.Filter.DateFrom" />
         </div>
         <div class="input-group-addon addon-label-container">
             До:
         </div>
         <div class="input-group-addon addon-dtpicker-container">
-            <date-time-picker asp-for="Filter.DateTo" class="form-control"
-                              autocomplete="off" value="@Model.Filter.DateTo"/>
+            <date-time-picker asp-for="Filter.DateTo" class="form-control" value="@Model.Filter.DateTo" />
         </div>
         <div class="input-group-addon addon-button-container">
             <button type="submit" asp-page-handler="refresh"
@@ -58,62 +66,47 @@
 
 <table class="cashed-table table table-striped table-hover">
     <thead class="thead-dark">
-    <tr>
-        <th>Дата/время</th>
-        <th>Статья дохода</th>
-        <th>Счет зачисления</th>
-        <th class="align-right">Сумма</th>
-    </tr>
+        <tr>
+            <th>Дата/время</th>
+            <th>Статья дохода</th>
+            <th>Счет зачисления</th>
+            <th class="align-right">Сумма</th>
+        </tr>
     </thead>
     <tbody>
-    @if (Model.IsDataValid)
-    {
-        @for (int i = 0; i < Model.Incomes.Incomes.Count; i++)
-         {
-             var item = Model.Incomes.Incomes[i];
-//            var trClass = item.IsDangerExpense ? "table-danger" : "table-default";
-
-@*            <tr class="@trClass">*@
-             <tr>
-                 <td>
-                     @item.Interval
-                     @*                    <a asp-page="./ExpensesTable" class="edit-item-link"*@
-                     @*                       asp-route-dateFrom="@item.DateFrom"*@
-                     @*                       asp-route-dateTo="@item.DateTo">*@
-                     @*                        @item.Interval</a>*@
-                 </td>
-                 <td>
-                     @item.Types
-                     @*                    <a asp-page="./ExpensesTable" class="edit-item-link"*@
-                     @*                       asp-route-dateFrom="@item.DateFrom"*@
-                     @*                       asp-route-dateTo="@item.DateTo">*@
-                     @*                        @item.Caption</a>*@
-                 </td>
-                 <td>
-                     @item.Caption
-                     @*                    <a asp-page="./ExpensesTable" class="edit-item-link"*@
-                     @*                       asp-route-dateFrom="@item.DateFrom"*@
-                     @*                       asp-route-dateTo="@item.DateTo">*@
-                     @*                        @item.Goods</a>*@
-                 </td>
-                 <td class="align-right">@item.Sum.ToMoney()</td>
-             </tr>
-         }
-    }
-    </tbody>
-    <tfoot>
-    <tr class="table-info">
         @if (Model.IsDataValid)
         {
-            <td colspan="3" class="totals-caption-left">@Model.Incomes.Totals.Caption</td>
-            <td class="totals-caption">@Model.Incomes.Totals.Total.ToMoney()</td>
+            for (int i = 0; i < Model.Incomes.Incomes.Count; i++)
+            {
+                var item = Model.Incomes.Incomes[i];
+                <tr>
+                    <td>
+                        @item.Interval
+                    </td>
+                    <td>
+                        @item.Types
+                    </td>
+                    <td>
+                        @item.Caption
+                    </td>
+                    <td class="align-right">@item.Sum.ToMoney()</td>
+                </tr>
+            }
         }
-        else
-        {
-            <td colspan="3" class="totals-caption-left">Итого за выбранный период:</td>
-            <td class="totals-caption">-</td>
-        }
-    </tr>
+    </tbody>
+    <tfoot>
+        <tr class="table-info">
+            @if (Model.IsDataValid)
+            {
+                <td colspan="3" class="totals-caption-left">@Model.Incomes.Totals.Caption</td>
+                <td class="totals-caption">@Model.Incomes.Totals.Total.ToMoney()</td>
+            }
+            else
+            {
+                <td colspan="3" class="totals-caption-left">Итого за выбранный период:</td>
+                <td class="totals-caption">-</td>
+            }
+        </tr>
     </tfoot>
 </table>
 
@@ -125,7 +118,7 @@
 }
 
 @section Scripts
-{
+    {
     <script type="text/javascript">
         activateLink("#incomesLink");
 

@@ -28,6 +28,8 @@ namespace Monifier.Web.Models.Accounts
         
         public bool AddNonexistentIncomeType { get; set; }
 
+        public string ReturnPage { get; set; }
+
         public IEnumerable<ModelValidationResult> Validate()
         {
             var amountResult = Amount.ValidateMoney(nameof(Amount));

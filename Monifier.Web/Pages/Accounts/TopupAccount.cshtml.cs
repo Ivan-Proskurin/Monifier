@@ -44,7 +44,7 @@ namespace Monifier.Web.Pages.Accounts
         
         public bool SuggestAddIncomeType { get; set; }
 
-        public async Task OnGetAsync(int id, bool correcting = false)
+        public async Task OnGetAsync(int id, bool correcting = false, string returnPage = "./AccountsList")
         {
             var account = correcting ? null : await _accountQueries.GetById(id);
             Topup = new TopupAccount
@@ -52,12 +52,13 @@ namespace Monifier.Web.Pages.Accounts
                 Id = id,
                 Correcting = correcting,
                 AccountName = account?.Name,
-                TopupDate = DateTime.Now.ToStandardString(false)
+                TopupDate = DateTime.Now.ToStandardString(false),
+                ReturnPage = returnPage,
             };
             IncomeTypes = await _incomeTypeQueries.GetAll();
+            Accounts = await _accountQueries.GetAll();
             if (correcting)
             {
-                Accounts = await _accountQueries.GetAll();
                 var balanceState = await _inventorizationQueries.GetBalanceState();
                 Topup.Amount = balanceState.Balance.ToStandardString();
             }
@@ -69,32 +70,29 @@ namespace Monifier.Web.Pages.Accounts
                 async () =>
                 {
                     var incomeType = await _incomeTypeQueries.GetByName(Topup.IncomeType);
-                    var accountId = Topup.Correcting ? (await _accountQueries.GetByName(Topup.AccountName)).Id : Topup.Id;
+                    var account = await _accountQueries.GetByName(Topup.AccountName);
                     await _accountCommands.Topup(new BusinessLogic.Model.Accounts.TopupAccountModel
                     {
                         Correction = Topup.Correcting,
-                        AccountId = accountId,
+                        AccountId = account.Id,
                         IncomeTypeId = incomeType?.Id,
                         AddIncomeTypeName = incomeType == null ? Topup.IncomeType : null,
                         TopupDate = Topup.TopupDate.ParseDtFromStandardString(),
                         Amount = Topup.Amount.ParseMoneyInvariant()
                     });
-                    return RedirectToPage("./AccountsList");
+                    return RedirectToPage(Topup.ReturnPage);
                 },
                 
                 async () =>
                 {
                     IncomeTypes = await _incomeTypeQueries.GetAll();
-                    if (Topup.Correcting)
-                    {
-                        Accounts = await _accountQueries.GetAll();
-                    }
+                    Accounts = await _accountQueries.GetAll();
                     return Page();
                 },
                 
                 async vrList =>
                 {
-                    if (Topup.Correcting)
+                    if (!Topup.AccountName.IsNullOrEmpty())
                     {
                         var account = await _accountQueries.GetByName(Topup.AccountName);
                         if (account == null)

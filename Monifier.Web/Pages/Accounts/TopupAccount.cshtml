@@ -8,33 +8,21 @@
 <div class="col-md-7 left-aligned-form">
     <h3>Пополнение счета</h3>
     <br/>
-    @if (!Model.Topup.Correcting)
-    {
-        <h4>@Model.Topup.AccountName</h4>
-        <br/>
-    }
 
     <form method="post">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        <input asp-for="Topup.Id" hidden/>
         <input asp-for="Topup.Correcting" hidden/>
-        @if (Model.Topup.Correcting)
-        {
-            <div class="row">
-                <div class="col-md-12 col-sm-7 col-7">
-                    <div class="form-group">
-                        <label asp-for="Topup.AccountName" class="control-label"></label>
-                        <autocomplete asp-for="Topup.AccountName" value="@Model.Topup.AccountName"
-                                      value-list="@accounts"/>
-                        <span asp-validation-for="Topup.AccountName" class="text-danger"></span>
-                    </div>
+        <input asp-for="Topup.ReturnPage" hidden/>
+        <div class="row">
+            <div class="col-md-12 col-sm-7 col-7">
+                <div class="form-group">
+                    <label asp-for="Topup.AccountName" class="control-label"></label>
+                    <autocomplete asp-for="Topup.AccountName" value="@Model.Topup.AccountName"
+                                  value-list="@accounts"/>
+                    <span asp-validation-for="Topup.AccountName" class="text-danger"></span>
                 </div>
             </div>
-        }
-        else
-        {
-            <input asp-for="Topup.AccountName" hidden/>
-        }
+        </div>
         <div class="row">
             <div class="col-md-12 col-sm-7 col-7">
                 <div class="form-group">
@@ -67,20 +55,20 @@
         </div>
         <div class="form-group bottom-buttons-row">
             <input type="submit" value="Пополнить счет" class="btn btn-outline-danger cursor-pointer"/>
-            <a asp-page="./AccountsList" class="btn btn-outline-primary gapped">Отмена</a>
+            <a asp-page="@Model.Topup.ReturnPage" class="btn btn-outline-primary gapped">Отмена</a>
         </div>
     </form>
 
 </div>
 
 @section Scripts {
-    <script>
+    <script type="text/javascript">
         makeInputDatetimePicker("Topup.TopupDate");
         makeInputAutocomplete("Topup.IncomeType");
         makeInputNumeric('Topup.Amount', false);
 
-        if ("@Model.Topup.Correcting" === "True") {
-            makeInputAutocomplete("Topup_AccountName");
+        makeInputAutocomplete("Topup_AccountName");
+        if (!$("#Topup_AccountName").val()) {
             $("#Topup_AccountName").focus();
         } else {
             $("#Topup_IncomeType").focus();
