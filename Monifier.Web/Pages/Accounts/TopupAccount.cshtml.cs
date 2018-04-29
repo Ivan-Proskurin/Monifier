@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Base;
+using Monifier.BusinessLogic.Contract.Common;
 using Monifier.BusinessLogic.Contract.Incomes;
 using Monifier.BusinessLogic.Contract.Inventorization;
 using Monifier.BusinessLogic.Model.Base;
@@ -22,16 +22,19 @@ namespace Monifier.Web.Pages.Accounts
         private readonly IAccountQueries _accountQueries;
         private readonly IAccountCommands _accountCommands;
         private readonly IInventorizationQueries _inventorizationQueries;
+        private readonly ITimeProvider _timeProvider;
         private readonly IIncomeTypeQueries _incomeTypeQueries;
 
         public TopupAccountModel(IAccountQueries accountQueries, 
             IIncomeTypeQueries incomeTypeQueries,
             IAccountCommands accountCommands,
-            IInventorizationQueries inventorizationQueries)
+            IInventorizationQueries inventorizationQueries,
+            ITimeProvider timeProvider)
         {
             _accountQueries = accountQueries;
             _accountCommands = accountCommands;
             _inventorizationQueries = inventorizationQueries;
+            _timeProvider = timeProvider;
             _incomeTypeQueries = incomeTypeQueries;
         }
         
@@ -52,7 +55,7 @@ namespace Monifier.Web.Pages.Accounts
                 Id = id,
                 Correcting = correcting,
                 AccountName = account?.Name,
-                TopupDate = DateTime.Now.ToStandardString(false),
+                TopupDate = _timeProvider.ClientLocalNow.ToStandardString(false),
                 ReturnPage = returnPage,
             };
             IncomeTypes = await _incomeTypeQueries.GetAll();

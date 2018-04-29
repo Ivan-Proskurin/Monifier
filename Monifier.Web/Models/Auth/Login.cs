@@ -12,6 +12,8 @@ namespace Monifier.Web.Models.Auth
         
         [Display(Name = "Пароль")]
         public string Password { get; set; }
+
+        public string TimeZoneOffset { get; set; }
         
         public string ReturnUrl { get; set; }
 

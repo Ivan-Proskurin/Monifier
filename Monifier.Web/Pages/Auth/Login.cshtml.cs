@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Auth;
 using Monifier.BusinessLogic.Model.Auth;
+using Monifier.Common.Extensions;
 using Monifier.Web.Auth;
 using Monifier.Web.Models;
 using Monifier.Web.Models.Auth;
@@ -39,12 +40,15 @@ namespace Monifier.Web.Pages.Auth
                 {
                     try
                     {
-                        var user = await _sessionCommands.CheckUser(Login.UserName, Login.Password);
-                        await HttpContext.SignInAsync(user);
+                        if (!Login.UserName.IsNullOrEmpty() && !Login.Password.IsNullOrEmpty())
+                        {
+                            var user = await _sessionCommands.CheckUser(Login.UserName, Login.Password);
+                            await HttpContext.SignInAsync(user, Login.TimeZoneOffset);
+                        }
                     }
                     catch (AuthException exc)
                     {
-                        vrList.Add(new ModelValidationResult(exc.Message));
+                        vrList.Add(new ModelValidationResult(string.Empty, exc.Message));
                     }
                 });
         }

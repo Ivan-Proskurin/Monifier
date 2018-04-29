@@ -8,6 +8,7 @@ namespace Monifier.Web.Auth
     {
         private readonly bool _isAuthenticated;
         private readonly int _userId;
+        private readonly int _timeZoneOffset;
 
         public CurrentSession(IHttpContextAccessor httpContextAccessor)
         {
@@ -16,9 +17,14 @@ namespace Monifier.Web.Auth
             var userIdClaim = user.FindFirst(MonifierClaimTypes.UserId); 
             if (_isAuthenticated && userIdClaim != null)
                 int.TryParse(userIdClaim.Value, out _userId);
+            var timeZoneOffsetClaim = user.FindFirst(MonifierClaimTypes.TimeZoneOffset);
+            if (timeZoneOffsetClaim != null)
+                int.TryParse(timeZoneOffsetClaim.Value, out _timeZoneOffset);
         }
 
         public bool IsAuthenticated => _isAuthenticated;
         public int UserId => _isAuthenticated ? _userId : throw new AuthException("Not authenticated");
+
+        public int TimeZoneOffest => _timeZoneOffset;
     }
 }

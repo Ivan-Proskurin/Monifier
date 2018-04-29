@@ -8,6 +8,7 @@
 <div class="login-form">
     <form method="post">
         <input asp-for="Login.ReturnUrl" hidden />
+        <input asp-for="Login.TimeZoneOffset" style="display: none"/>
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <div class="row">
             <div class="form-group col-sm-6">
@@ -34,5 +35,6 @@
 @section Scripts {
     <script type="text/javascript">
         $("#Login_UserName").focus();
+        $('#Login_TimeZoneOffset').val(-(new Date()).getTimezoneOffset());
     </script>
 }

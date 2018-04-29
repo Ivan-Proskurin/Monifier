@@ -44,7 +44,7 @@ namespace Monifier.Web.Pages.Auth
                     {
                         await _authCommands.UpdateUser(_currentSession.UserId, newName, User.Password);
                         user.Name = newName;
-                        await HttpContext.SignInAsync(user);
+                        await HttpContext.SignInAsync(user, User.TimeZoneOffset);
                     }
                     return RedirectToPage("/Accounts/AccountsList");
                 },

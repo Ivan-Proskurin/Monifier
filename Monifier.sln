@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.0.0
-MinimumVisualStudioVersion = 10.0.0.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.Web", "Monifier.Web\Monifier.Web.csproj", "{0EDCF183-630D-4569-9919-7CCC455B6CC0}"
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.2015
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.Web", "Monifier.Web\Monifier.Web.csproj", "{0EDCF183-630D-4569-9919-7CCC455B6CC0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "0 Common", "0 Common", "{D753C2A9-18F9-4368-B66B-FE2269E42A3A}"
 EndProject
@@ -13,61 +13,63 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2 BusinessLogic", "2 Busine
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4 Tests", "4 Tests", "{B56CCBB8-AE5A-47E3-BA71-CCC63B608186}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.DataAccess.Model", "Monifier.DataAccess.Model\Monifier.DataAccess.Model.csproj", "{12240751-E4BD-48C4-B46C-4BE3EF314BA5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.DataAccess.Model", "Monifier.DataAccess.Model\Monifier.DataAccess.Model.csproj", "{12240751-E4BD-48C4-B46C-4BE3EF314BA5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.DataAccess.Contract", "Monifier.DataAccess.Contract\Monifier.DataAccess.Contract.csproj", "{1D458E3A-9062-485E-BCA8-7A336AF0E58E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.DataAccess.Contract", "Monifier.DataAccess.Contract\Monifier.DataAccess.Contract.csproj", "{1D458E3A-9062-485E-BCA8-7A336AF0E58E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.DataAccess.EntityFramework", "Monifier.DataAccess.EntityFramework\Monifier.DataAccess.EntityFramework.csproj", "{0976F20E-3919-4148-AA1F-9298C8FCFDE4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.DataAccess.EntityFramework", "Monifier.DataAccess.EntityFramework\Monifier.DataAccess.EntityFramework.csproj", "{0976F20E-3919-4148-AA1F-9298C8FCFDE4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3 Web", "3 Web", "{E5820AF5-DF5D-4A8A-9586-D669D3EA2195}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.Common.Extensions", "Monifier.Common.Extensions\Monifier.Common.Extensions.csproj", "{D2635426-B606-451E-B681-5B34C4DC5186}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.Common.Extensions", "Monifier.Common.Extensions\Monifier.Common.Extensions.csproj", "{D2635426-B606-451E-B681-5B34C4DC5186}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.BusinessLogic.Contract", "Monifier.BusinessLogic.Contract\Monifier.BusinessLogic.Contract.csproj", "{5550E45D-562B-4B99-A2CF-89AC666B1845}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.BusinessLogic.Contract", "Monifier.BusinessLogic.Contract\Monifier.BusinessLogic.Contract.csproj", "{5550E45D-562B-4B99-A2CF-89AC666B1845}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.BusinessLogic.Model", "Monifier.BusinessLogic.Model\Monifier.BusinessLogic.Model.csproj", "{0A397923-A446-4A76-86B9-0D66E9C920EF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.BusinessLogic.Model", "Monifier.BusinessLogic.Model\Monifier.BusinessLogic.Model.csproj", "{0A397923-A446-4A76-86B9-0D66E9C920EF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.BusinessLogic.Queries", "Monifier.BusinessLogic.Queries\Monifier.BusinessLogic.Queries.csproj", "{2C6D2051-0B30-4927-A0E1-D3EA15BCE86D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.BusinessLogic.Queries", "Monifier.BusinessLogic.Queries\Monifier.BusinessLogic.Queries.csproj", "{2C6D2051-0B30-4927-A0E1-D3EA15BCE86D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "0 Common", "0 Common", "{F41DAE3C-4220-409D-822B-E3E20B8043D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.Common.Extensions.Tests", "Monifier.Common.Extensions.Tests\Monifier.Common.Extensions.Tests.csproj", "{13A0D3BE-E825-41AF-B749-24F07454453A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.Common.Extensions.Tests", "Monifier.Common.Extensions.Tests\Monifier.Common.Extensions.Tests.csproj", "{13A0D3BE-E825-41AF-B749-24F07454453A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2 BusinessLogic", "2 BusinessLogic", "{283FCE9D-DC71-4BE8-B56B-31319844D110}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.BusinessLogic.Model.Tests", "Monifier.BusinessLogic.Model.Tests\Monifier.BusinessLogic.Model.Tests.csproj", "{AC7ACC79-A698-4905-82A3-669113AA0450}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.BusinessLogic.Model.Tests", "Monifier.BusinessLogic.Model.Tests\Monifier.BusinessLogic.Model.Tests.csproj", "{AC7ACC79-A698-4905-82A3-669113AA0450}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1 DataAccess", "1 DataAccess", "{AF0EE9BC-41BC-4E0C-ABBB-CBF3B54240AC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.DataAccess.EntityFramework.Tests", "Monifier.DataAccess.EntityFramework.Tests\Monifier.DataAccess.EntityFramework.Tests.csproj", "{083AB8B7-5CB0-4C6C-8539-5DA1C6722F08}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.DataAccess.EntityFramework.Tests", "Monifier.DataAccess.EntityFramework.Tests\Monifier.DataAccess.EntityFramework.Tests.csproj", "{083AB8B7-5CB0-4C6C-8539-5DA1C6722F08}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.BusinessLogic.Distribution", "Monifier.BusinessLogic.Distribution\Monifier.BusinessLogic.Distribution.csproj", "{1015744A-EEBC-41B3-AADF-C48F3C9BB3C5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.BusinessLogic.Distribution", "Monifier.BusinessLogic.Distribution\Monifier.BusinessLogic.Distribution.csproj", "{1015744A-EEBC-41B3-AADF-C48F3C9BB3C5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.BusinessLogic.Distribution.Tests", "Monifier.BusinessLogic.Distribution.Tests\Monifier.BusinessLogic.Distribution.Tests.csproj", "{18EC57C6-23EB-4315-9068-873B73164191}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.BusinessLogic.Distribution.Tests", "Monifier.BusinessLogic.Distribution.Tests\Monifier.BusinessLogic.Distribution.Tests.csproj", "{18EC57C6-23EB-4315-9068-873B73164191}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.BusinessLogic.Queries.Tests", "Monifier.BusinessLogic.Queries.Tests\Monifier.BusinessLogic.Queries.Tests.csproj", "{637FB666-48A7-463B-9A9E-4500725B9FA1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.BusinessLogic.Queries.Tests", "Monifier.BusinessLogic.Queries.Tests\Monifier.BusinessLogic.Queries.Tests.csproj", "{637FB666-48A7-463B-9A9E-4500725B9FA1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "5 IntegrationTests", "5 IntegrationTests", "{76BA854B-5393-4C57-96AC-EF106CFEED31}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "0 Infrastructure", "0 Infrastructure", "{ED527FB9-FDC3-43A5-840E-FDA14775F600}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.IntegrationTests.Infrastructure", "Monifier.IntegrationTests.Infrastructure\Monifier.IntegrationTests.Infrastructure.csproj", "{778C8086-55D3-42EE-976D-3A78DCDB4012}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.IntegrationTests.Infrastructure", "Monifier.IntegrationTests.Infrastructure\Monifier.IntegrationTests.Infrastructure.csproj", "{778C8086-55D3-42EE-976D-3A78DCDB4012}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.BusinessLogic.Queries.IntegrationTests", "Monifier.BusinessLogic.Queries.IntegrationTests\Monifier.BusinessLogic.Queries.IntegrationTests.csproj", "{988DEDAF-6500-492A-8930-2B3BAF13C032}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.BusinessLogic.Queries.IntegrationTests", "Monifier.BusinessLogic.Queries.IntegrationTests\Monifier.BusinessLogic.Queries.IntegrationTests.csproj", "{988DEDAF-6500-492A-8930-2B3BAF13C032}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3 BusinessLogic", "3 BusinessLogic", "{3C8EC64D-F8C6-4BFD-B680-5C0FF9E6E907}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.BusinessLogic.Model.IntegrationTests", "Monifier.BusinessLogic.Model.IntegrationTests\Monifier.BusinessLogic.Model.IntegrationTests.csproj", "{58C26BD7-64BE-4C07-8322-00B0F2AD82BA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.BusinessLogic.Model.IntegrationTests", "Monifier.BusinessLogic.Model.IntegrationTests\Monifier.BusinessLogic.Model.IntegrationTests.csproj", "{58C26BD7-64BE-4C07-8322-00B0F2AD82BA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.BusinessLogic.Distribution.Model", "Monifier.BusinessLogic.Distribution.Model\Monifier.BusinessLogic.Distribution.Model.csproj", "{C7317B72-F18C-4797-A3DB-64C840ACE45F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.BusinessLogic.Distribution.Model", "Monifier.BusinessLogic.Distribution.Model\Monifier.BusinessLogic.Distribution.Model.csproj", "{C7317B72-F18C-4797-A3DB-64C840ACE45F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.BusinessLogic.Auth", "Monifier.BusinessLogic.Auth\Monifier.BusinessLogic.Auth.csproj", "{A2E0510D-46F9-4AFD-A6EA-A0C7942A385C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.BusinessLogic.Auth", "Monifier.BusinessLogic.Auth\Monifier.BusinessLogic.Auth.csproj", "{A2E0510D-46F9-4AFD-A6EA-A0C7942A385C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.BusinessLogic.Auth.IntegrationTests", "Monifier.BusinessLogic.Auth.IntegrationTests\Monifier.BusinessLogic.Auth.IntegrationTests.csproj", "{BE439185-37AE-4F39-B165-67B4E84F522C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.BusinessLogic.Auth.IntegrationTests", "Monifier.BusinessLogic.Auth.IntegrationTests\Monifier.BusinessLogic.Auth.IntegrationTests.csproj", "{BE439185-37AE-4F39-B165-67B4E84F522C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "6 Tools", "6 Tools", "{157B8328-AF31-431D-91B3-B4F15FBCEECD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.Tools.Accounts", "Monifier.Tools.Accounts\Monifier.Tools.Accounts.csproj", "{581969F5-D7C4-43A4-8101-C6C8B9AE9F19}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.Tools.Accounts", "Monifier.Tools.Accounts\Monifier.Tools.Accounts.csproj", "{581969F5-D7C4-43A4-8101-C6C8B9AE9F19}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.BusinessLogic.Support", "Monifier.BusinessLogic.Support\Monifier.BusinessLogic.Support.csproj", "{62F6CE4D-CDAE-47AC-AF1D-AD0A976121A1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -159,15 +161,19 @@ Global
 		{581969F5-D7C4-43A4-8101-C6C8B9AE9F19}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{581969F5-D7C4-43A4-8101-C6C8B9AE9F19}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{581969F5-D7C4-43A4-8101-C6C8B9AE9F19}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62F6CE4D-CDAE-47AC-AF1D-AD0A976121A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62F6CE4D-CDAE-47AC-AF1D-AD0A976121A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62F6CE4D-CDAE-47AC-AF1D-AD0A976121A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62F6CE4D-CDAE-47AC-AF1D-AD0A976121A1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{0EDCF183-630D-4569-9919-7CCC455B6CC0} = {E5820AF5-DF5D-4A8A-9586-D669D3EA2195}
 		{12240751-E4BD-48C4-B46C-4BE3EF314BA5} = {2D6D2E7E-50FF-4440-AFEE-1ED4F43D72CF}
 		{1D458E3A-9062-485E-BCA8-7A336AF0E58E} = {2D6D2E7E-50FF-4440-AFEE-1ED4F43D72CF}
 		{0976F20E-3919-4148-AA1F-9298C8FCFDE4} = {2D6D2E7E-50FF-4440-AFEE-1ED4F43D72CF}
-		{0EDCF183-630D-4569-9919-7CCC455B6CC0} = {E5820AF5-DF5D-4A8A-9586-D669D3EA2195}
 		{D2635426-B606-451E-B681-5B34C4DC5186} = {D753C2A9-18F9-4368-B66B-FE2269E42A3A}
 		{5550E45D-562B-4B99-A2CF-89AC666B1845} = {23E58EB3-DF0B-4ED7-8B15-383B86EB1C95}
 		{0A397923-A446-4A76-86B9-0D66E9C920EF} = {23E58EB3-DF0B-4ED7-8B15-383B86EB1C95}
@@ -183,12 +189,16 @@ Global
 		{637FB666-48A7-463B-9A9E-4500725B9FA1} = {283FCE9D-DC71-4BE8-B56B-31319844D110}
 		{ED527FB9-FDC3-43A5-840E-FDA14775F600} = {76BA854B-5393-4C57-96AC-EF106CFEED31}
 		{778C8086-55D3-42EE-976D-3A78DCDB4012} = {ED527FB9-FDC3-43A5-840E-FDA14775F600}
-		{3C8EC64D-F8C6-4BFD-B680-5C0FF9E6E907} = {76BA854B-5393-4C57-96AC-EF106CFEED31}
 		{988DEDAF-6500-492A-8930-2B3BAF13C032} = {3C8EC64D-F8C6-4BFD-B680-5C0FF9E6E907}
+		{3C8EC64D-F8C6-4BFD-B680-5C0FF9E6E907} = {76BA854B-5393-4C57-96AC-EF106CFEED31}
 		{58C26BD7-64BE-4C07-8322-00B0F2AD82BA} = {3C8EC64D-F8C6-4BFD-B680-5C0FF9E6E907}
 		{C7317B72-F18C-4797-A3DB-64C840ACE45F} = {23E58EB3-DF0B-4ED7-8B15-383B86EB1C95}
 		{A2E0510D-46F9-4AFD-A6EA-A0C7942A385C} = {23E58EB3-DF0B-4ED7-8B15-383B86EB1C95}
 		{BE439185-37AE-4F39-B165-67B4E84F522C} = {3C8EC64D-F8C6-4BFD-B680-5C0FF9E6E907}
 		{581969F5-D7C4-43A4-8101-C6C8B9AE9F19} = {157B8328-AF31-431D-91B3-B4F15FBCEECD}
+		{62F6CE4D-CDAE-47AC-AF1D-AD0A976121A1} = {23E58EB3-DF0B-4ED7-8B15-383B86EB1C95}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {34AA2978-9969-466D-9D74-180D905E4DBA}
 	EndGlobalSection
 EndGlobal

@@ -10,12 +10,13 @@ namespace Monifier.Web.Auth
 {
     public static class AuthHelper
     {
-        public static async Task SignInAsync(this HttpContext httpContext, User user)
+        public static async Task SignInAsync(this HttpContext httpContext, User user, string timeZoneOffset)
         {
             var claims = new List<Claim>
             {
                 new Claim(MonifierClaimTypes.UserId, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Name)
+                new Claim(ClaimTypes.Name, user.Name),
+                new Claim(MonifierClaimTypes.TimeZoneOffset, timeZoneOffset)
             };
             var identity = new ClaimsIdentity(claims, AuthConsts.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);

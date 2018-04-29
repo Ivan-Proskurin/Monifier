@@ -4,7 +4,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Base" />
-    <Folder Include="Common" />
     <Folder Include="Settings" />
   </ItemGroup>
   <ItemGroup>

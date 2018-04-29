@@ -31,6 +31,7 @@
     <ProjectReference Include="..\Monifier.BusinessLogic.Contract\Monifier.BusinessLogic.Contract.csproj" />
     <ProjectReference Include="..\Monifier.BusinessLogic.Model\Monifier.BusinessLogic.Model.csproj" />
     <ProjectReference Include="..\Monifier.BusinessLogic.Queries\Monifier.BusinessLogic.Queries.csproj" />
+    <ProjectReference Include="..\Monifier.BusinessLogic.Support\Monifier.BusinessLogic.Support.csproj" />
     <ProjectReference Include="..\Monifier.Common.Extensions\Monifier.Common.Extensions.csproj" />
     <ProjectReference Include="..\Monifier.DataAccess.EntityFramework\Monifier.DataAccess.EntityFramework.csproj" />
   </ItemGroup>

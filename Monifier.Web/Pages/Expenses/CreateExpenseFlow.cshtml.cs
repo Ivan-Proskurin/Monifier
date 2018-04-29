@@ -1,8 +1,8 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Monifier.BusinessLogic.Contract.Common;
 using Monifier.BusinessLogic.Contract.Expenses;
 using Monifier.BusinessLogic.Model.Expenses;
 using Monifier.Common.Extensions;
@@ -16,11 +16,16 @@ namespace Monifier.Web.Pages.Expenses
     {
         private readonly IExpenseFlowQueries _expenseFlowQueries;
         private readonly IExpenseFlowCommands _expenseFlowCommands;
+        private readonly ITimeProvider _timeProvider;
 
-        public CreateExpenseFlowModel(IExpenseFlowQueries expenseFlowQueries, IExpenseFlowCommands expenseFlowCommands)
+        public CreateExpenseFlowModel(
+            IExpenseFlowQueries expenseFlowQueries, 
+            IExpenseFlowCommands expenseFlowCommands,
+            ITimeProvider timeProvider)
         {
             _expenseFlowQueries = expenseFlowQueries;
             _expenseFlowCommands = expenseFlowCommands;
+            _timeProvider = timeProvider;
         }
         
         [BindProperty]
@@ -32,7 +37,7 @@ namespace Monifier.Web.Pages.Expenses
             {
                 Id = -1,
                 Number = await _expenseFlowQueries.GetNextNumber(),
-                CreationDate = DateTime.Today.ToStandardString(false),
+                CreationDate = _timeProvider.ClientLocalNow.Date.ToStandardString(false),
                 Balance = "0"
             };
         }

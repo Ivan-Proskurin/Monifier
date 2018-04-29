@@ -4,5 +4,6 @@
     {
         public static readonly string SessionId = "SessionId";
         public static readonly string UserId = "UserId";
+        public static readonly string TimeZoneOffset = "TimeZoneOffset";
     }
 }

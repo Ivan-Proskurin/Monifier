@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Base;
+using Monifier.BusinessLogic.Contract.Common;
 using Monifier.BusinessLogic.Contract.Expenses;
 using Monifier.BusinessLogic.Model.Base;
 using Monifier.BusinessLogic.Model.Expenses;
@@ -30,6 +31,7 @@ namespace Monifier.Web.Pages.Expenses
         private readonly IExpensesBillCommands _expensesBillCommands;
         private readonly ICategoriesCommands _categoriesCommands;
         private readonly IProductCommands _productCommands;
+        private readonly ITimeProvider _timeProvider;
 
         public AddExpenseBillModel(
             IAccountQueries accountQueries,
@@ -39,7 +41,8 @@ namespace Monifier.Web.Pages.Expenses
             IExpensesBillQueries expensesBillQueries,
             IExpensesBillCommands expensesBillCommands,
             ICategoriesCommands categoriesCommands,
-            IProductCommands productCommands)
+            IProductCommands productCommands,
+            ITimeProvider timeProvider)
         {
             _accountQueries = accountQueries;
             _expenseFlowQueries = expenseFlowQueries;
@@ -49,6 +52,7 @@ namespace Monifier.Web.Pages.Expenses
             _expensesBillCommands = expensesBillCommands;
             _categoriesCommands = categoriesCommands;
             _productCommands = productCommands;
+            _timeProvider = timeProvider;
         }
 
         private async Task PrepareModelsAsync(int flowId)
@@ -103,7 +107,11 @@ namespace Monifier.Web.Pages.Expenses
 
         private async Task PrepareInputNewBill(int flowId, string returnUrl)
         {
-            await PrepareEditBill(flowId, () => Task.FromResult(new ExpenseBillModel {ExpenseFlowId = flowId}), returnUrl);
+            await PrepareEditBill(flowId, () => Task.FromResult(new ExpenseBillModel
+            {
+                ExpenseFlowId = flowId,
+                DateTime = _timeProvider.ClientLocalNow.ToMinutes()
+            }), returnUrl);
             Good.Account = Accounts.GetDefaultAccount()?.Name;
         }
 

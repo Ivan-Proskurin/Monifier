@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Base;
+using Monifier.BusinessLogic.Contract.Common;
 using Monifier.BusinessLogic.Contract.Expenses;
 using Monifier.BusinessLogic.Contract.Inventorization;
 using Monifier.BusinessLogic.Model.Base;
@@ -31,6 +32,7 @@ namespace Monifier.Web.Pages.Expenses
         private readonly ICategoriesCommands _categoriesCommands;
         private readonly IProductCommands _productCommands;
         private readonly IInventorizationQueries _inventorizationQueries;
+        private readonly ITimeProvider _timeProvider;
 
         public AddExpenseModel(
             IAccountQueries accountQueries,
@@ -40,7 +42,8 @@ namespace Monifier.Web.Pages.Expenses
             ICategoriesQueries categoriesQueries,
             ICategoriesCommands categoriesCommands,
             IProductCommands productCommands,
-            IInventorizationQueries inventorizationQueries)
+            IInventorizationQueries inventorizationQueries,
+            ITimeProvider timeProvider)
         {
             _accountQueries = accountQueries;
             _expenseFlowQueries = expenseFlowQueries;
@@ -50,6 +53,7 @@ namespace Monifier.Web.Pages.Expenses
             _categoriesCommands = categoriesCommands;
             _productCommands = productCommands;
             _inventorizationQueries = inventorizationQueries;
+            _timeProvider = timeProvider;
         }
 
         private async Task PrepareModels(int flowId)
@@ -90,7 +94,7 @@ namespace Monifier.Web.Pages.Expenses
                 FlowId = flowId,
                 Account = Accounts.GetDefaultAccount()?.Name,
                 FlowName = flow?.Name,
-                DateTime = DateTime.Now.ToStandardString(),
+                DateTime = _timeProvider.ClientLocalNow.ToStandardString(),
                 Cost = string.Empty,
                 ReturnPage = returnPage,
             };

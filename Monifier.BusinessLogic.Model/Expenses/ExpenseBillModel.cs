@@ -14,7 +14,6 @@ namespace Monifier.BusinessLogic.Model.Expenses
     {
         public ExpenseBillModel()
         {
-            DateTime = DateTime.Now.ToMinutes();
             Items = new List<ExpenseItemModel>();
         }
         

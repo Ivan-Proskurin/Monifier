@@ -35,7 +35,10 @@ namespace Monifier.Web.Models
                 await validate(vrList);
                 foreach (var vr in vrList)
                 {
-                    modelState.AddModelError($"{propertyName}.{vr.PropertyName}", vr.Message);
+                    if (vr.PropertyName.IsNullOrEmpty())
+                        modelState.AddModelError(string.Empty, vr.Message);
+                    else
+                        modelState.AddModelError($"{propertyName}.{vr.PropertyName}", vr.Message);
                 }
             }     
             

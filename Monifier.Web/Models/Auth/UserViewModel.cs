@@ -20,6 +20,8 @@ namespace Monifier.Web.Models.Auth
         [Display(Name = "Подтверждение")]
         public string PasswordConfirmation { get; set; }
 
+        public string TimeZoneOffset { get; set; }
+
         public IEnumerable<ModelValidationResult> Validate()
         {
             if (Name.IsNullOrEmpty())
