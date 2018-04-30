@@ -32,7 +32,7 @@ namespace Monifier.Web.Pages.Expenses
         private readonly ICategoriesCommands _categoriesCommands;
         private readonly IProductCommands _productCommands;
         private readonly IInventorizationQueries _inventorizationQueries;
-        private readonly ITimeProvider _timeProvider;
+        private readonly ITimeService _timeService;
 
         public AddExpenseModel(
             IAccountQueries accountQueries,
@@ -43,7 +43,7 @@ namespace Monifier.Web.Pages.Expenses
             ICategoriesCommands categoriesCommands,
             IProductCommands productCommands,
             IInventorizationQueries inventorizationQueries,
-            ITimeProvider timeProvider)
+            ITimeService timeService)
         {
             _accountQueries = accountQueries;
             _expenseFlowQueries = expenseFlowQueries;
@@ -53,7 +53,7 @@ namespace Monifier.Web.Pages.Expenses
             _categoriesCommands = categoriesCommands;
             _productCommands = productCommands;
             _inventorizationQueries = inventorizationQueries;
-            _timeProvider = timeProvider;
+            _timeService = timeService;
         }
 
         private async Task PrepareModels(int flowId)
@@ -94,7 +94,7 @@ namespace Monifier.Web.Pages.Expenses
                 FlowId = flowId,
                 Account = Accounts.GetDefaultAccount()?.Name,
                 FlowName = flow?.Name,
-                DateTime = _timeProvider.ClientLocalNow.ToStandardString(),
+                DateTime = _timeService.ClientLocalNow.ToStandardString(),
                 Cost = string.Empty,
                 ReturnPage = returnPage,
             };

@@ -17,16 +17,16 @@ namespace Monifier.Web.Pages.Accounts
     {
         private readonly IAccountCommands _accountCommands;
         private readonly IAccountQueries _accountQueries;
-        private readonly ITimeProvider _timeProvider;
+        private readonly ITimeService _timeService;
 
         public CreateAccountModel(
             IAccountCommands accountCommands, 
             IAccountQueries accountQueries,
-            ITimeProvider timeProvider)
+            ITimeService timeService)
         {
             _accountCommands = accountCommands;
             _accountQueries = accountQueries;
-            _timeProvider = timeProvider;
+            _timeService = timeService;
         }
         
         [BindProperty]
@@ -38,7 +38,7 @@ namespace Monifier.Web.Pages.Accounts
             {
                 Id = -1,
                 Number = await _accountQueries.GetNextNumber(),
-                CreationDate = _timeProvider.ClientLocalNow.ToStandardString(false)
+                CreationDate = _timeService.ClientLocalNow.ToStandardString(false)
             };
         }
 

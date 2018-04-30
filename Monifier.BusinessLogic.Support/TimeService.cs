@@ -4,11 +4,11 @@ using Monifier.BusinessLogic.Contract.Common;
 
 namespace Monifier.BusinessLogic.Support
 {
-    public class TimeProvider : ITimeProvider
+    public class TimeService : ITimeService
     {
         private readonly ICurrentSession _currentSession;
 
-        public TimeProvider(ICurrentSession currentSession)
+        public TimeService(ICurrentSession currentSession)
         {
             _currentSession = currentSession;
         }

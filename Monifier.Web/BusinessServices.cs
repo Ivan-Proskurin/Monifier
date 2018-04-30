@@ -51,7 +51,7 @@ namespace Monifier.Web
             services.AddTransient<ISessionCommands, SessionCommands>();
             services.AddTransient<IAuthCommands, AuthCommands>();
             services.AddTransient<IIncomeItemCommands, IncomeItemCommands>();
-            services.AddTransient<ITimeProvider, TimeProvider>();
+            services.AddTransient<ITimeService, TimeService>();
         }
     }
 }

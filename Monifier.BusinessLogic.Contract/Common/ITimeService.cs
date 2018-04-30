@@ -2,7 +2,7 @@
 
 namespace Monifier.BusinessLogic.Contract.Common
 {
-    public interface ITimeProvider
+    public interface ITimeService
     {
         DateTime ClientLocalNow { get; }
     }

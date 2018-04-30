@@ -16,16 +16,16 @@ namespace Monifier.Web.Pages.Expenses
     {
         private readonly IExpenseFlowQueries _expenseFlowQueries;
         private readonly IExpenseFlowCommands _expenseFlowCommands;
-        private readonly ITimeProvider _timeProvider;
+        private readonly ITimeService _timeService;
 
         public CreateExpenseFlowModel(
             IExpenseFlowQueries expenseFlowQueries, 
             IExpenseFlowCommands expenseFlowCommands,
-            ITimeProvider timeProvider)
+            ITimeService timeService)
         {
             _expenseFlowQueries = expenseFlowQueries;
             _expenseFlowCommands = expenseFlowCommands;
-            _timeProvider = timeProvider;
+            _timeService = timeService;
         }
         
         [BindProperty]
@@ -37,7 +37,7 @@ namespace Monifier.Web.Pages.Expenses
             {
                 Id = -1,
                 Number = await _expenseFlowQueries.GetNextNumber(),
-                CreationDate = _timeProvider.ClientLocalNow.Date.ToStandardString(false),
+                CreationDate = _timeService.ClientLocalNow.Date.ToStandardString(false),
                 Balance = "0"
             };
         }

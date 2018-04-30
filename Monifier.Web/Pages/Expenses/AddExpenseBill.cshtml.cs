@@ -31,7 +31,7 @@ namespace Monifier.Web.Pages.Expenses
         private readonly IExpensesBillCommands _expensesBillCommands;
         private readonly ICategoriesCommands _categoriesCommands;
         private readonly IProductCommands _productCommands;
-        private readonly ITimeProvider _timeProvider;
+        private readonly ITimeService _timeService;
 
         public AddExpenseBillModel(
             IAccountQueries accountQueries,
@@ -42,7 +42,7 @@ namespace Monifier.Web.Pages.Expenses
             IExpensesBillCommands expensesBillCommands,
             ICategoriesCommands categoriesCommands,
             IProductCommands productCommands,
-            ITimeProvider timeProvider)
+            ITimeService timeService)
         {
             _accountQueries = accountQueries;
             _expenseFlowQueries = expenseFlowQueries;
@@ -52,7 +52,7 @@ namespace Monifier.Web.Pages.Expenses
             _expensesBillCommands = expensesBillCommands;
             _categoriesCommands = categoriesCommands;
             _productCommands = productCommands;
-            _timeProvider = timeProvider;
+            _timeService = timeService;
         }
 
         private async Task PrepareModelsAsync(int flowId)
@@ -110,7 +110,7 @@ namespace Monifier.Web.Pages.Expenses
             await PrepareEditBill(flowId, () => Task.FromResult(new ExpenseBillModel
             {
                 ExpenseFlowId = flowId,
-                DateTime = _timeProvider.ClientLocalNow.ToMinutes()
+                DateTime = _timeService.ClientLocalNow.ToMinutes()
             }), returnUrl);
             Good.Account = Accounts.GetDefaultAccount()?.Name;
         }

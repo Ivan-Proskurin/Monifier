@@ -22,19 +22,19 @@ namespace Monifier.Web.Pages.Accounts
         private readonly IAccountQueries _accountQueries;
         private readonly IAccountCommands _accountCommands;
         private readonly IInventorizationQueries _inventorizationQueries;
-        private readonly ITimeProvider _timeProvider;
+        private readonly ITimeService _timeService;
         private readonly IIncomeTypeQueries _incomeTypeQueries;
 
         public TopupAccountModel(IAccountQueries accountQueries, 
             IIncomeTypeQueries incomeTypeQueries,
             IAccountCommands accountCommands,
             IInventorizationQueries inventorizationQueries,
-            ITimeProvider timeProvider)
+            ITimeService timeService)
         {
             _accountQueries = accountQueries;
             _accountCommands = accountCommands;
             _inventorizationQueries = inventorizationQueries;
-            _timeProvider = timeProvider;
+            _timeService = timeService;
             _incomeTypeQueries = incomeTypeQueries;
         }
         
@@ -55,7 +55,7 @@ namespace Monifier.Web.Pages.Accounts
                 Id = id,
                 Correcting = correcting,
                 AccountName = account?.Name,
-                TopupDate = _timeProvider.ClientLocalNow.ToStandardString(false),
+                TopupDate = _timeService.ClientLocalNow.ToStandardString(false),
                 ReturnPage = returnPage,
             };
             IncomeTypes = await _incomeTypeQueries.GetAll();

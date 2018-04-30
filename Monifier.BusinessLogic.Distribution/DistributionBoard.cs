@@ -166,7 +166,7 @@ namespace Monifier.BusinessLogic.Distribution
             });
         }
 
-        public async Task Save(IUnitOfWork unitOfWork)
+        public async Task Save(IUnitOfWork unitOfWork, DateTime dateTime)
         {
             var accountSettingsQueries = unitOfWork.GetQueryRepository<AccountFlowSettings>();
             var accountSettingsCommands = unitOfWork.GetCommandRepository<AccountFlowSettings>();
@@ -228,7 +228,7 @@ namespace Monifier.BusinessLogic.Distribution
 
             var distribution = new DataAccess.Model.Distribution.Distribution()
             {
-                DateTime = DateTime.Now,
+                DateTime = dateTime,
                 SumFlow = DistributionFlows.Sum(x => x.Amount)
             };
             unitOfWork.GetCommandRepository<DataAccess.Model.Distribution.Distribution>().Create(distribution);
