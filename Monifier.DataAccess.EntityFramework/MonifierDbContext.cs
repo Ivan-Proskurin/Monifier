@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Monifier.DataAccess.Model.Accounts;
 using Monifier.DataAccess.Model.Auth;
 using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Distribution;
@@ -28,6 +29,7 @@ namespace Monifier.DataAccess.EntityFramework
         public DbSet<ExpenseFlowSettings> ExpenseFlowSettings { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Session> Sessions { get; set; }
+        public DbSet<Transaction> Transactions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

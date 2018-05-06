@@ -3,8 +3,12 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Monifier.BusinessLogic.Contract.Auth;
 using Monifier.BusinessLogic.Contract.Base;
+using Monifier.BusinessLogic.Contract.Common;
+using Monifier.BusinessLogic.Contract.Incomes;
+using Monifier.BusinessLogic.Contract.Transactions;
 using Monifier.BusinessLogic.Model.Accounts;
 using Monifier.BusinessLogic.Model.Base;
+using Monifier.BusinessLogic.Model.Incomes;
 using Monifier.DataAccess.Contract;
 using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Expenses;
@@ -16,11 +20,21 @@ namespace Monifier.BusinessLogic.Queries.Base
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentSession _currentSession;
+        private readonly IIncomeItemCommands _incomeItemCommands;
+        private readonly ITransactionCommands _transactionCommands;
+        private readonly ITimeService _timeService;
 
-        public AccountCommands(IUnitOfWork unitOfWork, ICurrentSession currentSession)
+        public AccountCommands(IUnitOfWork unitOfWork, 
+            ICurrentSession currentSession,
+            IIncomeItemCommands incomeItemCommands,
+            ITransactionCommands transactionCommands,
+            ITimeService timeService)
         {
             _unitOfWork = unitOfWork;
             _currentSession = currentSession;
+            _incomeItemCommands = incomeItemCommands;
+            _transactionCommands = transactionCommands;
+            _timeService = timeService;
         }
 
         public async Task<AccountModel> Update(AccountModel model)
@@ -93,11 +107,10 @@ namespace Monifier.BusinessLogic.Queries.Base
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task<IncomeItem> Topup(TopupAccountModel topup)
+        public async Task<IncomeItemModel> Topup(TopupAccountModel topup)
         {
             var accountQueries = _unitOfWork.GetQueryRepository<Account>();
             var accountCommands = _unitOfWork.GetCommandRepository<Account>();
-            var incomeCommands = _unitOfWork.GetCommandRepository<IncomeItem>();
             var account = await accountQueries.GetById(topup.AccountId);
             var incomeTypeId = topup.IncomeTypeId;
             if (incomeTypeId == null)
@@ -113,27 +126,28 @@ namespace Monifier.BusinessLogic.Queries.Base
                 incomeTypeId = incomeType.Id;
             }
 
-            var income = new IncomeItem
+            var income = new IncomeItemModel
             {
                 AccountId = account.Id,
                 DateTime = topup.TopupDate,
                 IncomeTypeId = incomeTypeId.Value,
                 Total = topup.Amount,
-                OwnerId = _currentSession.UserId,
                 IsCorrection = topup.Correction,
             };
-            incomeCommands.Create(income);
+
+            await _incomeItemCommands.Update(income).ConfigureAwait(false);
+
             if (!topup.Correction)
             {
                 account.Balance += topup.Amount;
             }
             account.AvailBalance += topup.Amount;
             accountCommands.Update(account);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
             return income;
         }
 
-        public async Task Transfer(int accountFromId, int accountToId, decimal amount)
+        public async Task<DateTime> Transfer(int accountFromId, int accountToId, decimal amount)
         {
             if (amount < 0)
                 throw new ArgumentException("Сумма перевода не должна быть меньше нуля", nameof(amount));
@@ -147,6 +161,8 @@ namespace Monifier.BusinessLogic.Queries.Base
             if (accountTo == null)
                 throw new ArgumentException($"Нет счета с Id = {accountToId}");
             
+            if (accountToId == accountFromId)
+                throw new InvalidOperationException("Нельзя вполнить перевод между одинковыми счетами");
             if (accountFrom.Balance < amount)
                 throw new InvalidOperationException(
                     $"Невозможно перевести сумму {amount} со счета \"{accountFrom.Name}\", так как на его балансе не хватает средств");
@@ -157,8 +173,28 @@ namespace Monifier.BusinessLogic.Queries.Base
             accountTo.AvailBalance += amount;
             accountCommands.Update(accountFrom);
             accountCommands.Update(accountTo);
+
+            var transactionTime = _timeService.ClientLocalNow;
+            var transaction1 = new TransactionModel
+            {
+                DateTime = transactionTime,
+                InitiatorId = accountFromId,
+                ParticipantId = accountToId,
+                Total = -amount,
+            };
+            var transaction2 = new TransactionModel
+            {
+                DateTime = transactionTime,
+                InitiatorId = accountToId,
+                ParticipantId = accountFromId,
+                Total = amount
+            };
+            await _transactionCommands.Update(transaction1).ConfigureAwait(false);
+            await _transactionCommands.Update(transaction2).ConfigureAwait(false);
             
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+
+            return transactionTime;
         }
 
         public async Task TransferToExpenseFlow(int flowId, int fromAccountId, decimal amount)

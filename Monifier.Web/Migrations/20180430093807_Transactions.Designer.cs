@@ -12,9 +12,10 @@ using System;
 namespace Monifier.Web.Migrations
 {
     [DbContext(typeof(MonifierDbContext))]
-    partial class MonifierDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180430093807_Transactions")]
+    partial class Transactions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

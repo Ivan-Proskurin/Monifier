@@ -1,0 +1,23 @@
+﻿.table-expense,
+.table-expense > th,
+.table-expense > td {
+    background-color: #f4dee1;
+}
+
+.table-income,
+.table-income > th,
+.table-icnime > td {
+    background-color: #e3eddc;
+}
+
+.table-info-header {
+    display: flex;
+}
+
+.table-info-caption {
+    margin-right: auto;
+}
+
+.table-info-link {
+    font-weight: 600;
+}

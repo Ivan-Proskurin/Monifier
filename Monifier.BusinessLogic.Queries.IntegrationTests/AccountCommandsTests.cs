@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using FluentAssertions;
+using Monifier.BusinessLogic.Contract.Transactions;
 using Monifier.BusinessLogic.Model.Accounts;
 using Monifier.BusinessLogic.Model.Base;
 using Monifier.BusinessLogic.Queries.Base;
-using Monifier.BusinessLogic.Queries.Incomes;
+using Monifier.BusinessLogic.Queries.Transactions;
 using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Expenses;
 using Monifier.DataAccess.Model.Incomes;
 using Monifier.IntegrationTests.Infrastructure;
+using Remotion.Linq.Parsing.ExpressionVisitors.Transformation.PredefinedTransformations;
 using Xunit;
 
 namespace Monifier.BusinessLogic.Queries.IntegrationTests
@@ -32,7 +35,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                     TopupDate = DateTime.Today,
                     Amount = 15000,
                 };
-                var commands = new AccountCommands(session.UnitOfWork, session.UserSession);
+                var commands = session.CreateAccountCommands();
                 var income = await commands.Topup(model);
                 var incomeType = await session.UnitOfWork.GetNamedModelQueryRepository<IncomeType>()
                     .GetByName(session.UserSession.UserId, incomeTypeName);
@@ -62,7 +65,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                     TopupDate = DateTime.Today,
                     Amount = 15000,
                 };
-                var commands = new AccountCommands(session.UnitOfWork, session.UserSession);
+                var commands = session.CreateAccountCommands();
                 await commands.Topup(model);
                 var account = await session.UnitOfWork.GetQueryRepository<Account>().GetById(session.DebitCardAccount.Id);
                 account.Balance.ShouldBeEquivalentTo(balance);
@@ -82,7 +85,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 var availBalance2 = session.CashAccount.AvailBalance;
                 const decimal transferAmount = 10000m;
 
-                var commands = new AccountCommands(session.UnitOfWork, session.UserSession);
+                var commands = session.CreateAccountCommands();
                 await commands.Transfer(session.DebitCardAccount.Id, session.CashAccount.Id, transferAmount);
 
                 var accountQueries = session.UnitOfWork.GetQueryRepository<Account>();
@@ -114,7 +117,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 var flowBalance = session.FoodExpenseFlow.Balance;
                 const decimal transferAmount = 5000m;
 
-                var commands = new AccountCommands(session.UnitOfWork, session.UserSession);
+                var commands = session.CreateAccountCommands();
                 await commands.TransferToExpenseFlow(session.FoodExpenseFlow.Id, session.DebitCardAccount.Id, transferAmount);
 
                 var account = await session.UnitOfWork.GetQueryRepository<Account>().GetById(session.DebitCardAccount.Id);
@@ -140,7 +143,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
 
             using (var session = await CreateDefaultSession(ids))
             {
-                var commands = new AccountCommands(session.UnitOfWork, session.UserSession);
+                var commands = session.CreateAccountCommands();
                 await Assert.ThrowsAsync<InvalidOperationException>(async () =>
                 {
                     await commands.TransferToExpenseFlow(session.FoodExpenseFlow.Id, session.DebitCardAccount.Id, 2000);
@@ -158,7 +161,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 var availBalance = session.DebitCardAccount.AvailBalance;
                 var newBalance = balance + 500m;
 
-                var commands = new AccountCommands(session.UnitOfWork, session.UserSession);
+                var commands = session.CreateAccountCommands();
                 var model = session.DebitCardAccount.ToModel();
                 model.Balance = newBalance;
                 await commands.Update(model);
@@ -182,7 +185,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                     Name = "test",
                     Number = 1,
                 };
-                var commands = new AccountCommands(session.UnitOfWork, session.UserSession);
+                var commands = session.CreateAccountCommands();
                 model = await commands.Update(model);
                 model.Id.Should().BeGreaterThan(0);
 
@@ -216,7 +219,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                     Number = 1,
                     IsDefault = true
                 };
-                var commands = new AccountCommands(session.UnitOfWork, session.UserSession);
+                var commands = session.CreateAccountCommands();
                 model = await commands.Update(model);
 
                 var queries = new AccountQueries(session.UnitOfWork, session.UserSession);
@@ -226,6 +229,91 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 expected.Should().NotBeNull();
                 expected.ShouldBeEquivalentTo(model);
                 accounts.Where(x => x.Id != model.Id).Select(x => x.IsDefault).ShouldAllBeEquivalentTo(false);
+            }
+        }
+
+        [Fact]
+        public async void Topup_CreatedSingleTransaction()
+        {
+            const string incomeTypeName = "Новый тип дохода";
+            using (var session = await CreateDefaultSession())
+            {
+                session.CreateDefaultEntities();
+                var model = new TopupAccountModel
+                {
+                    Correction = false,
+                    AccountId = session.DebitCardAccount.Id,
+                    AddIncomeTypeName = incomeTypeName,
+                    TopupDate = DateTime.Today,
+                    Amount = 15000,
+                };
+                var commands = session.CreateAccountCommands();
+                var income = await commands.Topup(model);
+
+                var transactoionQueries = new TransactionQueries(session.UnitOfWork, session.UserSession);
+                var transaction = await transactoionQueries.GetIncomeTransaction(session.DebitCardAccount.Id, income.Id);
+                transaction.ShouldBeEquivalentTo(new TransactionModel
+                {
+                    OwnerId = session.UserSession.UserId,
+                    InitiatorId = session.DebitCardAccount.Id,
+                    DateTime = income.DateTime,
+                    BillId = null,
+                    IncomeId = income.Id,
+                    ParticipantId = null,
+                    Total = income.Total
+                }, opt => opt.Excluding(x => x.Id));
+            }
+        }
+
+        [Fact]
+        public async void Transfer_TwoTransactionsCreated()
+        {
+            using (var session = await CreateDefaultSession())
+            {
+                var ids = session.CreateDefaultEntities();
+                const decimal transferAmount = 10000m;
+
+                var commands = session.CreateAccountCommands();
+                var transferTime = await commands.Transfer(session.DebitCardAccount.Id, session.CashAccount.Id, transferAmount);
+
+                var transactionQueries = new TransactionQueries(session.UnitOfWork, session.UserSession);
+                var transaction = await transactionQueries.GetTransferTransaction(ids.DebitCardAccountId, ids.CashAccountId);
+                transaction.ShouldBeEquivalentTo(new TransactionModel
+                    {
+                        OwnerId = session.UserSession.UserId,
+                        DateTime = transferTime,
+                        InitiatorId = ids.DebitCardAccountId,
+                        BillId = null,
+                        IncomeId = null,
+                        ParticipantId = ids.CashAccountId,
+                        Total = -transferAmount
+                    }, opt => opt.Excluding(x => x.Id)
+                );
+
+                transaction = await transactionQueries.GetTransferTransaction(ids.CashAccountId, ids.DebitCardAccountId);
+                transaction.ShouldBeEquivalentTo(new TransactionModel
+                    {
+                        OwnerId = session.UserSession.UserId,
+                        DateTime = transferTime,
+                        InitiatorId = ids.CashAccountId,
+                        BillId = null,
+                        IncomeId = null,
+                        ParticipantId = ids.DebitCardAccountId,
+                        Total = transferAmount
+                    }, opt => opt.Excluding(x => x.Id)
+                );
+            }
+        }
+
+        [Fact]
+        public async void Transfer_SameTargetAndDestinaition_ShouldThrowsExcpetion()
+        {
+            using (var session = await CreateDefaultSession())
+            {
+                var ids = session.CreateDefaultEntities();
+                var commands = session.CreateAccountCommands();
+                await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+                    await commands.Transfer(ids.DebitCardAccountId, ids.DebitCardAccountId, 1));
             }
         }
     }

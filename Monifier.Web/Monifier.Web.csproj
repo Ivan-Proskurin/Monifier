@@ -7,6 +7,14 @@
     <Compile Remove="Migrations\20180425102836_ExpenseBillCorrection.Designer.cs" />
     <Compile Remove="Migrations\20180425130714_AccountAndIncomeIsCorrection.cs" />
     <Compile Remove="Migrations\20180425130714_AccountAndIncomeIsCorrection.Designer.cs" />
+    <Compile Remove="Migrations\20180430032641_Transactions.cs" />
+    <Compile Remove="Migrations\20180430032641_Transactions.Designer.cs" />
+    <Compile Remove="Migrations\20180430032819_Transactions.cs" />
+    <Compile Remove="Migrations\20180430032819_Transactions.Designer.cs" />
+    <Compile Remove="Migrations\20180430040757_Transactions.cs" />
+    <Compile Remove="Migrations\20180430040757_Transactions.Designer.cs" />
+    <Compile Remove="Migrations\20180430061648_Transactions.cs" />
+    <Compile Remove="Migrations\20180430061648_Transactions.Designer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Properties\PublishProfiles\CustomProfile.pubxml" />

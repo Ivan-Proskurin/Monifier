@@ -1,9 +1,14 @@
 @page "{id:int}"
+@using Common.Extensions
 @model Accounts.EditAccountModel
+
+@section Styles{ 
+    <link rel="stylesheet" href="~/css/transactions.css" />
+}
 
 <div class="col-md-7 left-aligned-form">
     <h3>@Model.Account.OriginalName</h3>
-    <br/>
+    <br />
 
     <form method="post">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -43,7 +48,7 @@
             <div class="form-group form-check col-md-7 col-sm-7 col-7">
                 <span aria-disabled="true" data-toggle="tooltip" data-placement="right" style="padding-right: 10px;"
                       title="Такой счет будет автоматически подставляться при добавлении расхода или вводе чека">
-                    <input asp-for="Account.IsDefault"/>
+                    <input asp-for="Account.IsDefault" />
                     <label asp-for="Account.IsDefault" class="form-check-label"></label>
                 </span>
             </div>
@@ -80,7 +85,39 @@
             </div>
         </div>
     </form>
+    
+    @if (Model.Transactions.Count > 0)
+    {
+        <div class="alert alert-info" role="alert" style="margin-top: 30px;">
+            <div class="table-info-header">
+                <span class="table-info-caption">Последние операции</span>
+                <a class="alert-link table-info-link" 
+                   asp-page="./TransactionList" asp-route-accountId="@Model.Account.Id">Просмотреть все</a>
+            </div>
+        </div>
+        <table class="cashed-table table table-hover">
+            <tbody>
+            @for (int i = 0; i < Model.Transactions.Count; i++)
+            {
+                var item = Model.Transactions[i];
+                var trClass = item.Total < 0 ? "table-expense" : "table-income";
 
+                <tr class="@trClass">
+                    <td>
+                        @item.DateTime.ToStandardDateStr()
+                    </td>
+                    <td>
+                        @item.Type
+                    </td>
+                    <td>
+                        @item.Target
+                    </td>
+                    <td class="money-cell">@item.Total.ToMoney()</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
 </div>
 
 
@@ -90,6 +127,6 @@
         makeInputNumeric('Account.Balance', true);
         $('[data-toggle="tooltip"]').tooltip();
 
-        $("#Account_Balance").focus();
+        //$("#Account_Balance").focus();
     </script>
 }

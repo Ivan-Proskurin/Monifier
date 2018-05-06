@@ -1,8 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Base;
+using Monifier.BusinessLogic.Contract.Transactions;
+using Monifier.BusinessLogic.Model.Transactions;
 using Monifier.Web.Models;
 using Monifier.Web.Models.Accounts;
 
@@ -13,19 +16,27 @@ namespace Monifier.Web.Pages.Accounts
     {
         private readonly IAccountQueries _accountQueries;
         private readonly IAccountCommands _accountCommands;
+        private readonly ITransactionQueries _transactionQueries;
 
-        public EditAccountModel(IAccountQueries accountQueries, IAccountCommands accountCommands)
+        public EditAccountModel(
+            IAccountQueries accountQueries, 
+            IAccountCommands accountCommands,
+            ITransactionQueries transactionQueries)
         {
             _accountQueries = accountQueries;
             _accountCommands = accountCommands;
+            _transactionQueries = transactionQueries;
         }
         
         [BindProperty]
         public EditAccount Account { get; set; }
 
+        public List<TransactionViewModel> Transactions { get; private set; }
+
         public async Task OnGetAsync(int id)
         {
             var account = await _accountQueries.GetById(id);
+            Transactions = await _transactionQueries.GetLastTransactions(account.Id, 3);
             Account = account.ToEditAccount();
         }
 
@@ -40,8 +51,11 @@ namespace Monifier.Web.Pages.Accounts
                     return RedirectToPage("./AccountsList");
                 },
 
-                async () => await Task.FromResult(Page())
-            );
+                async () =>
+                {
+                    Transactions = await _transactionQueries.GetLastTransactions(Account.Id, 3);
+                    return await Task.FromResult(Page());
+                });
         }
 
         public async Task<IActionResult> OnPostDeleteAsync(bool permanent)

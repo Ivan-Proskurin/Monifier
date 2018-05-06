@@ -6,6 +6,10 @@ using Microsoft.EntityFrameworkCore;
 using Monifier.BusinessLogic.Auth;
 using Monifier.BusinessLogic.Contract.Auth;
 using Monifier.BusinessLogic.Model.Expenses;
+using Monifier.BusinessLogic.Queries.Base;
+using Monifier.BusinessLogic.Queries.Incomes;
+using Monifier.BusinessLogic.Queries.Transactions;
+using Monifier.BusinessLogic.Support;
 using Monifier.Common.Extensions;
 using Monifier.DataAccess.Contract;
 using Monifier.DataAccess.EntityFramework;
@@ -178,7 +182,7 @@ namespace Monifier.IntegrationTests.Infrastructure
             return entity;
         }
 
-        public async Task<int> CreateExpenseBill(int accountId, int flowId, DateTime dateTime, 
+        public async Task<ExpenseBillModel> CreateExpenseBill(int accountId, int flowId, DateTime dateTime, 
             Product product, decimal cost)
         {
             var bill = new ExpenseBillModel
@@ -195,7 +199,7 @@ namespace Monifier.IntegrationTests.Infrastructure
                 Cost = cost
             });
             await bill.Save(_unitOfWork);
-            return bill.Id;
+            return bill;
         }
 
         public AccountFlowSettings CreateAccountFlowSettinsg(int accountId, bool canFlow)
@@ -325,6 +329,31 @@ namespace Monifier.IntegrationTests.Infrastructure
         public Account CashAccount { get; private set; }
 
         public List<IncomeItem> Incomes { get; private set; }
+
+        #endregion
+
+        #region Commands & Queries factories
+
+        public IncomeItemCommands CreateIncomeCommands()
+        {
+            return new IncomeItemCommands(UnitOfWork, UserSession,
+                new TransactionCommands(UnitOfWork, UserSession),
+                new TransactionQueries(UnitOfWork, UserSession));
+        }
+
+        public AccountCommands CreateAccountCommands()
+        {
+            return new AccountCommands(UnitOfWork, UserSession, 
+                new IncomeItemCommands(UnitOfWork, UserSession, new TransactionCommands(UnitOfWork, UserSession), 
+                    new TransactionQueries(UnitOfWork, UserSession)),
+                new TransactionCommands(UnitOfWork, UserSession),
+                new TimeService(UserSession));
+        }
+
+        public TransactionQueries CreateTransactionQueries()
+        {
+            return new TransactionQueries(UnitOfWork, UserSession);
+        }
 
         #endregion
     }

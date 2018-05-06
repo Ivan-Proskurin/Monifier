@@ -1,0 +1,77 @@
+﻿@page "{accountId:int}"
+@using BusinessLogic.Model.Transactions
+@using Common.Extensions
+@model Monifier.Web.Pages.Accounts.TransactionListModel
+
+@section Styles{
+    <link rel="stylesheet" href="~/css/transactions.css" />
+}
+
+<h4 class="form-caption-xs">История операций по счету <a asp-page="./EditAccount" asp-route-id="@Model.Account.Id">"@Model.Account.Name"</a></h4>
+<form method="post" id="filterForm">
+    <input asp-for="Filter.AccountId" hidden/>
+    <input asp-for="Filter.PageNumber" hidden/>
+    <div class="input-group">
+        <div class="input-group-addon addon-select-container">
+            <autocomplete asp-for="Filter.Type" value-list="@Model.FilterTypes" value="@Model.Filter.Type"
+                          hide-button="true" placeholder="Тип операции"/>
+        </div>
+        <div class="input-group-addon addon-button-container">
+            <button type="submit" asp-page-handler="refresh"
+                    class="btn btn-outline-secondary cursor-pointer" id="refresh-button">
+                <i class="fa fa-refresh"></i>
+            </button>
+        </div>
+        <div class="input-group-addon addon-button-container">
+            <a class="btn btn-outline-secondary cursor-pointer"
+               asp-page="./EditAccount" asp-route-id="@Model.Account.Id">
+              Назад 
+            </a>
+        </div>
+    </div>
+    <span asp-validation-for="Filter.Type" class="text-danger"></span>
+
+</form>
+
+<table class="cashed-table table table-hover">
+    <thead class="thead-dark">
+    <tr>
+        <th>Дата</th>
+        <th>Операция</th>
+        <th>Назначение</th>
+        <th class="align-right">Cумма</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.Transactions.Transactions)
+    {
+        var trClass = item.Total < 0 ? "table-expense" : "table-income";
+
+        <tr class="@trClass">
+            <td>
+                @item.DateTime.ToStandardDateStr()
+            </td>
+            <td>
+                @item.Type
+            </td>
+            <td>
+                @item.Target
+            </td>
+            <td class="money-cell">@item.Total.ToMoney()</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<pagination asp-page="./TransactionList" pagination="@Model.Transactions.Pagination"></pagination>
+
+@section Scripts
+{
+    <script type="text/javascript">
+        makeInputAutocomplete("Filter.Type", null, refresh, 100);
+        function refresh() {
+            document.getElementById("refresh-button").click();
+        }
+
+    </script>
+}

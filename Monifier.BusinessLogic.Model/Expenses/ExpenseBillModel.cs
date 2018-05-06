@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using Monifier.Common.Extensions;
 using Monifier.DataAccess.Contract;
+using Monifier.DataAccess.Model.Accounts;
 using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Expenses;
 
@@ -69,7 +69,7 @@ namespace Monifier.BusinessLogic.Model.Expenses
         {
             var clone = new ExpenseBillModel
             {
-                Id = Id,
+                Id = 0,
                 DateTime = DateTime,
                 Cost = Cost,
             };
@@ -191,9 +191,25 @@ namespace Monifier.BusinessLogic.Model.Expenses
                 accountCommands.Update(account);
             }
 
-            await unitOfWork.SaveChangesAsync();
+            await unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
             Id = bill.Id;
+
+            if (AccountId != null)
+            {
+                var transation = new Transaction
+                {
+                    OwnerId = OwnerId,
+                    DateTime = DateTime,
+                    InitiatorId = AccountId.Value,
+                    BillId = Id,
+                    Total = Cost,
+                };
+                var transactionCommands = unitOfWork.GetCommandRepository<Transaction>();
+                transactionCommands.Create(transation);
+            }
+
+            await unitOfWork.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task Update(IUnitOfWork unitOfWork)
@@ -300,7 +316,44 @@ namespace Monifier.BusinessLogic.Model.Expenses
                 accountCommands.Update(newAccount);
             }
 
-            await unitOfWork.SaveChangesAsync();
+            var transactionCommands = unitOfWork.GetCommandRepository<Transaction>();
+            var transactionQueries = unitOfWork.GetQueryRepository<Transaction>();
+            if (oldAccountId == AccountId)
+            {
+                var transaction = transactionQueries.Query
+                    .SingleOrDefault(x => x.OwnerId == OwnerId && x.InitiatorId == AccountId && x.BillId == Id);
+                if (transaction != null)
+                {
+                    transaction.DateTime = DateTime;
+                    transaction.Total = Cost;
+                    transactionCommands.Update(transaction);
+                }
+            }
+            else if (AccountId != null)
+            {
+                var transaction = transactionQueries.Query
+                    .SingleOrDefault(x => x.OwnerId == OwnerId && x.InitiatorId == oldAccountId && x.BillId == Id);
+                if (transaction == null)
+                {
+                    transaction = new Transaction
+                    {
+                        OwnerId = OwnerId,
+                        DateTime = DateTime,
+                        BillId = Id,
+                        InitiatorId = AccountId.Value,
+                        Total = Cost
+                    };
+                    transactionCommands.Create(transaction);
+                }
+                else
+                {
+                    transaction.InitiatorId = AccountId.Value;
+                    transaction.Total = Cost;
+                    transactionCommands.Update(transaction);
+                }
+            }
+
+            await unitOfWork.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public static async Task Delete(int id, IUnitOfWork unitOfWork)

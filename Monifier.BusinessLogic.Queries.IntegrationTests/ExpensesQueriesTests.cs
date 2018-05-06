@@ -77,9 +77,9 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
             using (var session = await CreateDefaultSession())
             {
                 var ids = session.CreateDefaultEntities();
-                var bill1Id = await session.CreateExpenseBill(ids.DebitCardAccountId, ids.FoodExpenseFlowId, date1, session.Meat, 345.45m);
-                var bill2Id = await session.CreateExpenseBill(ids.DebitCardAccountId, ids.FoodExpenseFlowId, date2, session.Bread, 46);
-                var bill3Id = await session.CreateExpenseBill(ids.CashAccountId, ids.TechExpenseFlowId, date2, session.Tv, 20000);
+                var bill1 = await session.CreateExpenseBill(ids.DebitCardAccountId, ids.FoodExpenseFlowId, date1, session.Meat, 345.45m);
+                var bill2 = await session.CreateExpenseBill(ids.DebitCardAccountId, ids.FoodExpenseFlowId, date2, session.Bread, 46);
+                var bill3 = await session.CreateExpenseBill(ids.CashAccountId, ids.TechExpenseFlowId, date2, session.Tv, 20000);
                 await session.CreateExpenseBill(ids.DebitCardAccountId, ids.TechExpenseFlowId, date3, session.Tv, 10000);
 
                 var queries = new ExpensesQueries(session.UnitOfWork, new UserSettings(), session.UserSession);
@@ -98,7 +98,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 {
                     new ExpensesListItemModel
                     {
-                        BillIds = new List<int> {bill1Id},
+                        BillIds = new List<int> {bill1.Id},
                         Sum = 345.45m,
                         Caption = "Понедельник",
                         DateFrom = "2018.01.15 00:00",
@@ -109,7 +109,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                     },
                     new ExpensesListItemModel
                     {
-                        BillIds = new List<int> {bill2Id, bill3Id},
+                        BillIds = new List<int> {bill2.Id, bill3.Id},
                         Sum = 20046,
                         Caption = "Среда",
                         DateFrom = "2018.01.31 00:00",
@@ -144,10 +144,10 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
             using (var session = await CreateDefaultSession())
             {
                 var ids = session.CreateDefaultEntities();
-                var bill1Id = await session.CreateExpenseBill(ids.DebitCardAccountId, ids.FoodExpenseFlowId, date1, session.Meat, 345.45m);
-                var bill2Id = await session.CreateExpenseBill(ids.DebitCardAccountId, ids.FoodExpenseFlowId, date2, session.Bread, 46);
-                var bill3Id = await session.CreateExpenseBill(ids.CashAccountId, ids.TechExpenseFlowId, date2, session.Tv, 20000);
-                var bill4Id = await session.CreateExpenseBill(ids.DebitCardAccountId, ids.TechExpenseFlowId, date3, session.Tv, 10000);
+                var bill1 = await session.CreateExpenseBill(ids.DebitCardAccountId, ids.FoodExpenseFlowId, date1, session.Meat, 345.45m);
+                var bill2 = await session.CreateExpenseBill(ids.DebitCardAccountId, ids.FoodExpenseFlowId, date2, session.Bread, 46);
+                var bill3 = await session.CreateExpenseBill(ids.CashAccountId, ids.TechExpenseFlowId, date2, session.Tv, 20000);
+                var bill4 = await session.CreateExpenseBill(ids.DebitCardAccountId, ids.TechExpenseFlowId, date3, session.Tv, 10000);
 
                 var queries = new ExpensesQueries(session.UnitOfWork, new UserSettings(), session.UserSession);
                 var report = await queries.GetExpensesByMonth(new ExpensesFilter
@@ -165,7 +165,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 {
                     new ExpensesListItemModel
                     {
-                        BillIds = new List<int> {bill1Id},
+                        BillIds = new List<int> {bill1.Id},
                         Sum = 345.45m,
                         Caption = "Январь",
                         DateFrom = "2018.01.01 00:00",
@@ -176,7 +176,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                     },
                     new ExpensesListItemModel
                     {
-                        BillIds = new List<int> {bill2Id, bill3Id, bill4Id},
+                        BillIds = new List<int> {bill2.Id, bill3.Id, bill4.Id},
                         Sum = 30046,
                         Caption = "Февраль",
                         DateFrom = "2018.02.01 00:00",
@@ -212,8 +212,8 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
             {
                 var ids = session.CreateDefaultEntities();
                 await session.CreateExpenseBill(ids.DebitCardAccountId, ids.FoodExpenseFlowId, date1, session.Meat, 345.45m);
-                var bill2Id = await session.CreateExpenseBill(ids.DebitCardAccountId, ids.FoodExpenseFlowId, date2, session.Bread, 46);
-                var bill3Id = await session.CreateExpenseBill(ids.CashAccountId, ids.TechExpenseFlowId, date2, session.Tv, 20000);
+                var bill2 = await session.CreateExpenseBill(ids.DebitCardAccountId, ids.FoodExpenseFlowId, date2, session.Bread, 46);
+                var bill3 = await session.CreateExpenseBill(ids.CashAccountId, ids.TechExpenseFlowId, date2, session.Tv, 20000);
                 await session.CreateExpenseBill(ids.DebitCardAccountId, ids.TechExpenseFlowId, date3, session.Tv, 10000);
 
                 var queries = new ExpensesQueries(session.UnitOfWork, new UserSettings(), session.UserSession);
@@ -227,7 +227,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 {
                     new ExpensesListItemModel
                     {
-                        BillIds = new List<int> {bill2Id},
+                        BillIds = new List<int> {bill2.Id},
                         Sum = 46,
                         Caption = "2018.01.31 00:00",
                         DateFrom = "2018.01.31 00:00",
@@ -238,7 +238,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                     },
                     new ExpensesListItemModel
                     {
-                        BillIds = new List<int> {bill3Id},
+                        BillIds = new List<int> {bill3.Id},
                         Sum = 20000,
                         Caption = "2018.01.31 00:00",
                         DateFrom = "2018.01.31 00:00",

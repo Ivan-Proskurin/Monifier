@@ -1,12 +1,10 @@
 ﻿using System;
-using System.ComponentModel.Design;
+using System.Linq;
 using FluentAssertions;
 using Monifier.BusinessLogic.Model.Accounts;
 using Monifier.BusinessLogic.Model.Incomes;
-using Monifier.BusinessLogic.Queries.Base;
-using Monifier.BusinessLogic.Queries.Incomes;
+using Monifier.BusinessLogic.Queries.Transactions;
 using Monifier.DataAccess.Model.Base;
-using Monifier.DataAccess.Model.Incomes;
 using Monifier.IntegrationTests.Infrastructure;
 using Xunit;
 
@@ -18,7 +16,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
         public async void Delete_AccountBalancesDecreased()
         {
             EntityIdSet ids;
-            IncomeItem income;
+            IncomeItemModel income;
             using (var session = await CreateDefaultSession())
             {
                 ids = session.CreateDefaultEntities();
@@ -32,7 +30,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                     TopupDate = DateTime.Today,
                     Amount = 15000,
                 };
-                var commands = new AccountCommands(session.UnitOfWork, session.UserSession);
+                var commands = session.CreateAccountCommands();
                 income = await commands.Topup(model);
                 var account = await session.LoadEntity<Account>(ids.DebitCardAccountId);
                 account.Balance.ShouldBeEquivalentTo(balance + model.Amount);
@@ -41,7 +39,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
 
             using (var session = await CreateDefaultSession(ids))
             {
-                var commands = new IncomeItemCommands(session.UnitOfWork, session.UserSession);
+                var commands = session.CreateIncomeCommands();
                 await commands.Delete(income.Id, false);
                 var account = await session.LoadEntity<Account>(ids.DebitCardAccountId);
                 account.Balance.ShouldBeEquivalentTo(session.DebitCardAccount.Balance - income.Total);
@@ -53,7 +51,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
         public async void Delete_Correction_OnlyAvailBalanceDecreased()
         {
             EntityIdSet ids;
-            IncomeItem income;
+            IncomeItemModel income;
             using (var session = await CreateDefaultSession())
             {
                 ids = session.CreateDefaultEntities();
@@ -67,7 +65,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                     TopupDate = DateTime.Today,
                     Amount = 15000,
                 };
-                var commands = new AccountCommands(session.UnitOfWork, session.UserSession);
+                var commands = session.CreateAccountCommands();
                 income = await commands.Topup(model);
                 var account = await session.LoadEntity<Account>(ids.DebitCardAccountId);
                 account.Balance.ShouldBeEquivalentTo(balance);
@@ -76,7 +74,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
 
             using (var session = await CreateDefaultSession(ids))
             {
-                var commands = new IncomeItemCommands(session.UnitOfWork, session.UserSession);
+                var commands = session.CreateIncomeCommands();
                 await commands.Delete(income.Id, false);
                 var account = await session.LoadEntity<Account>(ids.DebitCardAccountId);
                 account.Balance.ShouldBeEquivalentTo(session.DebitCardAccount.Balance);
@@ -98,7 +96,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
 
             using (var session = await CreateDefaultSession(ids))
             {
-                var commands = new IncomeItemCommands(session.UnitOfWork, session.UserSession);
+                var commands = session.CreateIncomeCommands();
                 var income = new IncomeItemModel
                 {
                     AccountId = ids.DebitCardAccountId,
@@ -129,7 +127,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
 
             using (var session = await CreateDefaultSession(ids))
             {
-                var commands = new IncomeItemCommands(session.UnitOfWork, session.UserSession);
+                var commands = session.CreateIncomeCommands();
                 income = new IncomeItemModel
                 {
                     AccountId = ids.DebitCardAccountId,
@@ -146,7 +144,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
 
             using (var session = await CreateDefaultSession(ids))
             {
-                var commands = new IncomeItemCommands(session.UnitOfWork, session.UserSession);
+                var commands = session.CreateIncomeCommands();
                 income.Total = 1340;
                 await commands.Update(income);
                 var account = await session.LoadEntity<Account>(ids.DebitCardAccountId);
@@ -170,7 +168,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
 
             using (var session = await CreateDefaultSession(ids))
             {
-                var commands = new IncomeItemCommands(session.UnitOfWork, session.UserSession);
+                var commands = session.CreateIncomeCommands();
                 income = new IncomeItemModel
                 {
                     AccountId = ids.DebitCardAccountId,
@@ -187,7 +185,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
 
             using (var session = await CreateDefaultSession(ids))
             {
-                var commands = new IncomeItemCommands(session.UnitOfWork, session.UserSession);
+                var commands = session.CreateIncomeCommands();
                 income.Total = 1340;
                 income.AccountId = ids.CashAccountId;
                 await commands.Update(income);
@@ -214,7 +212,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
 
             using (var session = await CreateDefaultSession(ids))
             {
-                var commands = new IncomeItemCommands(session.UnitOfWork, session.UserSession);
+                var commands = session.CreateIncomeCommands();
                 var income = new IncomeItemModel
                 {
                     AccountId = ids.DebitCardAccountId,
@@ -231,7 +229,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
         }
 
         [Fact]
-        public async void Update_UpdateCorrection_OnleAvailBalanceCorrected()
+        public async void Update_UpdateCorrection_OnlyAvailBalanceCorrected()
         {
             EntityIdSet ids;
             decimal balance, availBalance;
@@ -245,7 +243,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
 
             using (var session = await CreateDefaultSession(ids))
             {
-                var commands = new IncomeItemCommands(session.UnitOfWork, session.UserSession);
+                var commands = session.CreateIncomeCommands();
                 income = new IncomeItemModel
                 {
                     AccountId = ids.DebitCardAccountId,
@@ -262,12 +260,93 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
 
             using (var session = await CreateDefaultSession(ids))
             {
-                var commands = new IncomeItemCommands(session.UnitOfWork, session.UserSession);
+                var commands = session.CreateIncomeCommands();
                 income.Total = 1340;
                 await commands.Update(income);
                 var account = await session.LoadEntity<Account>(ids.DebitCardAccountId);
                 account.Balance.ShouldBeEquivalentTo(balance);
                 account.AvailBalance.ShouldBeEquivalentTo(availBalance + income.Total);
+            }
+        }
+
+        [Fact]
+        public async void Create_SingleTransactionCreated()
+        {
+            using (var session = await CreateDefaultSession())
+            {
+                var ids = session.CreateDefaultEntities();
+                var commands = session.CreateIncomeCommands();
+                var income = new IncomeItemModel
+                {
+                    AccountId = ids.DebitCardAccountId,
+                    DateTime = new DateTime(2018, 03, 05, 23, 45, 00),
+                    IsCorrection = false,
+                    Total = 1230.45m,
+                    IncomeTypeId = ids.GiftsIncomeId,
+                };
+                await commands.Update(income);
+                var transactionQueries = new TransactionQueries(session.UnitOfWork, session.UserSession);
+                var transactions = await transactionQueries.GetInitiatorTransactions(ids.DebitCardAccountId);
+                transactions.Count.ShouldBeEquivalentTo(1);
+                var transaction = transactions.Single();
+                transaction.ShouldBeEquivalentTo(new TransactionModel
+                {
+                    OwnerId = session.UserSession.UserId,
+                    InitiatorId = ids.DebitCardAccountId,
+                    DateTime = income.DateTime,
+                    Total = income.Total,
+                    IncomeId = income.Id,
+                    BillId = null,
+                    ParticipantId = null
+                }, opt => opt.Excluding(x => x.Id));
+            }
+        }
+
+        [Fact]
+        public async void Update_SameAccount_TransactionIsUpdated()
+        {
+            EntityIdSet ids;
+            IncomeItemModel income;
+            int transactionId;
+
+            using (var session = await CreateDefaultSession())
+            {
+                var transactionQueries = new TransactionQueries(session.UnitOfWork, session.UserSession);
+                ids = session.CreateDefaultEntities();
+                var commands = session.CreateIncomeCommands();
+                income = new IncomeItemModel
+                {
+                    AccountId = ids.DebitCardAccountId,
+                    DateTime = new DateTime(2018, 03, 05, 23, 45, 00),
+                    IsCorrection = false,
+                    Total = 1230.45m,
+                    IncomeTypeId = ids.GiftsIncomeId,
+                };
+                await commands.Update(income);
+                transactionId = (await transactionQueries.GetInitiatorTransactions(income.AccountId)).Single().Id;
+            }
+
+            using (var session = await CreateDefaultSession(ids))
+            {
+                var transactionQueries = new TransactionQueries(session.UnitOfWork, session.UserSession);
+                var commands = session.CreateIncomeCommands();
+                income.Total = 1340;
+                await commands.Update(income);
+                var transactions = await transactionQueries.GetInitiatorTransactions(ids.DebitCardAccountId);
+                transactions.Count.ShouldBeEquivalentTo(1);
+                var transaction = transactions.Single();
+                transaction.ShouldBeEquivalentTo(
+                    new TransactionModel
+                    {
+                        Id = transactionId,
+                        OwnerId = session.UserSession.UserId,
+                        BillId = null,
+                        DateTime = income.DateTime,
+                        IncomeId = income.Id,
+                        Total = income.Total,
+                        InitiatorId = ids.DebitCardAccountId,
+                        ParticipantId = null,
+                    });
             }
         }
     }
