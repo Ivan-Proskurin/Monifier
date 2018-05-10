@@ -8,9 +8,9 @@ using Monifier.BusinessLogic.Contract.Incomes;
 using Monifier.BusinessLogic.Model.Base;
 using Monifier.BusinessLogic.Model.Incomes;
 using Monifier.Common.Extensions;
+using Monifier.Common.Validation;
 using Monifier.Web.Models;
 using Monifier.Web.Models.Incomes;
-using Monifier.Web.Models.Validation;
 
 namespace Monifier.Web.Pages.Incomes
 {

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Monifier.Common.Extensions;
+using Monifier.Common.Validation;
 using Monifier.DataAccess.Model.Auth;
-using Monifier.Web.Models.Validation;
 
 namespace Monifier.Web.Models.Auth
 {

@@ -10,9 +10,9 @@ using Monifier.BusinessLogic.Contract.Inventorization;
 using Monifier.BusinessLogic.Model.Base;
 using Monifier.BusinessLogic.Model.Incomes;
 using Monifier.Common.Extensions;
+using Monifier.Common.Validation;
 using Monifier.Web.Models;
 using Monifier.Web.Models.Accounts;
-using Monifier.Web.Models.Validation;
 
 namespace Monifier.Web.Pages.Accounts
 {

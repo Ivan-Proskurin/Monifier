@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Monifier.Web.Models.Validation
+namespace Monifier.Common.Validation
 {
     public interface IValidatable
     {

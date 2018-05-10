@@ -17,6 +17,7 @@ namespace Monifier.BusinessLogic.Model.Base
         public decimal AvailBalance { get; set; }
         public DateTime? LastWithdraw { get; set; }
         public bool IsDefault { get; set; }
+        public AccountType AccountType { get; set; }
         
         #region IFlowEndPoint
 
@@ -62,7 +63,8 @@ namespace Monifier.BusinessLogic.Model.Base
                 Balance = account.Balance,
                 AvailBalance = account.AvailBalance,
                 LastWithdraw = account.LastWithdraw,
-                IsDefault = account.IsDefault
+                IsDefault = account.IsDefault,
+                AccountType = account.AccountType
             };
         }
         

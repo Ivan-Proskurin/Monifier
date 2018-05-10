@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Base;
+using Monifier.Common.Validation;
 using Monifier.Web.Models;
 using Monifier.Web.Models.Products;
-using Monifier.Web.Models.Validation;
 
 namespace Monifier.Web.Pages.Products
 {

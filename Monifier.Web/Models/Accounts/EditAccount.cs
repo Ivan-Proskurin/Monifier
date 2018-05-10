@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Monifier.BusinessLogic.Model.Base;
 using Monifier.Common.Extensions;
-using Monifier.Web.Models.Validation;
+using Monifier.Common.Validation;
+using Monifier.DataAccess.Model.Extensions;
 
 namespace Monifier.Web.Models.Accounts
 {
@@ -32,6 +33,10 @@ namespace Monifier.Web.Models.Accounts
 
         [Display(Name = "Использовать по умолчанию")]
         public bool IsDefault { get; set; }
+
+        [Display(Name = "Тип счета")]
+        [Required(ErrorMessage = "Укажите тип счета")]
+        public string AccountType { get; set; }
         
         public IEnumerable<ModelValidationResult> Validate()
         {
@@ -39,6 +44,8 @@ namespace Monifier.Web.Models.Accounts
             if (balanceResult != null) yield return balanceResult;
             var dateResult = CreationDate.ValidateDateTime(nameof(CreationDate));
             if (dateResult != null) yield return dateResult;
+            var accountTypeResult = AccountType.ValidateAccountType(nameof(AccountType));
+            if (accountTypeResult != null) yield return accountTypeResult;
         }
     }
 
@@ -54,7 +61,8 @@ namespace Monifier.Web.Models.Accounts
                 Name = account.Name,
                 CreationDate = account.DateCreated.ToStandardString(),
                 Balance = account.Balance.ToStandardString(),
-                IsDefault = account.IsDefault
+                IsDefault = account.IsDefault,
+                AccountType = account.AccountType.GetNumanName(),
             };
         }
 
@@ -65,6 +73,7 @@ namespace Monifier.Web.Models.Accounts
             model.DateCreated = account.CreationDate.ParseDtFromStandardString();
             model.Name = account.Name;
             model.Balance = account.Balance.ParseMoneyInvariant();
+            model.AccountType = account.AccountType.ParseFromHumanName();
         }
     }
 }

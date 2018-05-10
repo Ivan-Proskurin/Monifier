@@ -33,5 +33,7 @@ namespace Monifier.DataAccess.Model.Base
         public User Owner { get; set; }
 
         public bool IsDefault { get; set; }
+
+        public AccountType AccountType { get; set; }
     }
 }

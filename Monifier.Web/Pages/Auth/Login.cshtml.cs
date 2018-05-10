@@ -5,10 +5,10 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Auth;
 using Monifier.BusinessLogic.Model.Auth;
 using Monifier.Common.Extensions;
+using Monifier.Common.Validation;
 using Monifier.Web.Auth;
 using Monifier.Web.Models;
 using Monifier.Web.Models.Auth;
-using Monifier.Web.Models.Validation;
 
 namespace Monifier.Web.Pages.Auth
 {

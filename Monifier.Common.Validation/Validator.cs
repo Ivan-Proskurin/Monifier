@@ -1,7 +1,8 @@
 ﻿using System;
 using Monifier.Common.Extensions;
+using Monifier.DataAccess.Model.Extensions;
 
-namespace Monifier.Web.Models.Validation
+namespace Monifier.Common.Validation
 {
     public static class Validator
     {
@@ -29,6 +30,11 @@ namespace Monifier.Web.Models.Validation
             {
                 return new ModelValidationResult(name, "Дата/время некорректна");
             }
+        }
+
+        public static ModelValidationResult ValidateAccountType(this string value, string name)
+        {
+            return (!value?.ExistsAccountType() ?? false) ? new ModelValidationResult(name, "Нет такого типа счета") : null;
         }
     }
 }

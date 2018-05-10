@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,6 +7,7 @@ using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Contract.Common;
 using Monifier.BusinessLogic.Model.Base;
 using Monifier.Common.Extensions;
+using Monifier.DataAccess.Model.Extensions;
 using Monifier.Web.Models;
 using Monifier.Web.Models.Accounts;
 
@@ -32,6 +33,8 @@ namespace Monifier.Web.Pages.Accounts
         [BindProperty]
         public EditAccount Account { get; set; }
 
+        public List<string> AccountTypes { get; private set; }
+
         public async Task OnGetAsync()
         {
             Account = new EditAccount
@@ -40,6 +43,7 @@ namespace Monifier.Web.Pages.Accounts
                 Number = await _accountQueries.GetNextNumber(),
                 CreationDate = _timeService.ClientLocalNow.ToStandardString(false)
             };
+            AccountTypes = AccountTypeHelper.GetAllHumanNames();
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -53,8 +57,11 @@ namespace Monifier.Web.Pages.Accounts
                     return RedirectToPage("./AccountsList");
                 },
 
-                async () => await Task.FromResult(Page())
-            );
+                async () =>
+                {
+                    AccountTypes = AccountTypeHelper.GetAllHumanNames();
+                    return await Task.FromResult(Page());
+                });
         }
     }
 }

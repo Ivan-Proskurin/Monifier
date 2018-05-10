@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Model.Base;
 using Monifier.Common.Extensions;
+using Monifier.Common.Validation;
 using Monifier.Web.Extensions;
 using Monifier.Web.Models;
 using Monifier.Web.Models.Accounts;
-using Monifier.Web.Models.Validation;
 
 namespace Monifier.Web.Pages.Accounts
 {

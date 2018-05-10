@@ -58,7 +58,8 @@ namespace Monifier.BusinessLogic.Queries.Base
                 Number = model.Number,
                 IsDeleted = false,
                 OwnerId = _currentSession.UserId,
-                IsDefault = model.IsDefault
+                IsDefault = model.IsDefault,
+                AccountType = model.AccountType
             };
 
             if (account.IsDefault)

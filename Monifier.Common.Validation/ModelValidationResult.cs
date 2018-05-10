@@ -1,4 +1,4 @@
-﻿namespace Monifier.Web.Models.Validation
+﻿namespace Monifier.Common.Validation
 {
     public class ModelValidationResult
     {

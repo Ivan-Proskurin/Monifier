@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Contract.Transactions;
 using Monifier.BusinessLogic.Model.Transactions;
+using Monifier.DataAccess.Model.Extensions;
 using Monifier.Web.Models;
 using Monifier.Web.Models.Accounts;
 
@@ -31,11 +32,14 @@ namespace Monifier.Web.Pages.Accounts
         [BindProperty]
         public EditAccount Account { get; set; }
 
+        public List<string> AccountTypes { get; private set; }
+
         public List<TransactionViewModel> Transactions { get; private set; }
 
         public async Task OnGetAsync(int id)
         {
             var account = await _accountQueries.GetById(id);
+            AccountTypes = AccountTypeHelper.GetAllHumanNames();
             Transactions = await _transactionQueries.GetLastTransactions(account.Id, 3);
             Account = account.ToEditAccount();
         }
@@ -54,6 +58,7 @@ namespace Monifier.Web.Pages.Accounts
                 async () =>
                 {
                     Transactions = await _transactionQueries.GetLastTransactions(Account.Id, 3);
+                    AccountTypes = AccountTypeHelper.GetAllHumanNames();
                     return await Task.FromResult(Page());
                 });
         }

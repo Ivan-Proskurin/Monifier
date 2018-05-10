@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Monifier.Common.Extensions\Monifier.Common.Extensions.csproj" />
+    <ProjectReference Include="..\Monifier.DataAccess.Model\Monifier.DataAccess.Model.csproj" />
+  </ItemGroup>
+
+</Project>

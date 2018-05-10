@@ -10,6 +10,9 @@
     <Folder Include="Incomes" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Monifier.Common.Extensions\Monifier.Common.Extensions.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="System.ComponentModel.DataAnnotations" />
   </ItemGroup>
 </Project>

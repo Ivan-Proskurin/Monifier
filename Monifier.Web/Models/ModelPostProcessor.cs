@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Monifier.Common.Extensions;
-using Monifier.Web.Models.Validation;
+using Monifier.Common.Validation;
 
 namespace Monifier.Web.Models
 {

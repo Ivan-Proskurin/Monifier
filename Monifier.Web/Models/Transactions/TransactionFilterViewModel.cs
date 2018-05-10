@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using Monifier.BusinessLogic.Model.Transactions;
-using Monifier.Web.Models.Validation;
+using Monifier.Common.Validation;
 
 namespace Monifier.Web.Models.Transactions
 {

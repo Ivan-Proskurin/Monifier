@@ -19,8 +19,17 @@
             </div>
             <div class="col-md-9 col-sm-7 col-7">
                 <div class="form-group">
+                    <label asp-for="Account.AccountType" class="control-label"></label>
+                    <autocomplete asp-for="Account.AccountType" value-list="@Model.AccountTypes" value="@Model.Account.AccountType"/>
+                    <span asp-validation-for="Account.AccountType" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 col-sm-7 col-7">
+                <div class="form-group">
                     <label asp-for="Account.Name" class="control-label"></label>
-                    <input asp-for="Account.Name" class="form-control" autocomplete="off"/>
+                    <input asp-for="Account.Name" class="form-control" autocomplete="off" />
                     <span asp-validation-for="Account.Name" class="text-danger"></span>
                 </div>
             </div>
@@ -60,6 +69,7 @@
     <script>
         makeInputDatetimePicker("Account.CreationDate");
         makeInputNumeric('Account.Balance', true);
+        makeInputAutocomplete("Account.AccountType");
         $('[data-toggle="tooltip"]').tooltip();
 
         $("#Account_Name").focus();

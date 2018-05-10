@@ -69,7 +69,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "6 Tools", "6 Tools", "{157B
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.Tools.Accounts", "Monifier.Tools.Accounts\Monifier.Tools.Accounts.csproj", "{581969F5-D7C4-43A4-8101-C6C8B9AE9F19}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.BusinessLogic.Support", "Monifier.BusinessLogic.Support\Monifier.BusinessLogic.Support.csproj", "{62F6CE4D-CDAE-47AC-AF1D-AD0A976121A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.BusinessLogic.Support", "Monifier.BusinessLogic.Support\Monifier.BusinessLogic.Support.csproj", "{62F6CE4D-CDAE-47AC-AF1D-AD0A976121A1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.DataAccess.Model.Tests", "Monifier.DataAccess.Model.Tests\Monifier.DataAccess.Model.Tests.csproj", "{DEF12073-EC6F-45BA-8690-254EF05B5B47}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.Common.Validation", "Monifier.Common.Validation\Monifier.Common.Validation.csproj", "{A025FEA9-9D1C-4737-8719-CE0953091DD8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.Common.Validation.Tests", "Monifier.Common.Validation.Tests\Monifier.Common.Validation.Tests.csproj", "{84A0F23A-AA07-417B-8BAF-E002C24C84B5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -165,6 +171,18 @@ Global
 		{62F6CE4D-CDAE-47AC-AF1D-AD0A976121A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62F6CE4D-CDAE-47AC-AF1D-AD0A976121A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62F6CE4D-CDAE-47AC-AF1D-AD0A976121A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DEF12073-EC6F-45BA-8690-254EF05B5B47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DEF12073-EC6F-45BA-8690-254EF05B5B47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DEF12073-EC6F-45BA-8690-254EF05B5B47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DEF12073-EC6F-45BA-8690-254EF05B5B47}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A025FEA9-9D1C-4737-8719-CE0953091DD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A025FEA9-9D1C-4737-8719-CE0953091DD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A025FEA9-9D1C-4737-8719-CE0953091DD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A025FEA9-9D1C-4737-8719-CE0953091DD8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84A0F23A-AA07-417B-8BAF-E002C24C84B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84A0F23A-AA07-417B-8BAF-E002C24C84B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84A0F23A-AA07-417B-8BAF-E002C24C84B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84A0F23A-AA07-417B-8BAF-E002C24C84B5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -197,6 +215,9 @@ Global
 		{BE439185-37AE-4F39-B165-67B4E84F522C} = {3C8EC64D-F8C6-4BFD-B680-5C0FF9E6E907}
 		{581969F5-D7C4-43A4-8101-C6C8B9AE9F19} = {157B8328-AF31-431D-91B3-B4F15FBCEECD}
 		{62F6CE4D-CDAE-47AC-AF1D-AD0A976121A1} = {23E58EB3-DF0B-4ED7-8B15-383B86EB1C95}
+		{DEF12073-EC6F-45BA-8690-254EF05B5B47} = {AF0EE9BC-41BC-4E0C-ABBB-CBF3B54240AC}
+		{A025FEA9-9D1C-4737-8719-CE0953091DD8} = {D753C2A9-18F9-4368-B66B-FE2269E42A3A}
+		{84A0F23A-AA07-417B-8BAF-E002C24C84B5} = {F41DAE3C-4220-409D-822B-E3E20B8043D8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {34AA2978-9969-466D-9D74-180D905E4DBA}

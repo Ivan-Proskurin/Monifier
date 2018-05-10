@@ -9,9 +9,9 @@ using Monifier.BusinessLogic.Model.Base;
 using Monifier.BusinessLogic.Model.Pagination;
 using Monifier.BusinessLogic.Model.Transactions;
 using Monifier.Common.Extensions;
+using Monifier.Common.Validation;
 using Monifier.Web.Models;
 using Monifier.Web.Models.Transactions;
-using Monifier.Web.Models.Validation;
 
 namespace Monifier.Web.Pages.Accounts
 {

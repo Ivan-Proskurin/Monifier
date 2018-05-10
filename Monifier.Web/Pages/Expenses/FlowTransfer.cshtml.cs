@@ -8,10 +8,10 @@ using Monifier.BusinessLogic.Contract.Expenses;
 using Monifier.BusinessLogic.Model.Base;
 using Monifier.BusinessLogic.Model.Expenses;
 using Monifier.Common.Extensions;
+using Monifier.Common.Validation;
 using Monifier.Web.Extensions;
 using Monifier.Web.Models;
 using Monifier.Web.Models.Expenses;
-using Monifier.Web.Models.Validation;
 
 namespace Monifier.Web.Pages.Expenses
 {

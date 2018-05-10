@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Monifier.Common.Extensions;
-using Monifier.Web.Models.Validation;
+using Monifier.Common.Validation;
 
 namespace Monifier.Web.Models
 {

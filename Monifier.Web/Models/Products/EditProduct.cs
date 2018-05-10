@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Monifier.BusinessLogic.Model.Base;
-using Monifier.Web.Models.Validation;
+using Monifier.Common.Validation;
 
 namespace Monifier.Web.Models.Products
 {
