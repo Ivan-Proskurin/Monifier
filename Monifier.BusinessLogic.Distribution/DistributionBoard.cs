@@ -37,7 +37,8 @@ namespace Monifier.BusinessLogic.Distribution
             var settingsQueries = unitOfWork.GetQueryRepository<AccountFlowSettings>();
             
             var accounts = await accountQueries.Query
-                .Where(x => x.OwnerId == userId && !x.IsDeleted && x.AvailBalance > 0)
+                .Where(x => x.OwnerId == userId && !x.IsDeleted && x.AvailBalance > 0 
+                            && x.AccountType != AccountType.CreditCard)
                 .OrderBy(x => x.Number)
                 .ToListAsync();
 

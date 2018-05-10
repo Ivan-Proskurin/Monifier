@@ -19,6 +19,7 @@ namespace Monifier.IntegrationTests.Infrastructure
 
         public int DebitCardAccountId { get; set; }
         public int CashAccountId { get; set; }
+        public int CreditCardAccountId { get; set; }
 
         public List<int> IncomeIds { get; set; }
     }

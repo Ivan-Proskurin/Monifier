@@ -5,8 +5,13 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Monifier.BusinessLogic.Auth;
 using Monifier.BusinessLogic.Contract.Auth;
+using Monifier.BusinessLogic.Contract.Base;
+using Monifier.BusinessLogic.Contract.Expenses;
+using Monifier.BusinessLogic.Contract.Incomes;
+using Monifier.BusinessLogic.Contract.Transactions;
 using Monifier.BusinessLogic.Model.Expenses;
 using Monifier.BusinessLogic.Queries.Base;
+using Monifier.BusinessLogic.Queries.Expenses;
 using Monifier.BusinessLogic.Queries.Incomes;
 using Monifier.BusinessLogic.Queries.Transactions;
 using Monifier.BusinessLogic.Support;
@@ -138,7 +143,7 @@ namespace Monifier.IntegrationTests.Infrastructure
             return entity;
         }
 
-        public Account CreateAccount(string name, decimal balance, DateTime date, bool isDefault = false)
+        public Account CreateAccount(string name, decimal balance, DateTime date, AccountType accountType, bool isDefault = false)
         {
             var commands = _unitOfWork.GetCommandRepository<Account>();
             var entity = new Account
@@ -149,7 +154,8 @@ namespace Monifier.IntegrationTests.Infrastructure
                 AvailBalance = balance,
                 Number = 1,
                 OwnerId = UserSession.UserId,
-                IsDefault = isDefault
+                IsDefault = isDefault,
+                AccountType = accountType
             };
             commands.Create(entity);
             return entity;
@@ -198,7 +204,8 @@ namespace Monifier.IntegrationTests.Infrastructure
                 ProductId = product.Id,
                 Cost = cost
             });
-            await bill.Save(_unitOfWork);
+            var commands = CreateExpensesBillCommands();
+            await commands.Save(bill);
             return bill;
         }
 
@@ -247,8 +254,9 @@ namespace Monifier.IntegrationTests.Infrastructure
             FoodExpenseFlow = CreateExpenseFlow("Продукты питания", 1000, DateTime.Today, 1);
             TechExpenseFlow = CreateExpenseFlow("Техника", 30000, DateTime.Today, 2);
 
-            DebitCardAccount = CreateAccount("Дебетовая карта", 15000, DateTime.Today);
-            CashAccount = CreateAccount("Наличные", 30000, DateTime.Today);
+            DebitCardAccount = CreateAccount("Дебетовая карта", 15000, DateTime.Today, AccountType.DebitCard);
+            CashAccount = CreateAccount("Наличные", 30000, DateTime.Today, AccountType.Cash);
+            CreditCardAccount = CreateAccount("Кредитка", 10000, DateTime.Today, AccountType.CreditCard);
 
             Incomes = new[]
                 {
@@ -272,6 +280,7 @@ namespace Monifier.IntegrationTests.Infrastructure
                 TechExpenseFlowId = TechExpenseFlow.Id,
                 DebitCardAccountId = DebitCardAccount.Id,
                 CashAccountId = CashAccount.Id,
+                CreditCardAccountId = CreditCardAccount.Id,
                 IncomeIds = Incomes.Select(x => x.Id).ToList(),
             };
         }
@@ -301,6 +310,7 @@ namespace Monifier.IntegrationTests.Infrastructure
             TechExpenseFlow = await LoadEntity<ExpenseFlow>(idSet.TechExpenseFlowId);
             DebitCardAccount = await LoadEntity<Account>(idSet.DebitCardAccountId);
             CashAccount = await LoadEntity<Account>(idSet.CashAccountId);
+            CreditCardAccount = await LoadEntity<Account>(idSet.CreditCardAccountId);
 
             Incomes = (await LoadEntities<IncomeItem>()).OrderBy(x => x.DateTime).ToList();
         }
@@ -327,6 +337,7 @@ namespace Monifier.IntegrationTests.Infrastructure
 
         public Account DebitCardAccount { get; private set; }
         public Account CashAccount { get; private set; }
+        public Account CreditCardAccount { get; private set; }
 
         public List<IncomeItem> Incomes { get; private set; }
 
@@ -334,14 +345,14 @@ namespace Monifier.IntegrationTests.Infrastructure
 
         #region Commands & Queries factories
 
-        public IncomeItemCommands CreateIncomeCommands()
+        public IIncomeItemCommands CreateIncomeCommands()
         {
             return new IncomeItemCommands(UnitOfWork, UserSession,
                 new TransactionCommands(UnitOfWork, UserSession),
                 new TransactionQueries(UnitOfWork, UserSession));
         }
 
-        public AccountCommands CreateAccountCommands()
+        public IAccountCommands CreateAccountCommands()
         {
             return new AccountCommands(UnitOfWork, UserSession, 
                 new IncomeItemCommands(UnitOfWork, UserSession, new TransactionCommands(UnitOfWork, UserSession), 
@@ -350,9 +361,19 @@ namespace Monifier.IntegrationTests.Infrastructure
                 new TimeService(UserSession));
         }
 
-        public TransactionQueries CreateTransactionQueries()
+        public ITransactionQueries CreateTransactionQueries()
         {
             return new TransactionQueries(UnitOfWork, UserSession);
+        }
+
+        public IExpensesBillCommands CreateExpensesBillCommands()
+        {
+            return new ExpensesBillCommands(UnitOfWork, UserSession);
+        }
+
+        public IExpenseFlowCommands CreateExpenseFlowCommands()
+        {
+            return new ExpenseFlowCommands(UnitOfWork, UserSession, CreateExpensesBillCommands());
         }
 
         #endregion

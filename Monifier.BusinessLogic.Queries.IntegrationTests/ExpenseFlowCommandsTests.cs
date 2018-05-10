@@ -1,7 +1,6 @@
 ﻿using System;
 using FluentAssertions;
 using Monifier.BusinessLogic.Model.Expenses;
-using Monifier.BusinessLogic.Queries.Expenses;
 using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Expenses;
 using Monifier.IntegrationTests.Infrastructure;
@@ -31,7 +30,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
             using (var session = await CreateDefaultSession())
             {
                 var queries = session.UnitOfWork.GetQueryRepository<ExpenseFlow>();
-                var efc = new ExpenseFlowCommands(session.UnitOfWork, session.UserSession);
+                var efc = session.CreateExpenseFlowCommands();
                 _model = await efc.Update(_model);
                 Assert.True(_model.Id > 0);
 
@@ -50,7 +49,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
         {
             using (var session = await CreateDefaultSession())
             {
-                var efc = new ExpenseFlowCommands(session.UnitOfWork, session.UserSession);
+                var efc = session.CreateExpenseFlowCommands();
                 _model.DateCreated = DateTime.Today;
                 _model = await efc.Update(_model); // created first
                 _model.Id.Should().BeGreaterThan(0);
@@ -58,7 +57,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
 
             using (var session = await CreateDefaultSession())
             {
-                var efc = new ExpenseFlowCommands(session.UnitOfWork, session.UserSession);
+                var efc = session.CreateExpenseFlowCommands();
                 var queries = session.UnitOfWork.GetQueryRepository<ExpenseFlow>();
                 _model.Balance -= 50;
                 await efc.Update(_model); // flow updated
@@ -74,7 +73,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
             {
                 session.CreateDefaultEntities();
                 var queries = session.UnitOfWork.GetQueryRepository<ExpenseFlow>();
-                var efc = new ExpenseFlowCommands(session.UnitOfWork, session.UserSession);
+                var efc = session.CreateExpenseFlowCommands();
                 var model = session.FoodExpenseFlow.ToModel();
                 model.Balance -= 100;
                 await efc.Update(model);
@@ -101,7 +100,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 };
 
                 var now = DateTime.Now;
-                var efc = new ExpenseFlowCommands(session.UnitOfWork, session.UserSession);
+                var efc = session.CreateExpenseFlowCommands();
                 await efc.AddExpense(expense);
                 var flow = await session.UnitOfWork.GetQueryRepository<ExpenseFlow>().GetById(session.FoodExpenseFlow.Id);
                 flow.Balance.ShouldBeEquivalentTo(session.FoodExpenseFlow.Balance - expense.Cost);
@@ -131,7 +130,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                     Product = session.Meat.Name,
                 };
 
-                var efc = new ExpenseFlowCommands(session.UnitOfWork, session.UserSession);
+                var efc = session.CreateExpenseFlowCommands();
                 await efc.AddExpense(expense);
                 var flow = await session.UnitOfWork.GetQueryRepository<ExpenseFlow>().GetById(session.FoodExpenseFlow.Id);
                 flow.Balance.ShouldBeEquivalentTo(session.FoodExpenseFlow.Balance - expense.Cost);

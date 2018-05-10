@@ -16,11 +16,14 @@ namespace Monifier.BusinessLogic.Queries.Expenses
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentSession _currentSession;
+        private readonly IExpensesBillCommands _expensesBillCommands;
 
-        public ExpenseFlowCommands(IUnitOfWork unitOfWork, ICurrentSession currentSession)
+        public ExpenseFlowCommands(IUnitOfWork unitOfWork, ICurrentSession currentSession,
+            IExpensesBillCommands expensesBillCommands)
         {
             _unitOfWork = unitOfWork;
             _currentSession = currentSession;
+            _expensesBillCommands = expensesBillCommands;
         }
         
         public async Task<ExpenseFlowModel> Update(ExpenseFlowModel model)
@@ -161,7 +164,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                 }
             };
 
-            await billModel.Create(_unitOfWork, expense.Correcting);
+            await _expensesBillCommands.Create(billModel, expense.Correcting);
         }
     }
 }
