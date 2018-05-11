@@ -72,5 +72,15 @@ namespace Monifier.BusinessLogic.Queries.Transactions
                 }
             }
         }
+
+        public async Task Delete(ExpenseBill bill)
+        {
+            var commands = _unitOfWork.GetCommandRepository<Transaction>();
+            var queries = _unitOfWork.GetQueryRepository<Transaction>();
+            var transaction = await queries.Query.SingleOrDefaultAsync(
+                x => x.InitiatorId == bill.AccountId && x.BillId == bill.Id);
+            if (transaction == null) return;
+            commands.Delete(transaction);
+        }
     }
 }

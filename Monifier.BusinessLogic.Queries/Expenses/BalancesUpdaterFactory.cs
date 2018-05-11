@@ -22,7 +22,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                 case AccountType.DebitCard:
                     return new DefaultBalancesUpdater(_untOfWork);
                 case AccountType.CreditCard:
-                    return new CreditCardBalancesUpdater();
+                    return new CreditCardBalancesUpdater(_untOfWork);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(accountType), accountType, null);
             }

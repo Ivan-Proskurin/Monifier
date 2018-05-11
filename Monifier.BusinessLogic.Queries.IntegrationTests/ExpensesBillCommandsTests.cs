@@ -167,7 +167,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
         }
 
         [Fact]
-        public async void Delete_AccountBalanceTopuped()
+        public async void Delete_AccountBalanceTopuped_TransactionDeleted()
         {
             decimal availBalance, balance;
             EntityIdSet ids;
@@ -190,6 +190,10 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 var account = await session.LoadEntity<Account>(bill.AccountId ?? 0);
                 account.Balance.ShouldBeEquivalentTo(balance + bill.Cost);
                 account.AvailBalance.ShouldBeEquivalentTo(availBalance);
+                var transactionsQueries = session.CreateTransactionQueries();
+                if (bill.AccountId == null) return;
+                var transaction = await transactionsQueries.GetBillTransaction(bill.AccountId.Value, bill.Id);
+                transaction.Should().BeNull();
             }
         }
 
@@ -654,6 +658,10 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
             {
                 var commands = session.CreateExpensesBillCommands();
                 await commands.Delete(bill.Id, false);
+            }
+
+            using (var session = await CreateDefaultSession(ids))
+            {
                 session.CreditCardAccount.Balance.ShouldBeEquivalentTo(cardBalance);
                 session.CreditCardAccount.AvailBalance.ShouldBeEquivalentTo(cardAvailBalance);
                 session.FoodExpenseFlow.Balance.ShouldBeEquivalentTo(flowBalance);

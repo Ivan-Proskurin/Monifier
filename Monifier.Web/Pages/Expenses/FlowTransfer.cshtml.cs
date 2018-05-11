@@ -57,11 +57,13 @@ namespace Monifier.Web.Pages.Expenses
         public async Task OnGetAsync(int expenseId)
         {
             await LoadModelsAsync(expenseId);
+            var defaultAccount = Accounts.GetDefaultAccount();
             Transfer = new FlowTransfer
             {
-                FlowId = expenseId
+                FlowId = expenseId,
+                AccountFrom = defaultAccount?.Name
             };
-            AvailableBalance = "-";
+            AvailableBalance = defaultAccount?.AvailBalance.ToMoney() ?? "-";
         }
 
         public async Task<IActionResult> OnPostAsync()

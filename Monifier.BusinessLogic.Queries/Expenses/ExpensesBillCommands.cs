@@ -50,6 +50,8 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                 await balanceUpdater.Delete(bill);
             }
 
+            await _transactionBuilder.Delete(bill).ConfigureAwait(false);
+
             var billCommands = _unitOfWork.GetCommandRepository<ExpenseBill>();
             billCommands.Delete(bill);
 

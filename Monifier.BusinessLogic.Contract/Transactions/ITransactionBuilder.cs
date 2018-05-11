@@ -7,5 +7,6 @@ namespace Monifier.BusinessLogic.Contract.Transactions
     {
         void Create(ExpenseBill bill);
         Task Update(ExpenseBill bill, int? oldAccountId);
+        Task Delete(ExpenseBill bill);
     }
 }
