@@ -368,7 +368,8 @@ namespace Monifier.IntegrationTests.Infrastructure
 
         public IExpensesBillCommands CreateExpensesBillCommands()
         {
-            return new ExpensesBillCommands(UnitOfWork, UserSession);
+            return new ExpensesBillCommands(UnitOfWork, UserSession, new BalancesUpdaterFactory(UnitOfWork),
+                new TransitionBalancesUpdater(UnitOfWork), new TransactionBuilder(UnitOfWork));
         }
 
         public IExpenseFlowCommands CreateExpenseFlowCommands()

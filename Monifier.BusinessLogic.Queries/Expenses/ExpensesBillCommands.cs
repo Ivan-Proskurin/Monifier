@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Monifier.BusinessLogic.Contract.Auth;
 using Monifier.BusinessLogic.Contract.Expenses;
+using Monifier.BusinessLogic.Contract.Transactions;
 using Monifier.BusinessLogic.Model.Expenses;
 using Monifier.DataAccess.Contract;
-using Monifier.DataAccess.Model.Accounts;
 using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Expenses;
 
@@ -15,11 +14,22 @@ namespace Monifier.BusinessLogic.Queries.Expenses
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentSession _currentSession;
+        private readonly IBalancesUpdaterFactory _balancesUpdaterFactory;
+        private readonly ITransitionBalanceUpdater _transitionBalanceUpdater;
+        private readonly ITransactionBuilder _transactionBuilder;
 
-        public ExpensesBillCommands(IUnitOfWork unitOfWork, ICurrentSession currentSession)
+        public ExpensesBillCommands(
+            IUnitOfWork unitOfWork, 
+            ICurrentSession currentSession,
+            IBalancesUpdaterFactory balancesUpdaterFactory,
+            ITransitionBalanceUpdater transitionBalanceUpdater,
+            ITransactionBuilder transactionBuilder)
         {
             _unitOfWork = unitOfWork;
             _currentSession = currentSession;
+            _balancesUpdaterFactory = balancesUpdaterFactory;
+            _transitionBalanceUpdater = transitionBalanceUpdater;
+            _transactionBuilder = transactionBuilder;
         }
 
         public async Task Delete(int id, bool onlyMark = true)
@@ -32,26 +42,18 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             if (bill == null)
                 throw new ArgumentException($"Нет чека с Id = {id}");
 
-            var billCommands = _unitOfWork.GetCommandRepository<ExpenseBill>();
-            var flowQueries = _unitOfWork.GetQueryRepository<ExpenseFlow>();
-            var flowCommands = _unitOfWork.GetCommandRepository<ExpenseFlow>();
-
-            var flow = await flowQueries.GetById(bill.ExpenseFlowId);
-            flow.Balance += bill.SumPrice;
-            flowCommands.Update(flow);
-
-            if (bill.AccountId != null && !bill.IsCorrection)
+            var accountQueries = _unitOfWork.GetQueryRepository<Account>();
+            var account = bill.AccountId != null ? await accountQueries.GetById(bill.AccountId.Value) : null;
+            if (account != null)
             {
-                var accountQueries = _unitOfWork.GetQueryRepository<Account>();
-                var accountCommands = _unitOfWork.GetCommandRepository<Account>();
-                var account = await accountQueries.GetById(bill.AccountId.Value);
-                account.Balance += bill.SumPrice;
-                accountCommands.Update(account);
+                var balanceUpdater = _balancesUpdaterFactory.Create(account.AccountType);
+                await balanceUpdater.Delete(bill);
             }
 
+            var billCommands = _unitOfWork.GetCommandRepository<ExpenseBill>();
             billCommands.Delete(bill);
 
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task<int> Create(ExpenseBillModel model, bool correction = false)
@@ -98,50 +100,17 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                 account = await accountQueries.GetById(model.AccountId.Value);
             }
 
-            var flowQieries = _unitOfWork.GetQueryRepository<ExpenseFlow>();
-            var flowCommands = _unitOfWork.GetCommandRepository<ExpenseFlow>();
-            var flow = await flowQieries.GetById(bill.ExpenseFlowId);
-            if (flow == null)
-                throw new InvalidOperationException($"Can't find expense flow with id {bill.ExpenseFlowId}");
-            var lack = bill.SumPrice - Math.Max(flow.Balance, 0);
-            var withdrawTotal = bill.SumPrice;
-            if (lack > 0 && account != null && !correction)
+            if (account != null)
             {
-                var compensation = Math.Min(Math.Max(account.AvailBalance, 0), lack);
-                withdrawTotal -= compensation;
-                account.AvailBalance -= compensation;
+                var balancesUpdater = _balancesUpdaterFactory.Create(account.AccountType);
+                await balancesUpdater.Create(account, bill).ConfigureAwait(false);
             }
-            flow.Balance -= withdrawTotal;
-            flow.Version++;
-            flowCommands.Update(flow);
 
-            if (account != null && !correction)
-            {
-                var accountCommands = _unitOfWork.GetCommandRepository<Account>();
-                account.Balance -= bill.SumPrice;
-                account.LastWithdraw = DateTime.Now;
-                accountCommands.Update(account);
-            }
+            _transactionBuilder.Create(bill);
 
             await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
             model.Id = bill.Id;
-
-            if (model.AccountId != null)
-            {
-                var transation = new Transaction
-                {
-                    OwnerId = model.OwnerId,
-                    DateTime = model.DateTime,
-                    InitiatorId = model.AccountId.Value,
-                    BillId = model.Id,
-                    Total = model.Cost,
-                };
-                var transactionCommands = _unitOfWork.GetCommandRepository<Transaction>();
-                transactionCommands.Create(transation);
-            }
-
-            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
             return model.Id;
         }
 
@@ -200,91 +169,9 @@ namespace Monifier.BusinessLogic.Queries.Expenses
 
             billCommands.Update(bill);
 
-            var flowQueries = _unitOfWork.GetQueryRepository<ExpenseFlow>();
-            var flowCommands = _unitOfWork.GetCommandRepository<ExpenseFlow>();
-            var accountQueries = _unitOfWork.GetQueryRepository<Account>();
-            var accountCommands = _unitOfWork.GetCommandRepository<Account>();
+            await _transitionBalanceUpdater.Update(bill, oldsum, oldAccountId);
 
-            var flow = await flowQueries.GetById(bill.ExpenseFlowId);
-            var newAccount = bill.AccountId != null ? await accountQueries.GetById(bill.AccountId.Value) : null;
-            flow.Balance = flow.Balance + oldsum;
-            var lack = bill.SumPrice - Math.Max(flow.Balance, 0);
-            var withdrawTotal = bill.SumPrice;
-            if (lack > 0 && newAccount != null)
-            {
-                var compensation = Math.Min(Math.Max(newAccount.AvailBalance, 0), lack);
-                withdrawTotal -= compensation;
-                newAccount.AvailBalance -= compensation;
-            }
-            flow.Balance -= withdrawTotal;
-            flow.Version++;
-            flowCommands.Update(flow);
-
-            if (!bill.IsCorrection)
-            {
-                if (oldAccountId != bill.AccountId)
-                {
-                    if (oldAccountId != null)
-                    {
-                        var oldAccount = await accountQueries.GetById(oldAccountId.Value);
-                        oldAccount.Balance += oldsum;
-                        accountCommands.Update(oldAccount);
-                    }
-
-                    if (newAccount != null)
-                    {
-                        newAccount.Balance -= bill.SumPrice;
-                        newAccount.LastWithdraw = DateTime.Now;
-                        accountCommands.Update(newAccount);
-                    }
-                }
-                else if (newAccount != null)
-                {
-                    newAccount.Balance += oldsum - model.Cost;
-                    accountCommands.Update(newAccount);
-                }
-            }
-            else if (newAccount != null)
-            {
-                accountCommands.Update(newAccount);
-            }
-
-            var transactionCommands = _unitOfWork.GetCommandRepository<Transaction>();
-            var transactionQueries = _unitOfWork.GetQueryRepository<Transaction>();
-            if (oldAccountId == model.AccountId)
-            {
-                var transaction = transactionQueries.Query
-                    .SingleOrDefault(x => x.OwnerId == model.OwnerId && x.InitiatorId == model.AccountId && x.BillId == model.Id);
-                if (transaction != null)
-                {
-                    transaction.DateTime = model.DateTime;
-                    transaction.Total = model.Cost;
-                    transactionCommands.Update(transaction);
-                }
-            }
-            else if (model.AccountId != null)
-            {
-                var transaction = transactionQueries.Query
-                    .SingleOrDefault(x => x.OwnerId == model.OwnerId && x.InitiatorId == oldAccountId && x.BillId == model.Id);
-                if (transaction == null)
-                {
-                    transaction = new Transaction
-                    {
-                        OwnerId = model.OwnerId,
-                        DateTime = model.DateTime,
-                        BillId = model.Id,
-                        InitiatorId = model.AccountId.Value,
-                        Total = model.Cost
-                    };
-                    transactionCommands.Create(transaction);
-                }
-                else
-                {
-                    transaction.InitiatorId = model.AccountId.Value;
-                    transaction.Total = model.Cost;
-                    transactionCommands.Update(transaction);
-                }
-            }
+            await _transactionBuilder.Update(bill, oldAccountId);
 
             await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
             return model;

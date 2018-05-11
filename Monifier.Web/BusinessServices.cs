@@ -56,6 +56,9 @@ namespace Monifier.Web
             services.AddTransient<ITimeService, TimeService>();
             services.AddTransient<ITransactionCommands, TransactionCommands>();
             services.AddTransient<ITransactionQueries, TransactionQueries>();
+            services.AddTransient<IBalancesUpdaterFactory, BalancesUpdaterFactory>();
+            services.AddTransient<ITransitionBalanceUpdater, TransitionBalancesUpdater>();
+            services.AddTransient<ITransactionBuilder, TransactionBuilder>();
         }
     }
 }

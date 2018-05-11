@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Monifier.BusinessLogic.Queries.IntegrationTests
 {
-    public class ExpenssBillCommandsTests : QueryTestBase
+    public class ExpensesBillCommandsTests : QueryTestBase
     {
         [Fact]
         public async void Create_BalancesAreModifiedCorrectly()
@@ -622,13 +622,40 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 cardAvailBalance = session.CreditCardAccount.AvailBalance;
                 flowBalance = session.FoodExpenseFlow.Balance;
                 var commands = session.CreateExpensesBillCommands();
-                await commands.Create(bill);
+                await commands.Create(bill, correction: true);
             }
 
             using (var session = await CreateDefaultSession(ids))
             {
                 session.CreditCardAccount.Balance.ShouldBeEquivalentTo(cardBalance);
                 session.CreditCardAccount.AvailBalance.ShouldBeEquivalentTo(cardAvailBalance - bill.Cost);
+                session.FoodExpenseFlow.Balance.ShouldBeEquivalentTo(flowBalance);
+            }
+        }
+
+        [Fact]
+        public async void CreditCardBill_Deletion_OnlyCardBlancesCorrected()
+        {
+            EntityIdSet ids;
+            ExpenseBillModel bill;
+            decimal cardAvailBalance, cardBalance, flowBalance;
+            using (var session = await CreateDefaultSession())
+            {
+                ids = session.CreateDefaultEntities();
+                bill = CreateBill(session, ids.CreditCardAccountId);
+                cardBalance = session.CreditCardAccount.Balance;
+                cardAvailBalance = session.CreditCardAccount.AvailBalance;
+                flowBalance = session.FoodExpenseFlow.Balance;
+                var commands = session.CreateExpensesBillCommands();
+                await commands.Create(bill);
+            }
+
+            using (var session = await CreateDefaultSession(ids))
+            {
+                var commands = session.CreateExpensesBillCommands();
+                await commands.Delete(bill.Id, false);
+                session.CreditCardAccount.Balance.ShouldBeEquivalentTo(cardBalance);
+                session.CreditCardAccount.AvailBalance.ShouldBeEquivalentTo(cardAvailBalance);
                 session.FoodExpenseFlow.Balance.ShouldBeEquivalentTo(flowBalance);
             }
         }
