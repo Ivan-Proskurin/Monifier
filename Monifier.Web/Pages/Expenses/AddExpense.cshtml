@@ -81,7 +81,7 @@
         
         activateLink("#expensesLink");
 
-        makeInputAutocomplete("Expense.FlowName", null, updateCategoriesList);
+        makeInputAutocomplete("Expense.FlowName", null, updateCategoriesList, 16);
         makeInputAutocomplete("Expense.Account");
         var categoryAutocomplete = makeInputAutocomplete("Expense.Category", null, updateProductsList);
         var productsAutocomplete = makeInputAutocomplete("Expense.Product", null, selectCategoryByProduct);

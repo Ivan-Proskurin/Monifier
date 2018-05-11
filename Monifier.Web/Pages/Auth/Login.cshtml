@@ -26,7 +26,7 @@
         </div>
         <div class="row" style="margin-top: 15px;">
             <div class="form-group col-sm-6">
-                <input type="submit" value="Войти" class="btn btn-danger cursor-pointer" style="padding: 5px 30px;" />
+                <input id="login" type="submit" value="Войти" class="btn btn-danger cursor-pointer" style="padding: 5px 30px;" />
             </div>
         </div>
     </form>
@@ -34,7 +34,7 @@
 
 @section Scripts {
     <script type="text/javascript">
-        $("#Login_UserName").focus();
+        $("#login").focus();
         $('#Login_TimeZoneOffset').val(-(new Date()).getTimezoneOffset());
     </script>
 }

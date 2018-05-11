@@ -197,7 +197,7 @@
         
         activateLink("#expensesLink");
         makeInputAutocomplete("Good.Account");
-        makeInputAutocomplete("Good.FlowName", null, updateCategoriesList);
+        makeInputAutocomplete("Good.FlowName", null, updateCategoriesList, 16);
         var categoryAutocomplete = makeInputAutocomplete("Good.Category", null, updateProductsList);
         var productsAutocomplete = makeInputAutocomplete("Good.Product", null, selectCategoryByProduct);
         makeInputNumeric("Good.Price", false);
