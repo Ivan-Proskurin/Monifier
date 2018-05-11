@@ -36,12 +36,14 @@
             </tr>
             </thead>
             <tbody>
-
-            @for (int i = 0; i < products.Count; i++)
+            @{
+                var index = Model.Products.Pagination.Skipped;
+            }
+            @foreach (var product in products)
             {
-                var product = products[i];
+                index++;
                 <tr>
-                    <td>@(i + 1)</td>
+                    <td>@index</td>
                     <td>
                         <a asp-page="./EditProduct" asp-route-id="@product.Id"
                            class="edit-item-link">@product.Name</a>

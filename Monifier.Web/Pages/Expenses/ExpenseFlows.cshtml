@@ -34,15 +34,17 @@
     </tr>
     </thead>
     <tbody>
-        
-    @for (var i = 0; i < flows.Count; i++)
+    @{
+        var index = Model.ExpenseFlows.Pagination.Skipped;
+    }
+    @foreach (var flow in flows)
     {
-        var flow = flows[i];
+        index++;
         var rowClass = flow.Balance >= 0 ? "table-default" : "table-danger";
         var moneyRowClass = "money-cell " + rowClass;
         
         <tr class="@rowClass">
-            <td>@(i + 1)</td>
+            <td>@index</td>
             <td>
                 <a asp-page="./EditExpenseFlow" asp-route-id="@flow.Id" class="edit-item-link">@flow.Name</a>
             </td>
