@@ -3,6 +3,7 @@ using FluentAssertions;
 using Monifier.BusinessLogic.Model.Incomes;
 using Monifier.BusinessLogic.Model.Pagination;
 using Monifier.BusinessLogic.Model.Transactions;
+using Monifier.Common.Extensions;
 using Monifier.IntegrationTests.Infrastructure;
 using Xunit;
 
@@ -75,38 +76,48 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 {
                     new TransactionViewModel
                     {
+                        IsExpense = true,
                         DateTime = bill3.DateTime,
                         Type = "Оплата",
                         Target = session.TechExpenseFlow.Name,
-                        Total = -5600
+                        Total = ToMoney(-5600),
+                        Balance = ToMoney(26000, false)
                     },
                     new TransactionViewModel
                     {
+                        IsExpense = true,
                         DateTime = bill1.DateTime,
                         Type = "Оплата",
                         Target = session.FoodExpenseFlow.Name,
-                        Total = -350,
+                        Total = ToMoney(-350),
+                        Balance = ToMoney(31600, false)
                     },
                     new TransactionViewModel
                     {
+                        IsExpense = false,
                         DateTime = income.DateTime,
                         Type = "Поступление",
                         Target = session.GiftsIncome.Name,
-                        Total = 1450
+                        Total = ToMoney(1450),
+                        Balance = ToMoney(17450, false)
                     },
                     new TransactionViewModel
                     {
+                        IsExpense = false,
                         DateTime = transfer2DateTime,
                         Type = "Перевод",
                         Target = session.CashAccount.Name,
-                        Total = 2000
+                        Total = ToMoney(2000),
+                        Balance = ToMoney(16000, false)
                     },
                     new TransactionViewModel
                     {
+                        IsExpense = true,
                         DateTime = transfer1DateTime,
                         Type = "Перевод",
                         Target = session.CashAccount.Name,
-                        Total = -1000
+                        Total = ToMoney(-1000),
+                        Balance = ToMoney(14000, false)
                     },
                 });
 
@@ -115,24 +126,30 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                     {
                         new TransactionViewModel
                         {
+                            IsExpense = true,
                             DateTime = bill2.DateTime,
                             Type = "Оплата",
                             Target = session.TechExpenseFlow.Name,
-                            Total = -15000
+                            Total = ToMoney(-15000),
+                            Balance = ToMoney(14000, false)
                         },
                         new TransactionViewModel
                         {
+                            IsExpense = true,
                             DateTime = transfer2DateTime,
                             Type = "Перевод",
                             Target = session.DebitCardAccount.Name,
-                            Total = -2000
+                            Total = ToMoney(-2000),
+                            Balance = ToMoney(29000, false)
                         },
                         new TransactionViewModel
                         {
+                            IsExpense = false,
                             DateTime = transfer1DateTime,
                             Type = "Перевод",
                             Target = session.DebitCardAccount.Name,
-                            Total = 1000
+                            Total = ToMoney(1000),
+                            Balance = ToMoney(31000, false)
                         },
                     }
                 );
@@ -217,59 +234,75 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 {
                     new TransactionViewModel
                     {
+                        IsExpense = true,
                         DateTime = bill3.DateTime,
                         Type = "Оплата",
                         Target = session.TechExpenseFlow.Name,
-                        Total = -5600
+                        Total = ToMoney(-5600),
+                        Balance = ToMoney(21434, false)
                     },
                     new TransactionViewModel
                     {
+                        IsExpense = true,
                         DateTime = bill1.DateTime,
                         Type = "Оплата",
                         Target = session.FoodExpenseFlow.Name,
-                        Total = -350,
+                        Total = ToMoney(-350),
+                        Balance = ToMoney(27034, false)
                     },
                     new TransactionViewModel
                     {
+                        IsExpense = false,
                         DateTime = income.DateTime,
                         Type = "Поступление",
                         Target = session.GiftsIncome.Name,
-                        Total = 1450
+                        Total = ToMoney(1450),
+                        Balance = ToMoney(17450, false)
                     },
                     new TransactionViewModel
                     {
+                        IsExpense = false,
                         DateTime = transfer2DateTime,
                         Type = "Перевод",
                         Target = session.CashAccount.Name,
-                        Total = 2000
+                        Total = ToMoney(2000),
+                        Balance = ToMoney(16000, false)
                     },
                     new TransactionViewModel
                     {
+                        IsExpense = true,
                         DateTime = transfer1DateTime,
                         Type = "Перевод",
                         Target = session.CashAccount.Name,
-                        Total = -1000
+                        Total = ToMoney(-1000),
+                        Balance = ToMoney(14000, false)
                     },
                     new TransactionViewModel
                     {
+                        IsExpense = false,
                         DateTime = oldIncome.DateTime,
                         Type = "Поступление",
                         Target = session.SalaryIncome.Name,
-                        Total = 3456
+                        Total = ToMoney(3456),
+                        Balance = ToMoney(20906, false)
                     },
                     new TransactionViewModel
                     {
+                        IsExpense = false,
                         DateTime = veryOldIncome.DateTime,
                         Type = "Поступление",
                         Target = session.GiftsIncome.Name,
-                        Total = 6478
+                        Total = ToMoney(6478),
+                        Balance = ToMoney(27384, false)
                     },
                     new TransactionViewModel
                     {
+                        IsExpense = true,
                         DateTime = oldBill.DateTime,
                         Type = "Оплата",
                         Target = session.FoodExpenseFlow.Name,
-                        Total = -200
+                        Total = ToMoney(-200),
+                        Balance = ToMoney(21234, false)
                     }, 
                 });
 
@@ -278,31 +311,39 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                     {
                         new TransactionViewModel
                         {
+                            IsExpense = true,
                             DateTime = bill2.DateTime,
                             Type = "Оплата",
                             Target = session.TechExpenseFlow.Name,
-                            Total = -15000
+                            Total = ToMoney(-15000),
+                            Balance = ToMoney(14000, false)
                         },
                         new TransactionViewModel
                         {
+                            IsExpense = true,
                             DateTime = transfer2DateTime,
                             Type = "Перевод",
                             Target = session.DebitCardAccount.Name,
-                            Total = -2000
+                            Total = ToMoney(-2000),
+                            Balance = ToMoney(29000, false)
                         },
                         new TransactionViewModel
                         {
+                            IsExpense = false,
                             DateTime = transfer1DateTime,
                             Type = "Перевод",
                             Target = session.DebitCardAccount.Name,
-                            Total = 1000
+                            Total = ToMoney(1000),
+                            Balance = ToMoney(31000, false)
                         },
                         new TransactionViewModel
                         {
+                            IsExpense = true,
                             DateTime = veryOldBill.DateTime,
                             Type = "Оплата",
                             Target = session.FoodExpenseFlow.Name,
-                            Total = -333
+                            Total = ToMoney(-333),
+                            Balance = ToMoney(13667, false)
                         }, 
                     }
                 );
@@ -319,6 +360,12 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
                     await transactions.GetLastTransactions(ids.CashAccountId, 101));
             }
+        }
+
+        private static string ToMoney(int value, bool addPlusSign = true)
+        {
+            var result = Convert.ToDecimal(value).ToMoney();
+            return value > 0 && addPlusSign ? $"+{result}" : result;
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Monifier.BusinessLogic.Contract.Auth;
 using Monifier.BusinessLogic.Contract.Expenses;
+using Monifier.BusinessLogic.Model.Agregation;
 using Monifier.BusinessLogic.Model.Expenses;
 using Monifier.BusinessLogic.Model.Pagination;
 using Monifier.Common.Extensions;
@@ -23,7 +24,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             _unitOfWork = unitOfWork;
             _currentSession = currentSession;
         }
-        
+
         public async Task<List<ExpenseFlowModel>> GetAll(bool includeDeleted = false)
         {
             var queries = _unitOfWork.GetQueryRepository<ExpenseFlow>();
@@ -50,11 +51,19 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                 .Skip(pagination.Skipped)
                 .Take(pagination.Taken)
                 .Select(x => x.ToModel())
-                .ToListAsync();
+                .ToListAsync()
+                .ConfigureAwait(false);
+
+            var total = await query.Select(x => x.Balance).SumAsync().ConfigureAwait(false);
             
             return new ExpenseFlowList
             {
                 ExpenseFlows = flows,
+                Totals = new TotalsInfoModel
+                {
+                    Caption = "Всего на балансе:",
+                    Total = total
+                },
                 Pagination = pagination
             };
         }
