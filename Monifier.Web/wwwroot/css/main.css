@@ -226,3 +226,7 @@ a.edit-item-link {
 .form-check {
     margin-top: 20px;
 }
+
+.input-group {
+    background: #e9ecef;
+}

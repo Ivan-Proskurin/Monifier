@@ -24,39 +24,34 @@
             <a asp-page="./AddExpenseBill" asp-route-flowId="0" asp-route-returnUrl="/Expenses/ExpensesForDay" class="btn btn-danger cursor-pointer header-button">Ввести чек</a>
         </div>
         <div class="row">
-            <div class="form-group row col-md-12 col-sm-10 col-10">
-                <div class="input-group">
-                    <div class="input-group-addon addon-select-container">
-                        <autocomplete asp-for="Filter.Flow" value-list="@flows" value="@Model.Filter.Flow"
-                                      hide-button="true" placeholder="Статья расходов" />
-                    </div>
-                    <div class="form-group input-group-addon">
-                        <date-time-picker asp-for="Filter.DateFrom" class="form-control" autocomplete="off"
-                                          value="@Model.Filter.DateFrom" />
-                    </div>
-                    <div class="input-group-addon addon-button-container">
-                        <button type="submit" asp-page-handler="refresh"
-                                class="btn btn-outline-secondary cursor-pointer" id="refresh-button">
-                            <i class="fa fa-refresh"></i>
-                        </button>
-                    </div>
-                    @if (Model.IsDataValid)
-                    {
-                        <div class="input-group-addon addon-button-container">
-                            <a asp-page="./ExpensesTable"
-                               asp-route-dateFrom="@Model.Filter.DateFrom.ParseDtFromStandardString().StartOfTheWeek().ToStandardString()"
-                               asp-route-dateTo="@Model.Filter.DateFrom.ParseDtFromStandardString().EndOfTheWeek().ToStandardString()"
-                               asp-route-pageNumber="1"
-                               asp-route-flowId="@Model.Filter.FlowId"
-                               class="btn btn-outline-secondary cursor-pointer">
-                                По дням
-                            </a>
-                        </div>
-                    }
-                    <div class="input-group-addon addon-terminator-container">
-                        &nbsp;
-                    </div>
+            <div class="input-group">
+                <div class="input-group-addon addon-select-container">
+                    <autocomplete asp-for="Filter.Flow" value-list="@flows" value="@Model.Filter.Flow"
+                                  hide-button="true" placeholder="Статья расходов" />
                 </div>
+                <div class="form-group input-group-addon">
+                    <date-time-picker asp-for="Filter.DateFrom" class="form-control" autocomplete="off"
+                                      value="@Model.Filter.DateFrom" />
+                </div>
+                <div class="input-group-addon addon-button-container">
+                    <button type="submit" asp-page-handler="refresh"
+                            class="btn btn-outline-secondary cursor-pointer" id="refresh-button">
+                        <i class="fa fa-refresh"></i>
+                    </button>
+                </div>
+                @if (Model.IsDataValid)
+                {
+                    <div class="input-group-addon addon-button-container">
+                        <a asp-page="./ExpensesTable"
+                           asp-route-dateFrom="@Model.Filter.DateFrom.ParseDtFromStandardString().StartOfTheWeek().ToStandardString()"
+                           asp-route-dateTo="@Model.Filter.DateFrom.ParseDtFromStandardString().EndOfTheWeek().ToStandardString()"
+                           asp-route-pageNumber="1"
+                           asp-route-flowId="@Model.Filter.FlowId"
+                           class="btn btn-outline-dark cursor-pointer">
+                            По дням
+                        </a>
+                    </div>
+                }
             </div>
         </div>
     </div>
