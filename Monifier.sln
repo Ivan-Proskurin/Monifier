@@ -71,11 +71,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.Tools.Accounts", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.BusinessLogic.Support", "Monifier.BusinessLogic.Support\Monifier.BusinessLogic.Support.csproj", "{62F6CE4D-CDAE-47AC-AF1D-AD0A976121A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.DataAccess.Model.Tests", "Monifier.DataAccess.Model.Tests\Monifier.DataAccess.Model.Tests.csproj", "{DEF12073-EC6F-45BA-8690-254EF05B5B47}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.DataAccess.Model.Tests", "Monifier.DataAccess.Model.Tests\Monifier.DataAccess.Model.Tests.csproj", "{DEF12073-EC6F-45BA-8690-254EF05B5B47}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.Common.Validation", "Monifier.Common.Validation\Monifier.Common.Validation.csproj", "{A025FEA9-9D1C-4737-8719-CE0953091DD8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.Common.Validation", "Monifier.Common.Validation\Monifier.Common.Validation.csproj", "{A025FEA9-9D1C-4737-8719-CE0953091DD8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.Common.Validation.Tests", "Monifier.Common.Validation.Tests\Monifier.Common.Validation.Tests.csproj", "{84A0F23A-AA07-417B-8BAF-E002C24C84B5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monifier.Common.Validation.Tests", "Monifier.Common.Validation.Tests\Monifier.Common.Validation.Tests.csproj", "{84A0F23A-AA07-417B-8BAF-E002C24C84B5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.BusinessLogic.Processing.IntegrationTests", "Monifier.BusinessLogic.Processing.IntegrationTests\Monifier.BusinessLogic.Processing.IntegrationTests.csproj", "{815FD165-5474-4F5B-9500-71650C2DDD0D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monifier.BusinessLogic.Processing", "Monifier.BusinessLogic.Processing\Monifier.BusinessLogic.Processing.csproj", "{8BF4ABF1-A7B7-4C10-9023-55F79E1FF4BC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -183,6 +187,14 @@ Global
 		{84A0F23A-AA07-417B-8BAF-E002C24C84B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84A0F23A-AA07-417B-8BAF-E002C24C84B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84A0F23A-AA07-417B-8BAF-E002C24C84B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{815FD165-5474-4F5B-9500-71650C2DDD0D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{815FD165-5474-4F5B-9500-71650C2DDD0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{815FD165-5474-4F5B-9500-71650C2DDD0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{815FD165-5474-4F5B-9500-71650C2DDD0D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BF4ABF1-A7B7-4C10-9023-55F79E1FF4BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BF4ABF1-A7B7-4C10-9023-55F79E1FF4BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BF4ABF1-A7B7-4C10-9023-55F79E1FF4BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BF4ABF1-A7B7-4C10-9023-55F79E1FF4BC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -218,6 +230,8 @@ Global
 		{DEF12073-EC6F-45BA-8690-254EF05B5B47} = {AF0EE9BC-41BC-4E0C-ABBB-CBF3B54240AC}
 		{A025FEA9-9D1C-4737-8719-CE0953091DD8} = {D753C2A9-18F9-4368-B66B-FE2269E42A3A}
 		{84A0F23A-AA07-417B-8BAF-E002C24C84B5} = {F41DAE3C-4220-409D-822B-E3E20B8043D8}
+		{815FD165-5474-4F5B-9500-71650C2DDD0D} = {3C8EC64D-F8C6-4BFD-B680-5C0FF9E6E907}
+		{8BF4ABF1-A7B7-4C10-9023-55F79E1FF4BC} = {23E58EB3-DF0B-4ED7-8B15-383B86EB1C95}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {34AA2978-9969-466D-9D74-180D905E4DBA}

@@ -4,8 +4,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Monifier.BusinessLogic.Contract.Base;
+using Monifier.BusinessLogic.Contract.Processing;
 using Monifier.BusinessLogic.Contract.Transactions;
 using Monifier.BusinessLogic.Model.Transactions;
+using Monifier.DataAccess.Contract;
+using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Extensions;
 using Monifier.Web.Models;
 using Monifier.Web.Models.Accounts;
@@ -15,18 +18,24 @@ namespace Monifier.Web.Pages.Accounts
     [Authorize]
     public class EditAccountModel : PageModel
     {
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IAccountQueries _accountQueries;
         private readonly IAccountCommands _accountCommands;
         private readonly ITransactionQueries _transactionQueries;
+        private readonly ICreditCardProcessing _creditCardProcessing;
 
         public EditAccountModel(
+            IUnitOfWork unitOfWork,
             IAccountQueries accountQueries, 
             IAccountCommands accountCommands,
-            ITransactionQueries transactionQueries)
+            ITransactionQueries transactionQueries,
+            ICreditCardProcessing creditCardProcessing)
         {
+            _unitOfWork = unitOfWork;
             _accountQueries = accountQueries;
             _accountCommands = accountCommands;
             _transactionQueries = transactionQueries;
+            _creditCardProcessing = creditCardProcessing;
         }
         
         [BindProperty]
@@ -36,11 +45,18 @@ namespace Monifier.Web.Pages.Accounts
 
         public List<TransactionViewModel> Transactions { get; private set; }
 
+        public bool IsCreditCard { get; private set; }
+
+        private async Task PrepareModelsAsync(int accountId)
+        {
+            AccountTypes = AccountTypeHelper.GetAllHumanNames();
+            Transactions = await _transactionQueries.GetLastTransactions(accountId, 3);
+        }
+
         public async Task OnGetAsync(int id)
         {
             var account = await _accountQueries.GetById(id);
-            AccountTypes = AccountTypeHelper.GetAllHumanNames();
-            Transactions = await _transactionQueries.GetLastTransactions(account.Id, 3);
+            await PrepareModelsAsync(account.Id);
             Account = account.ToEditAccount();
         }
 
@@ -50,16 +66,21 @@ namespace Monifier.Web.Pages.Accounts
                 async () =>
                 {
                     var model = await _accountQueries.GetById(Account.Id);
+                    var oldBalance = model.Balance;
                     Account.ToAccountModel(model);
                     await _accountCommands.Update(model);
+                    if (model.Balance < oldBalance && model.AccountType == AccountType.CreditCard)
+                    {
+                        var account = await _unitOfWork.GetQueryRepository<Account>().GetById(model.Id);
+                        await _creditCardProcessing.ProcessReducingBalanceAsCreditFees(account, oldBalance - model.Balance);
+                    }
                     return RedirectToPage("./AccountsList");
                 },
 
                 async () =>
                 {
-                    Transactions = await _transactionQueries.GetLastTransactions(Account.Id, 3);
-                    AccountTypes = AccountTypeHelper.GetAllHumanNames();
-                    return await Task.FromResult(Page());
+                    await PrepareModelsAsync(Account.Id);
+                    return Page();
                 });
         }
 

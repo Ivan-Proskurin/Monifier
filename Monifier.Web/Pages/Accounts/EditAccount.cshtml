@@ -6,14 +6,20 @@
     <link rel="stylesheet" href="~/css/transactions.css" />
 }
 
-<div class="col-md-7 left-aligned-form">
+<div class="col-md-8 left-aligned-form">
     <h3>@Model.Account.OriginalName</h3>
-    <br />
-
+    <br/>
+    @if (Model.Account.IsCreditCard)
+    {
+        <div class="alert alert-info" role="alert">
+            Изменение баланса в меньшую сторону будет автоматически обработано как списание средств по уплате процентов
+        </div>
+    }
     <form method="post">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <input asp-for="Account.Id" hidden />
         <input asp-for="Account.OriginalName" hidden />
+        <input asp-for="Account.IsCreditCard" hidden/>
         <div class="row">
             <div class="col-md-3 col-sm-7 col-7">
                 <div class="form-group">

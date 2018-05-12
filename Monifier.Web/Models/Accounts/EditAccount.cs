@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using Monifier.BusinessLogic.Model.Base;
 using Monifier.Common.Extensions;
 using Monifier.Common.Validation;
+using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Extensions;
 
 namespace Monifier.Web.Models.Accounts
@@ -37,6 +38,8 @@ namespace Monifier.Web.Models.Accounts
         [Display(Name = "Тип счета")]
         [Required(ErrorMessage = "Укажите тип счета")]
         public string AccountType { get; set; }
+
+        public bool IsCreditCard { get; set; }
         
         public IEnumerable<ModelValidationResult> Validate()
         {
@@ -63,6 +66,7 @@ namespace Monifier.Web.Models.Accounts
                 Balance = account.Balance.ToStandardString(),
                 IsDefault = account.IsDefault,
                 AccountType = account.AccountType.GetNumanName(),
+                IsCreditCard = account.AccountType == AccountType.CreditCard
             };
         }
 

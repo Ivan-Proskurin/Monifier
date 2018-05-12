@@ -7,10 +7,12 @@ using Monifier.BusinessLogic.Contract.Distribution;
 using Monifier.BusinessLogic.Contract.Expenses;
 using Monifier.BusinessLogic.Contract.Incomes;
 using Monifier.BusinessLogic.Contract.Inventorization;
+using Monifier.BusinessLogic.Contract.Processing;
 using Monifier.BusinessLogic.Contract.Settings;
 using Monifier.BusinessLogic.Contract.Transactions;
 using Monifier.BusinessLogic.Distribution;
 using Monifier.BusinessLogic.Distribution.Model.Contract;
+using Monifier.BusinessLogic.Processing;
 using Monifier.BusinessLogic.Queries.Base;
 using Monifier.BusinessLogic.Queries.Distribution;
 using Monifier.BusinessLogic.Queries.Expenses;
@@ -59,6 +61,7 @@ namespace Monifier.Web
             services.AddTransient<IBalancesUpdaterFactory, BalancesUpdaterFactory>();
             services.AddTransient<ITransitionBalanceUpdater, TransitionBalancesUpdater>();
             services.AddTransient<ITransactionBuilder, TransactionBuilder>();
+            services.AddTransient<ICreditCardProcessing, CreditCardProcessing>();
         }
     }
 }

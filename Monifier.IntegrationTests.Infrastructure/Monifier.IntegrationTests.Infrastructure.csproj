@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Monifier.BusinessLogic.Auth\Monifier.BusinessLogic.Auth.csproj" />
+    <ProjectReference Include="..\Monifier.BusinessLogic.Processing\Monifier.BusinessLogic.Processing.csproj" />
     <ProjectReference Include="..\Monifier.BusinessLogic.Queries\Monifier.BusinessLogic.Queries.csproj" />
     <ProjectReference Include="..\Monifier.BusinessLogic.Support\Monifier.BusinessLogic.Support.csproj" />
     <ProjectReference Include="..\Monifier.DataAccess.Contract\Monifier.DataAccess.Contract.csproj" />

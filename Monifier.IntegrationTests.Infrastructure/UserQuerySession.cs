@@ -8,8 +8,10 @@ using Monifier.BusinessLogic.Contract.Auth;
 using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Contract.Expenses;
 using Monifier.BusinessLogic.Contract.Incomes;
+using Monifier.BusinessLogic.Contract.Processing;
 using Monifier.BusinessLogic.Contract.Transactions;
 using Monifier.BusinessLogic.Model.Expenses;
+using Monifier.BusinessLogic.Processing;
 using Monifier.BusinessLogic.Queries.Base;
 using Monifier.BusinessLogic.Queries.Expenses;
 using Monifier.BusinessLogic.Queries.Incomes;
@@ -375,6 +377,12 @@ namespace Monifier.IntegrationTests.Infrastructure
         public IExpenseFlowCommands CreateExpenseFlowCommands()
         {
             return new ExpenseFlowCommands(UnitOfWork, UserSession, CreateExpensesBillCommands());
+        }
+
+        public ICreditCardProcessing CreateCreditCardProcessing()
+        {
+            return new CreditCardProcessing(UnitOfWork, UserSession, new TimeService(UserSession), 
+                CreateExpensesBillCommands());
         }
 
         #endregion
