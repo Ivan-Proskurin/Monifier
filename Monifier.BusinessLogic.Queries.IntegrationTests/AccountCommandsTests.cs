@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using FluentAssertions;
-using Monifier.BusinessLogic.Contract.Transactions;
 using Monifier.BusinessLogic.Model.Accounts;
 using Monifier.BusinessLogic.Model.Base;
 using Monifier.BusinessLogic.Queries.Base;
@@ -11,7 +9,6 @@ using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Expenses;
 using Monifier.DataAccess.Model.Incomes;
 using Monifier.IntegrationTests.Infrastructure;
-using Remotion.Linq.Parsing.ExpressionVisitors.Transformation.PredefinedTransformations;
 using Xunit;
 
 namespace Monifier.BusinessLogic.Queries.IntegrationTests
@@ -260,7 +257,8 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                     BillId = null,
                     IncomeId = income.Id,
                     ParticipantId = null,
-                    Total = income.Total
+                    Total = income.Total,
+                    Balance = session.DebitCardAccount.Balance + income.Total
                 }, opt => opt.Excluding(x => x.Id));
             }
         }
@@ -286,7 +284,8 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                         BillId = null,
                         IncomeId = null,
                         ParticipantId = ids.CashAccountId,
-                        Total = -transferAmount
+                        Total = -transferAmount,
+                        Balance = session.DebitCardAccount.Balance - transferAmount
                     }, opt => opt.Excluding(x => x.Id)
                 );
 
@@ -299,7 +298,8 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                         BillId = null,
                         IncomeId = null,
                         ParticipantId = ids.DebitCardAccountId,
-                        Total = transferAmount
+                        Total = transferAmount,
+                        Balance = session.CashAccount.Balance + transferAmount
                     }, opt => opt.Excluding(x => x.Id)
                 );
             }

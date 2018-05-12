@@ -6,7 +6,7 @@ using Monifier.DataAccess.Model.Contracts;
 using Monifier.DataAccess.Model.Expenses;
 using Monifier.DataAccess.Model.Incomes;
 
-namespace Monifier.DataAccess.Model.Accounts
+namespace Monifier.DataAccess.Model.Transactions
 {
     public class Transaction : IHasId, IHasOwnerId
     {
@@ -33,6 +33,8 @@ namespace Monifier.DataAccess.Model.Accounts
         public int? IncomeId { get; set; }
         [ForeignKey("IncomeId")]
         public IncomeItem Income { get; set; }
+
+        public decimal? Balance { get; set; }
 
         public decimal Total { get; set; }
 

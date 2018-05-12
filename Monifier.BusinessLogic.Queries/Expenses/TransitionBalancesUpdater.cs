@@ -16,7 +16,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             _unitOfWork = unitOfWork;
         }
 
-        public async Task Update(ExpenseBill bill, decimal oldSum, int? oldAccountId)
+        public async Task<decimal> Update(ExpenseBill bill, decimal oldSum, int? oldAccountId)
         {
             var flowQueries = _unitOfWork.GetQueryRepository<ExpenseFlow>();
             var flowCommands = _unitOfWork.GetCommandRepository<ExpenseFlow>();
@@ -67,7 +67,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                 accountCommands.Update(newAccount);
             }
 
-
+            return newAccount?.Balance ?? 0;
         }
     }
 }

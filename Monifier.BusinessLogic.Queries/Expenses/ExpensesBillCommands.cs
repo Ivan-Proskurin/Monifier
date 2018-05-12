@@ -106,9 +106,8 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             {
                 var balancesUpdater = _balancesUpdaterFactory.Create(account.AccountType);
                 await balancesUpdater.Create(account, bill).ConfigureAwait(false);
+                _transactionBuilder.CreateExpense(bill, account.Balance);
             }
-
-            _transactionBuilder.CreateExpense(bill);
 
             await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
@@ -171,9 +170,9 @@ namespace Monifier.BusinessLogic.Queries.Expenses
 
             billCommands.Update(bill);
 
-            await _transitionBalanceUpdater.Update(bill, oldsum, oldAccountId);
+            var balance = await _transitionBalanceUpdater.Update(bill, oldsum, oldAccountId);
 
-            await _transactionBuilder.UpdateExpense(bill, oldAccountId);
+            await _transactionBuilder.UpdateExpense(bill, oldAccountId, balance);
 
             await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
             return model;

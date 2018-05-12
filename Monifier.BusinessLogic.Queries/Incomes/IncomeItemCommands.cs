@@ -59,6 +59,7 @@ namespace Monifier.BusinessLogic.Queries.Incomes
             {
                 var oldItem = await _unitOfWork.LoadEntity<IncomeItem>(item.Id).ConfigureAwait(false);
                 var accountId = oldItem.AccountId;
+                decimal balance;
                 if (oldItem.AccountId == item.AccountId)
                 {
                     var account = await _unitOfWork.LoadEntity<Account>(item.AccountId).ConfigureAwait(false);
@@ -66,6 +67,7 @@ namespace Monifier.BusinessLogic.Queries.Incomes
                         account.Balance += item.Total - oldItem.Total;
                     account.AvailBalance += item.Total - oldItem.Total;
                     accountCommands.Update(account);
+                    balance = account.Balance;
                 }
                 else
                 {
@@ -79,9 +81,10 @@ namespace Monifier.BusinessLogic.Queries.Incomes
                     account2.AvailBalance += item.Total;
                     accountCommands.Update(account1);
                     accountCommands.Update(account2);
+                    balance = account2.Balance;
                 }
                 incomeCommands.Update(item);
-                await _transactionBuilder.UpdateIncome(accountId, item).ConfigureAwait(false);
+                await _transactionBuilder.UpdateIncome(accountId, item, balance).ConfigureAwait(false);
                 await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
             else
@@ -93,7 +96,7 @@ namespace Monifier.BusinessLogic.Queries.Incomes
                 accountCommands.Update(account);
                 incomeCommands.Create(item);
                 await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
-                _transactionBuilder.CreateIncome(item);
+                _transactionBuilder.CreateIncome(item, account.Balance);
                 await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
             model.Id = item.Id;

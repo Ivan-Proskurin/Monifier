@@ -40,12 +40,13 @@
         <th>Операция</th>
         <th>Назначение</th>
         <th class="align-right">Cумма</th>
+        <th class="align-right">Баланс</th>
     </tr>
     </thead>
     <tbody>
     @foreach (var item in Model.Transactions.Transactions)
     {
-        var trClass = item.Total < 0 ? "table-expense" : "table-income";
+        var trClass = item.IsExpense ? "table-expense" : "table-income";
 
         <tr class="@trClass">
             <td>
@@ -57,7 +58,8 @@
             <td>
                 @item.Target
             </td>
-            <td class="money-cell">@item.Total.ToMoney()</td>
+            <td class="money-cell">@item.Total</td>
+            <td class="money-cell">@item.Balance</td>
         </tr>
     }
     </tbody>

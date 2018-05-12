@@ -297,7 +297,8 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                     Total = income.Total,
                     IncomeId = income.Id,
                     BillId = null,
-                    ParticipantId = null
+                    ParticipantId = null,
+                    Balance = session.DebitCardAccount.Balance + income.Total
                 }, opt => opt.Excluding(x => x.Id));
             }
         }
@@ -308,11 +309,13 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
             EntityIdSet ids;
             IncomeItemModel income;
             int transactionId;
+            decimal balance;
 
             using (var session = await CreateDefaultSession())
             {
                 var transactionQueries = new TransactionQueries(session.UnitOfWork, session.UserSession);
                 ids = session.CreateDefaultEntities();
+                balance = session.DebitCardAccount.Balance;
                 var commands = session.CreateIncomeCommands();
                 income = new IncomeItemModel
                 {
@@ -346,6 +349,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                         Total = income.Total,
                         InitiatorId = ids.DebitCardAccountId,
                         ParticipantId = null,
+                        Balance = balance + income.Total
                     });
             }
         }

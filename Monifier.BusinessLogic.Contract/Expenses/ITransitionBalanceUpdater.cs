@@ -5,6 +5,6 @@ namespace Monifier.BusinessLogic.Contract.Expenses
 {
     public interface ITransitionBalanceUpdater
     {
-        Task Update(ExpenseBill bill, decimal oldSum, int? oldAccountId);
+        Task<decimal> Update(ExpenseBill bill, decimal oldSum, int? oldAccountId);
     }
 }

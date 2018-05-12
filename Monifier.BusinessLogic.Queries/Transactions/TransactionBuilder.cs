@@ -4,10 +4,10 @@ using Microsoft.EntityFrameworkCore;
 using Monifier.BusinessLogic.Contract.Transactions;
 using Monifier.BusinessLogic.Model.Accounts;
 using Monifier.DataAccess.Contract;
-using Monifier.DataAccess.Model.Accounts;
 using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Expenses;
 using Monifier.DataAccess.Model.Incomes;
+using Monifier.DataAccess.Model.Transactions;
 
 namespace Monifier.BusinessLogic.Queries.Transactions
 {
@@ -22,7 +22,7 @@ namespace Monifier.BusinessLogic.Queries.Transactions
             _transactionQueries = transactionQueries;
         }
 
-        public void CreateExpense(ExpenseBill bill)
+        public void CreateExpense(ExpenseBill bill, decimal balance)
         {
             if (bill.AccountId == null) return;
             var transation = new Transaction
@@ -32,12 +32,13 @@ namespace Monifier.BusinessLogic.Queries.Transactions
                 InitiatorId = bill.AccountId.Value,
                 Bill = bill,
                 Total = bill.SumPrice,
+                Balance = balance
             };
             var transactionCommands = _unitOfWork.GetCommandRepository<Transaction>();
             transactionCommands.Create(transation);
         }
 
-        public async Task UpdateExpense(ExpenseBill bill, int? oldAccountId)
+        public async Task UpdateExpense(ExpenseBill bill, int? oldAccountId, decimal balance)
         {
             var transactionCommands = _unitOfWork.GetCommandRepository<Transaction>();
             var transactionQueries = _unitOfWork.GetQueryRepository<Transaction>();
@@ -50,6 +51,7 @@ namespace Monifier.BusinessLogic.Queries.Transactions
                 {
                     transaction.DateTime = bill.DateTime;
                     transaction.Total = bill.SumPrice;
+                    transaction.Balance = balance;
                     transactionCommands.Update(transaction);
                 }
             }
@@ -66,7 +68,8 @@ namespace Monifier.BusinessLogic.Queries.Transactions
                         DateTime = bill.DateTime,
                         BillId = bill.Id,
                         InitiatorId = bill.AccountId.Value,
-                        Total = bill.SumPrice
+                        Total = bill.SumPrice,
+                        Balance = balance
                     };
                     transactionCommands.Create(transaction);
                 }
@@ -74,6 +77,7 @@ namespace Monifier.BusinessLogic.Queries.Transactions
                 {
                     transaction.InitiatorId = bill.AccountId.Value;
                     transaction.Total = bill.SumPrice;
+                    transaction.Balance = balance;
                     transactionCommands.Update(transaction);
                 }
             }
@@ -89,7 +93,7 @@ namespace Monifier.BusinessLogic.Queries.Transactions
             commands.Delete(transaction);
         }
 
-        public void CreateIncome(IncomeItem income)
+        public void CreateIncome(IncomeItem income, decimal balance)
         {
             var commands = _unitOfWork.GetCommandRepository<Transaction>();
             var transaction = new Transaction
@@ -98,12 +102,13 @@ namespace Monifier.BusinessLogic.Queries.Transactions
                 InitiatorId = income.AccountId,
                 DateTime = income.DateTime,
                 IncomeId = income.Id,
-                Total = income.Total
+                Total = income.Total,
+                Balance = balance
             };
             commands.Create(transaction);
         }
 
-        public async Task UpdateIncome(int accountId, IncomeItem income)
+        public async Task UpdateIncome(int accountId, IncomeItem income, decimal balance)
         {
             var commands = _unitOfWork.GetCommandRepository<Transaction>();
             var transaction =
@@ -111,6 +116,7 @@ namespace Monifier.BusinessLogic.Queries.Transactions
             if (transaction == null) return;
             transaction.InitiatorId = income.AccountId;
             transaction.Total = income.Total;
+            transaction.Balance = balance;
             commands.Update(transaction.ToEntity());
         }
 
@@ -127,6 +133,7 @@ namespace Monifier.BusinessLogic.Queries.Transactions
                 InitiatorId = accountFrom.Id,
                 ParticipantId = accountTo.Id,
                 Total = -amount,
+                Balance = accountFrom.Balance
             };
             var transaction2 = new Transaction
             {
@@ -134,7 +141,8 @@ namespace Monifier.BusinessLogic.Queries.Transactions
                 DateTime = transferTime,
                 InitiatorId = accountTo.Id,
                 ParticipantId = accountFrom.Id,
-                Total = amount
+                Total = amount,
+                Balance = accountTo.Balance
             };
             commands.Create(transaction1);
             commands.Create(transaction2);

@@ -443,7 +443,8 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                         BillId = bill.Id,
                         DateTime = bill.DateTime,
                         IsDeleted = false,
-                        Total = bill.Cost
+                        Total = bill.Cost,
+                        Balance = session.DebitCardAccount.Balance
                     }, opt => opt.Excluding(x => x.Id));
             }
         }
@@ -462,9 +463,11 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
 
             EntityIdSet ids;
             int transactionId;
+            decimal balance;
             using (var session = await CreateDefaultSession())
             {
                 ids = session.CreateDefaultEntities();
+                balance = session.DebitCardAccount.Balance;
                 bill = CreateBill(session);
                 var commands = session.CreateExpensesBillCommands();
                 await commands.Save(bill);
@@ -481,7 +484,8 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                         IncomeId = null,
                         DateTime = bill.DateTime,
                         IsDeleted = false,
-                        Total = bill.Cost
+                        Total = bill.Cost,
+                        Balance = balance - bill.Cost
                     }, opt => opt.Excluding(x => x.Id));
                 transactionId = transaction.Id;
             }
@@ -511,7 +515,8 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                         IncomeId = null,
                         DateTime = bill.DateTime,
                         IsDeleted = false,
-                        Total = bill.Cost
+                        Total = bill.Cost,
+                        Balance = balance - bill.Cost
                     });
             }
         }
@@ -551,7 +556,8 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                         IncomeId = null,
                         DateTime = bill.DateTime,
                         IsDeleted = false,
-                        Total = bill.Cost
+                        Total = bill.Cost,
+                        Balance = session.DebitCardAccount.Balance - bill.Cost
                     }, opt => opt.Excluding(x => x.Id));
                 transactionId = transaction.Id;
             }
@@ -582,7 +588,8 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                         IncomeId = null,
                         DateTime = bill.DateTime,
                         IsDeleted = false,
-                        Total = bill.Cost
+                        Total = bill.Cost,
+                        Balance = session.CashAccount.Balance - bill.Cost
                     });
             }
         }

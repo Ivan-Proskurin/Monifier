@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -9,11 +8,12 @@ using Monifier.BusinessLogic.Contract.Transactions;
 using Monifier.BusinessLogic.Model.Accounts;
 using Monifier.BusinessLogic.Model.Pagination;
 using Monifier.BusinessLogic.Model.Transactions;
+using Monifier.Common.Extensions;
 using Monifier.DataAccess.Contract;
-using Monifier.DataAccess.Model.Accounts;
 using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Expenses;
 using Monifier.DataAccess.Model.Incomes;
+using Monifier.DataAccess.Model.Transactions;
 
 namespace Monifier.BusinessLogic.Queries.Transactions
 {
@@ -125,7 +125,7 @@ namespace Monifier.BusinessLogic.Queries.Transactions
                     x.DateTime,
                     Total = GetTransactionTotal(x),
                     Type = GetTransactionViewType(x),
-                    Transaction = x
+                    Transaction = x,
                 })
                 .Where(x => string.IsNullOrEmpty(filter.Operation) || x.Type == filter.Operation);
 
@@ -142,10 +142,12 @@ namespace Monifier.BusinessLogic.Queries.Transactions
             {
                 var model = new TransactionViewModel
                 {
+                    IsExpense = item.Total < 0,
                     DateTime = item.DateTime,
-                    Total = item.Total,
+                    Total = item.Total > 0 ? $"+{item.Total.ToMoney()}" : item.Total.ToMoney(),
                     Type = item.Type,
-                    Target = await GetTransactionTarget(item.Transaction)
+                    Target = await GetTransactionTarget(item.Transaction),
+                    Balance = item.Transaction.Balance?.ToMoney()
                 };
                 list.Add(model);
             }

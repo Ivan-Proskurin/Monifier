@@ -45,8 +45,6 @@ namespace Monifier.Web.Pages.Accounts
 
         public List<TransactionViewModel> Transactions { get; private set; }
 
-        public bool IsCreditCard { get; private set; }
-
         private async Task PrepareModelsAsync(int accountId)
         {
             AccountTypes = AccountTypeHelper.GetAllHumanNames();

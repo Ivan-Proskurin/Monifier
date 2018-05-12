@@ -1,5 +1,5 @@
 ﻿using System;
-using Monifier.DataAccess.Model.Accounts;
+using Monifier.DataAccess.Model.Transactions;
 
 namespace Monifier.BusinessLogic.Model.Accounts
 {
@@ -13,6 +13,7 @@ namespace Monifier.BusinessLogic.Model.Accounts
         public int? BillId { get; set; }
         public int? IncomeId { get; set; }
         public decimal Total { get; set; }
+        public decimal? Balance { get; set; }
         public bool IsDeleted { get; set; }
     }
 
@@ -30,7 +31,8 @@ namespace Monifier.BusinessLogic.Model.Accounts
                 BillId = transaction.BillId,
                 IncomeId = transaction.IncomeId,
                 IsDeleted = transaction.IsDeleted,
-                Total = transaction.Total
+                Total = transaction.Total,
+                Balance = transaction.Balance
             };
         }
 
@@ -46,7 +48,8 @@ namespace Monifier.BusinessLogic.Model.Accounts
                 BillId = model.BillId,
                 IncomeId = model.IncomeId,
                 IsDeleted = model.IsDeleted,
-                Total = model.Total
+                Total = model.Total,
+                Balance = model.Balance
             };
         }
     }

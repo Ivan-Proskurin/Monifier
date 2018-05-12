@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Monifier.DataAccess.Model.Accounts;
 using Monifier.DataAccess.Model.Auth;
 using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Distribution;
 using Monifier.DataAccess.Model.Expenses;
 using Monifier.DataAccess.Model.Incomes;
+using Monifier.DataAccess.Model.Transactions;
 
 namespace Monifier.DataAccess.EntityFramework
 {

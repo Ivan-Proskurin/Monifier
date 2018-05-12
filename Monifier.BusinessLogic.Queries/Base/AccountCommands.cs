@@ -111,7 +111,6 @@ namespace Monifier.BusinessLogic.Queries.Base
         public async Task<IncomeItemModel> Topup(TopupAccountModel topup)
         {
             var accountQueries = _unitOfWork.GetQueryRepository<Account>();
-            var accountCommands = _unitOfWork.GetCommandRepository<Account>();
             var account = await accountQueries.GetById(topup.AccountId);
             var incomeTypeId = topup.IncomeTypeId;
             if (incomeTypeId == null)
@@ -138,12 +137,6 @@ namespace Monifier.BusinessLogic.Queries.Base
 
             await _incomeItemCommands.Update(income).ConfigureAwait(false);
 
-            if (!topup.Correction)
-            {
-                account.Balance += topup.Amount;
-            }
-            account.AvailBalance += topup.Amount;
-            accountCommands.Update(account);
             await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
             return income;
         }
