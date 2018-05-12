@@ -50,7 +50,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                 await balanceUpdater.Delete(bill);
             }
 
-            await _transactionBuilder.Delete(bill).ConfigureAwait(false);
+            await _transactionBuilder.DeleteExpense(bill).ConfigureAwait(false);
 
             var billCommands = _unitOfWork.GetCommandRepository<ExpenseBill>();
             billCommands.Delete(bill);
@@ -108,7 +108,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                 await balancesUpdater.Create(account, bill).ConfigureAwait(false);
             }
 
-            _transactionBuilder.Create(bill);
+            _transactionBuilder.CreateExpense(bill);
 
             await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
@@ -173,7 +173,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
 
             await _transitionBalanceUpdater.Update(bill, oldsum, oldAccountId);
 
-            await _transactionBuilder.Update(bill, oldAccountId);
+            await _transactionBuilder.UpdateExpense(bill, oldAccountId);
 
             await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
             return model;

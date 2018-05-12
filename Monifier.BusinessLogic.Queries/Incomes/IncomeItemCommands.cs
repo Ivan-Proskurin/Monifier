@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Monifier.BusinessLogic.Contract.Auth;
 using Monifier.BusinessLogic.Contract.Incomes;
 using Monifier.BusinessLogic.Contract.Transactions;
-using Monifier.BusinessLogic.Model.Accounts;
 using Monifier.BusinessLogic.Model.Incomes;
 using Monifier.DataAccess.Contract;
 using Monifier.DataAccess.Model.Base;
@@ -15,18 +14,15 @@ namespace Monifier.BusinessLogic.Queries.Incomes
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentSession _currentSession;
-        private readonly ITransactionCommands _transactionCommands;
-        private readonly ITransactionQueries _transactionQueries;
+        private readonly ITransactionBuilder _transactionBuilder;
 
         public IncomeItemCommands(IUnitOfWork unitOfWork,
             ICurrentSession currentSession,
-            ITransactionCommands transactionCommands,
-            ITransactionQueries transactionQueries)
+            ITransactionBuilder transactionBuilder)
         {
             _unitOfWork = unitOfWork;
             _currentSession = currentSession;
-            _transactionCommands = transactionCommands;
-            _transactionQueries = transactionQueries;
+            _transactionBuilder = transactionBuilder;
         }
 
         public async Task Delete(int id, bool onlyMark = true)
@@ -47,7 +43,6 @@ namespace Monifier.BusinessLogic.Queries.Incomes
 
         public async Task<IncomeItemModel> Update(IncomeItemModel model)
         {
-            int accountId;
             var incomeCommands = _unitOfWork.GetCommandRepository<IncomeItem>();
             var accountCommands = _unitOfWork.GetCommandRepository<Account>();
             var item = new IncomeItem
@@ -63,7 +58,7 @@ namespace Monifier.BusinessLogic.Queries.Incomes
             if (item.Id > 0)
             {
                 var oldItem = await _unitOfWork.LoadEntity<IncomeItem>(item.Id).ConfigureAwait(false);
-                accountId = oldItem.AccountId;
+                var accountId = oldItem.AccountId;
                 if (oldItem.AccountId == item.AccountId)
                 {
                     var account = await _unitOfWork.LoadEntity<Account>(item.AccountId).ConfigureAwait(false);
@@ -86,39 +81,22 @@ namespace Monifier.BusinessLogic.Queries.Incomes
                     accountCommands.Update(account2);
                 }
                 incomeCommands.Update(item);
+                await _transactionBuilder.UpdateIncome(accountId, item).ConfigureAwait(false);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
             else
             {
-                accountId = item.AccountId;
                 var account = await _unitOfWork.LoadEntity<Account>(item.AccountId).ConfigureAwait(false);
                 if (!item.IsCorrection)
                     account.Balance += item.Total;
                 account.AvailBalance += item.Total;
                 accountCommands.Update(account);
                 incomeCommands.Create(item);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                _transactionBuilder.CreateIncome(item);
+                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
-            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
             model.Id = item.Id;
-
-            var transaction = await _transactionQueries.GetIncomeTransaction(accountId, model.Id).ConfigureAwait(false);
-            if (transaction == null)
-            {
-                transaction = new TransactionModel
-                {
-                    InitiatorId = model.AccountId,
-                    DateTime = model.DateTime,
-                    IncomeId = model.Id,
-                    Total = model.Total
-                };
-            }
-            else
-            {
-                transaction.InitiatorId = model.AccountId;
-                transaction.Total = model.Total;
-            }
-
-            await _transactionCommands.Update(transaction).ConfigureAwait(false);
-
             return model;
         }
     }

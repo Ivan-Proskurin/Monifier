@@ -33,5 +33,21 @@ namespace Monifier.BusinessLogic.Model.Accounts
                 Total = transaction.Total
             };
         }
+
+        public static Transaction ToEntity(this TransactionModel model)
+        {
+            return new Transaction
+            {
+                Id = model.Id,
+                OwnerId = model.OwnerId,
+                DateTime = model.DateTime,
+                InitiatorId = model.InitiatorId,
+                ParticipantId = model.ParticipantId,
+                BillId = model.BillId,
+                IncomeId = model.IncomeId,
+                IsDeleted = model.IsDeleted,
+                Total = model.Total
+            };
+        }
     }
 }

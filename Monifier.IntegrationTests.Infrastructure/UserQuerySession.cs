@@ -349,18 +349,18 @@ namespace Monifier.IntegrationTests.Infrastructure
 
         public IIncomeItemCommands CreateIncomeCommands()
         {
-            return new IncomeItemCommands(UnitOfWork, UserSession,
-                new TransactionCommands(UnitOfWork, UserSession),
-                new TransactionQueries(UnitOfWork, UserSession));
+            return new IncomeItemCommands(UnitOfWork, UserSession, CreateTransactionBuilder());
+        }
+
+        public ITransactionBuilder CreateTransactionBuilder()
+        {
+            return new TransactionBuilder(UnitOfWork, CreateTransactionQueries());
         }
 
         public IAccountCommands CreateAccountCommands()
         {
             return new AccountCommands(UnitOfWork, UserSession, 
-                new IncomeItemCommands(UnitOfWork, UserSession, new TransactionCommands(UnitOfWork, UserSession), 
-                    new TransactionQueries(UnitOfWork, UserSession)),
-                new TransactionCommands(UnitOfWork, UserSession),
-                new TimeService(UserSession));
+                CreateIncomeCommands(), new TimeService(UserSession), CreateTransactionBuilder());
         }
 
         public ITransactionQueries CreateTransactionQueries()
@@ -371,7 +371,7 @@ namespace Monifier.IntegrationTests.Infrastructure
         public IExpensesBillCommands CreateExpensesBillCommands()
         {
             return new ExpensesBillCommands(UnitOfWork, UserSession, new BalancesUpdaterFactory(UnitOfWork),
-                new TransitionBalancesUpdater(UnitOfWork), new TransactionBuilder(UnitOfWork));
+                new TransitionBalancesUpdater(UnitOfWork), CreateTransactionBuilder());
         }
 
         public IExpenseFlowCommands CreateExpenseFlowCommands()

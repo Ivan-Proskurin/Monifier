@@ -21,20 +21,20 @@ namespace Monifier.BusinessLogic.Queries.Base
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentSession _currentSession;
         private readonly IIncomeItemCommands _incomeItemCommands;
-        private readonly ITransactionCommands _transactionCommands;
         private readonly ITimeService _timeService;
+        private readonly ITransactionBuilder _transactionBuilder;
 
         public AccountCommands(IUnitOfWork unitOfWork, 
             ICurrentSession currentSession,
             IIncomeItemCommands incomeItemCommands,
-            ITransactionCommands transactionCommands,
-            ITimeService timeService)
+            ITimeService timeService,
+            ITransactionBuilder transactionBuilder)
         {
             _unitOfWork = unitOfWork;
             _currentSession = currentSession;
             _incomeItemCommands = incomeItemCommands;
-            _transactionCommands = transactionCommands;
             _timeService = timeService;
+            _transactionBuilder = transactionBuilder;
         }
 
         public async Task<AccountModel> Update(AccountModel model)
@@ -168,34 +168,18 @@ namespace Monifier.BusinessLogic.Queries.Base
                 throw new InvalidOperationException(
                     $"Невозможно перевести сумму {amount} со счета \"{accountFrom.Name}\", так как на его балансе не хватает средств");
 
+            var transferTime = _timeService.ClientLocalNow;
+
             accountFrom.Balance -= amount;
             accountFrom.AvailBalance -= amount;
             accountTo.Balance += amount;
             accountTo.AvailBalance += amount;
             accountCommands.Update(accountFrom);
             accountCommands.Update(accountTo);
-
-            var transactionTime = _timeService.ClientLocalNow;
-            var transaction1 = new TransactionModel
-            {
-                DateTime = transactionTime,
-                InitiatorId = accountFromId,
-                ParticipantId = accountToId,
-                Total = -amount,
-            };
-            var transaction2 = new TransactionModel
-            {
-                DateTime = transactionTime,
-                InitiatorId = accountToId,
-                ParticipantId = accountFromId,
-                Total = amount
-            };
-            await _transactionCommands.Update(transaction1).ConfigureAwait(false);
-            await _transactionCommands.Update(transaction2).ConfigureAwait(false);
-            
+            _transactionBuilder.CreateTransfer(accountFrom, accountTo, transferTime, amount);
             await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
-            return transactionTime;
+            return transferTime;
         }
 
         public async Task TransferToExpenseFlow(int flowId, int fromAccountId, decimal amount)
