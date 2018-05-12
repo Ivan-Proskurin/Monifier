@@ -5,6 +5,8 @@
 @{
     ViewBag.Title = "Расходы";
     var flows = Model.ExpenseFlows.ExpenseFlows;
+    var totals = Model.ExpenseFlows.Totals;
+    var footerClass = totals.Total >= 0 ? "table-info" : "table-danger";
 }
 
 @section Styles {
@@ -68,6 +70,14 @@
     }
 
     </tbody>
+    <tfoot class="thead-dark">
+        <tr class="@footerClass">
+            <td></td>
+            <td class="totals-caption-left">@totals.Caption</td>
+            <td class="totals-caption">@totals.Total.ToMoney()</td>
+            <td></td>
+        </tr>
+    </tfoot>
 </table>
 
 <!-- Pagination -->
