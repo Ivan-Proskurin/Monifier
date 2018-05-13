@@ -3,7 +3,6 @@ using System.Linq;
 using FluentAssertions;
 using Monifier.BusinessLogic.Model.Accounts;
 using Monifier.BusinessLogic.Model.Expenses;
-using Monifier.BusinessLogic.Queries.Transactions;
 using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Expenses;
 using Monifier.IntegrationTests.Infrastructure;
@@ -432,7 +431,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
 
             using (var session = await CreateDefaultSession(ids))
             {
-                var transactionsQueries = new TransactionQueries(session.UnitOfWork, session.UserSession);
+                var transactionsQueries = session.CreateTransactionQueries();
                 var transaction = await transactionsQueries.GetBillTransaction(ids.DebitCardAccountId, bill.Id);
                 transaction.ShouldBeEquivalentTo(
                     new TransactionModel
@@ -472,7 +471,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 var commands = session.CreateExpensesBillCommands();
                 await commands.Save(bill);
 
-                var transactionsQueries = new TransactionQueries(session.UnitOfWork, session.UserSession);
+                var transactionsQueries = session.CreateTransactionQueries();
                 var transaction = await transactionsQueries.GetBillTransaction(ids.DebitCardAccountId, bill.Id);
                 transaction.ShouldBeEquivalentTo(
                     new TransactionModel
@@ -502,7 +501,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 var commands = session.CreateExpensesBillCommands();
                 await commands.Update(bill);
 
-                var transactionsQueries = new TransactionQueries(session.UnitOfWork, session.UserSession);
+                var transactionsQueries = session.CreateTransactionQueries();
                 var transaction = await transactionsQueries.GetBillTransaction(ids.DebitCardAccountId, bill.Id);
                 transaction.ShouldBeEquivalentTo(
                     new TransactionModel
@@ -542,7 +541,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 var commands = session.CreateExpensesBillCommands();
                 await commands.Save(bill);
 
-                var transactionsQueries = new TransactionQueries(session.UnitOfWork, session.UserSession);
+                var transactionsQueries = session.CreateTransactionQueries();
                 var transactions = await transactionsQueries.GetInitiatorTransactions(ids.DebitCardAccountId);
                 transactions.Count.ShouldBeEquivalentTo(1);
                 var transaction = transactions.Single();
@@ -575,7 +574,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 var commands = session.CreateExpensesBillCommands();
                 await commands.Update(bill);
 
-                var transactionsQueries = new TransactionQueries(session.UnitOfWork, session.UserSession);
+                var transactionsQueries = session.CreateTransactionQueries();
                 var transaction = await transactionsQueries.GetBillTransaction(ids.CashAccountId, bill.Id);
                 transaction.ShouldBeEquivalentTo(
                     new TransactionModel

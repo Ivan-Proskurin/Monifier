@@ -15,8 +15,6 @@ namespace Monifier.Tools.Accounts
 
     class Program
     {
-//        private static readonly string ConnectionString =
-//            "Data Source=.\\SQLEXPRESS;Initial Catalog=Monifier;Integrated Security=True;MultipleActiveResultSets=True";
         private static readonly string ConnectionString =
             "Data Source=.\\SQLEXPRESS;Initial Catalog=Moneyflow;Integrated Security=True;MultipleActiveResultSets=True";
 
@@ -41,7 +39,7 @@ namespace Monifier.Tools.Accounts
                 {
                     using (var unitOfWork = new UnitOfWork(context))
                     {
-                        var authCommands = new AuthCommands(unitOfWork);
+                        var authCommands = new AuthCommands(new EntityRepository(unitOfWork));
                         Console.WriteLine($"Creating user account for {Account.Name} (aka {Account.Login})...");
                         authCommands.CreateUser(Account.Name, Account.Login, Account.Password, Account.IsAdmin).Wait();
                         Console.WriteLine("Success");

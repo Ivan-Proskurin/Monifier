@@ -13,20 +13,19 @@ namespace Monifier.BusinessLogic.Queries.Base
 {
     public class AccountQueries : IAccountQueries
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEntityRepository _repository;
         private readonly ICurrentSession _currentSession;
 
-        public AccountQueries(IUnitOfWork unitOfWork, ICurrentSession currentSession)
+        public AccountQueries(IEntityRepository repository, ICurrentSession currentSession)
         {
-            _unitOfWork = unitOfWork;
+            _repository = repository;
             _currentSession = currentSession;
         }
 
-        public async Task<List<AccountModel>> GetAll(bool includeDeleted = false)
+        public Task<List<AccountModel>> GetAll(bool includeDeleted = false)
         {
-            var queryRep = _unitOfWork.GetQueryRepository<Account>();
             var ownerId = _currentSession.UserId;
-            return await queryRep.Query
+            return _repository.GetQuery<Account>()
                 .Where(x => (!x.IsDeleted || includeDeleted) && x.OwnerId == ownerId)
                 .Select(x => x.ToModel())
                 .OrderBy(x => x.Number)
@@ -35,7 +34,7 @@ namespace Monifier.BusinessLogic.Queries.Base
 
         public async Task<AccountList> GetList()
         {
-            var accounts = await GetAll();
+            var accounts = await GetAll().ConfigureAwait(false);
             return new AccountList
             {
                 Accounts = accounts,
@@ -50,22 +49,21 @@ namespace Monifier.BusinessLogic.Queries.Base
 
         public async Task<AccountModel> GetById(int id)
         {
-            return (await _unitOfWork.GetQueryRepository<Account>().GetById(id)).ToModel();
+            return (await _repository.LoadAsync<Account>(id)).ToModel();
         }
 
         public async Task<AccountModel> GetByName(string name, bool includeDeleted = false)
         {
-            var account = await _unitOfWork.GetNamedModelQueryRepository<Account>().GetByName(_currentSession.UserId, name);
+            var account = await _repository.FindByNameAsync<Account>(_currentSession.UserId, name);
             if (account == null || account.IsDeleted && !includeDeleted) return null;
             return account.ToModel();
         }
 
         public async Task<int> GetNextNumber()
         {
-            var accountQuery = _unitOfWork.GetQueryRepository<Account>().Query;
             var ownerId = _currentSession.UserId;
-            var count = await accountQuery.CountAsync(x => x.OwnerId == ownerId);
-            return count == 0 ? 1 : await accountQuery.MaxAsync(x => x.Number) + 1;
+            var count = await _repository.GetQuery<Account>().CountAsync(x => x.OwnerId == ownerId);
+            return count == 0 ? 1 : await _repository.GetQuery<Account>().MaxAsync(x => x.Number) + 1;
         }
     }
 }

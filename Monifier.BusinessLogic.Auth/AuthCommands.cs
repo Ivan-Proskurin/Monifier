@@ -10,11 +10,11 @@ namespace Monifier.BusinessLogic.Auth
 {
     public class AuthCommands : IAuthCommands
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEntityRepository _repository;
 
-        public AuthCommands(IUnitOfWork unitOfWork)
+        public AuthCommands(IEntityRepository repository)
         {
-            _unitOfWork = unitOfWork;
+            _repository = repository;
         }
         
         public async Task<int> CreateUser(string name, string login, string password, bool isAdmin)
@@ -28,7 +28,7 @@ namespace Monifier.BusinessLogic.Auth
             if (password.IsNullOrEmpty())
                 throw new ArgumentException("Password should be non empty string", nameof(password));
 
-            var other = await _unitOfWork.GetQueryRepository<User>().GetByLogin(login);
+            var other = await _repository.GetQuery<User>().GetByLogin(login).ConfigureAwait(false);
             if (other != null)
                 throw new AuthException($"Пользователь с логином {login} уже есть");
 
@@ -43,9 +43,9 @@ namespace Monifier.BusinessLogic.Auth
 
             user.Hash = HashHelper.ComputeHash(password, user.Salt);
             
-            _unitOfWork.GetCommandRepository<User>().Create(user);
+            _repository.Create(user);
 
-            await _unitOfWork.SaveChangesAsync();
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
             
             return user.Id;
         }
@@ -54,8 +54,7 @@ namespace Monifier.BusinessLogic.Auth
         {
             if (newName == null && newPassword == null)
                 throw new ArgumentException("Provide either newName or newPassword");
-            var userQueries = _unitOfWork.GetQueryRepository<User>();
-            var user = await userQueries.GetById(userId);
+            var user = await _repository.LoadAsync<User>(userId).ConfigureAwait(false);
             if (user == null)
                 throw new ArgumentException($"Threre is no user with id {userId}", nameof(userId));
 
@@ -67,9 +66,8 @@ namespace Monifier.BusinessLogic.Auth
                 user.Hash = HashHelper.ComputeHash(newPassword, user.Salt);
             }
 
-            var commands = _unitOfWork.GetCommandRepository<User>();
-            commands.Update(user);
-            await _unitOfWork.SaveChangesAsync();
+            _repository.Update(user);
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }

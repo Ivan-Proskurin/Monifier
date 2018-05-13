@@ -9,18 +9,17 @@ namespace Monifier.BusinessLogic.Queries.Incomes
 {
     public class IncomeTypeCommands : IIncomeTypeCommands
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEntityRepository _repository;
         private readonly ICurrentSession _currentSession;
 
-        public IncomeTypeCommands(IUnitOfWork unitOfWork, ICurrentSession currentSession)
+        public IncomeTypeCommands(IEntityRepository repository, ICurrentSession currentSession)
         {
-            _unitOfWork = unitOfWork;
+            _repository = repository;
             _currentSession = currentSession;
         }
 
         public async Task<IncomeTypeModel> Update(IncomeTypeModel model)
         {
-            var typeRepo = _unitOfWork.GetCommandRepository<IncomeType>();
             var type = new IncomeType
             {
                 Id = model.Id,
@@ -29,13 +28,13 @@ namespace Monifier.BusinessLogic.Queries.Incomes
             };
             if (type.Id > 0)
             {
-                typeRepo.Update(type);
+                _repository.Update(type);
             }
             else
             {
-                typeRepo.Create(type);
+                _repository.Create(type);
             }
-            await _unitOfWork.SaveChangesAsync();
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
             model.Id = type.Id;
             return model;
         }

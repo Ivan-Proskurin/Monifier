@@ -7,11 +7,11 @@ namespace Monifier.BusinessLogic.Queries.Expenses
 {
     public class BalancesUpdaterFactory : IBalancesUpdaterFactory
     {
-        private readonly IUnitOfWork _untOfWork;
+        private readonly IEntityRepository _repository;
 
-        public BalancesUpdaterFactory(IUnitOfWork untOfWork)
+        public BalancesUpdaterFactory(IEntityRepository repository)
         {
-            _untOfWork = untOfWork;
+            _repository = repository;
         }
 
         public IBalancesUpdater Create(AccountType accountType)
@@ -20,9 +20,9 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             {
                 case AccountType.Cash:
                 case AccountType.DebitCard:
-                    return new DefaultBalancesUpdater(_untOfWork);
+                    return new DefaultBalancesUpdater(_repository);
                 case AccountType.CreditCard:
-                    return new CreditCardBalancesUpdater(_untOfWork);
+                    return new CreditCardBalancesUpdater(_repository);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(accountType), accountType, null);
             }

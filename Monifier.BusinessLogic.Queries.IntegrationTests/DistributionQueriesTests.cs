@@ -1,6 +1,5 @@
 ﻿using FluentAssertions;
 using Monifier.BusinessLogic.Distribution.Model;
-using Monifier.BusinessLogic.Queries.Distribution;
 using Monifier.DataAccess.Model.Distribution;
 using Monifier.IntegrationTests.Infrastructure;
 using Xunit;
@@ -20,7 +19,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
             using (var session = await CreateDefaultSession())
             {
                 var ids = session.CreateDefaultEntities();
-                var queries = new DistributionQueries(session.UnitOfWork, session.UserSession);
+                var queries = session.CreateDistributionQueries();
                 var board = await queries.GetDistributionBoard();
                 board.Accounts.ShouldBeEquivalentTo(new[] 
                 {
@@ -79,7 +78,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 session.CreateExpenseFlowSettings(ids.FoodExpenseFlowId, true, FlowRule.FixedFromBase, 15000);
                 await session.UnitOfWork.SaveChangesAsync();
 
-                var queries = new DistributionQueries(session.UnitOfWork, session.UserSession);
+                var queries = session.CreateDistributionQueries();
                 var board = await queries.GetDistributionBoard();
                 board.Accounts.ShouldBeEquivalentTo(new[]
                 {

@@ -3,7 +3,6 @@ using System.Linq;
 using FluentAssertions;
 using Monifier.BusinessLogic.Model.Accounts;
 using Monifier.BusinessLogic.Model.Incomes;
-using Monifier.BusinessLogic.Queries.Transactions;
 using Monifier.DataAccess.Model.Base;
 using Monifier.IntegrationTests.Infrastructure;
 using Xunit;
@@ -285,7 +284,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                     IncomeTypeId = ids.GiftsIncomeId,
                 };
                 await commands.Update(income);
-                var transactionQueries = new TransactionQueries(session.UnitOfWork, session.UserSession);
+                var transactionQueries = session.CreateTransactionQueries();
                 var transactions = await transactionQueries.GetInitiatorTransactions(ids.DebitCardAccountId);
                 transactions.Count.ShouldBeEquivalentTo(1);
                 var transaction = transactions.Single();
@@ -313,7 +312,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
 
             using (var session = await CreateDefaultSession())
             {
-                var transactionQueries = new TransactionQueries(session.UnitOfWork, session.UserSession);
+                var transactionQueries = session.CreateTransactionQueries();
                 ids = session.CreateDefaultEntities();
                 balance = session.DebitCardAccount.Balance;
                 var commands = session.CreateIncomeCommands();
@@ -331,7 +330,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
 
             using (var session = await CreateDefaultSession(ids))
             {
-                var transactionQueries = new TransactionQueries(session.UnitOfWork, session.UserSession);
+                var transactionQueries = session.CreateTransactionQueries();
                 var commands = session.CreateIncomeCommands();
                 income.Total = 1340;
                 await commands.Update(income);

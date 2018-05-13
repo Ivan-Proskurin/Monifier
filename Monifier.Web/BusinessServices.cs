@@ -32,6 +32,7 @@ namespace Monifier.Web
         public static void AddBusinessServices(this IServiceCollection services)
         {
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddTransient<IEntityRepository, EntityRepository>();
             services.AddScoped<ICurrentSession, CurrentSession>();
             services.AddTransient<IAccountQueries, AccountQueries>();
             services.AddTransient<IAccountCommands, AccountCommands>();

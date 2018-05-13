@@ -15,21 +15,23 @@ namespace Monifier.BusinessLogic.Queries.Base
 {
     public class CategoriesQueries : ICategoriesQueries
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEntityRepository _repository;
         private readonly ICurrentSession _currentSession;
 
-        public CategoriesQueries(IUnitOfWork unitOfWork, ICurrentSession currentSession)
+        public CategoriesQueries(IEntityRepository repository, ICurrentSession currentSession)
         {
-            _unitOfWork = unitOfWork;
+            _repository = repository;
             _currentSession = currentSession;
         }
 
-        public async Task<List<CategoryModel>> GetAll(bool includeDeleted = false)
+        public Task<List<CategoryModel>> GetAll(bool includeDeleted = false)
         {
-            var repo = _unitOfWork.GetQueryRepository<Category>();
-            var query = includeDeleted ? repo.Query : repo.Query.Where(x => !x.IsDeleted);
+            var query = includeDeleted 
+                ? _repository.GetQuery<Category>() 
+                : _repository.GetQuery<Category>().Where(x => !x.IsDeleted);
+
             var ownerId = _currentSession.UserId;
-            return await query
+            return query
                 .Where(x => x.OwnerId == ownerId)
                 .Select(x => new CategoryModel
                     {
@@ -37,13 +39,13 @@ namespace Monifier.BusinessLogic.Queries.Base
                         Name = x.Name,
                         ProductCount = x.Products.Count
                     }
-                ).ToListAsync();
+                )
+                .ToListAsync();
         }
 
-        public async Task<CategoryModel> GetById(int id)
+        public Task<CategoryModel> GetById(int id)
         {
-            var repo = _unitOfWork.GetQueryRepository<Category>();
-            return await repo.Query.Where(x => x.Id == id)
+            return _repository.GetQuery<Category>().Where(x => x.Id == id)
                 .Select(x => new CategoryModel
                 {
                     Id = x.Id,
@@ -55,7 +57,7 @@ namespace Monifier.BusinessLogic.Queries.Base
 
         public async Task<CategoryModel> GetByName(string name, bool includeDeleted = false)
         {
-            var category = await _unitOfWork.GetNamedModelQueryRepository<Category>().GetByName(_currentSession.UserId, name);
+            var category = await _repository.FindByNameAsync<Category>(_currentSession.UserId, name);
             if (category == null || category.IsDeleted && !includeDeleted) return null;
             return new CategoryModel
             {
@@ -66,14 +68,15 @@ namespace Monifier.BusinessLogic.Queries.Base
 
         public async Task<List<ProductModel>> GetProductsByCategoryName(string categoryName, bool includeDeleted = false)
         {
-            var category = await _unitOfWork.GetNamedModelQueryRepository<Category>().GetByName(
-                _currentSession.UserId, categoryName);
+            var category = await _repository.FindByNameAsync<Category>(_currentSession.UserId, categoryName);
             
             if (category == null)
                 throw new ArgumentException($"Нет категории с названием \"{categoryName}\"");
 
-            var productsRepo = _unitOfWork.GetQueryRepository<Product>();
-            var query = includeDeleted ? productsRepo.Query : productsRepo.Query.Where(x => !x.IsDeleted);
+            var query = includeDeleted 
+                ? _repository.GetQuery<Product>() 
+                : _repository.GetQuery<Product>().Where(x => !x.IsDeleted);
+
             var products = await query
                 .Where(x => x.CategoryId == category.Id)
                 .Select(x => new ProductModel
@@ -81,15 +84,19 @@ namespace Monifier.BusinessLogic.Queries.Base
                     Id = x.Id,
                     Name = x.Name
                 })
-                .ToListAsync();
+                .ToListAsync()
+                .ConfigureAwait(false);
+
             return products;
         }
 
         public async Task<CategoryList> GetList(PaginationArgs args)
         {
-            var repo = _unitOfWork.GetQueryRepository<Category>();
             var ownerId = _currentSession.UserId;
-            var query = args.IncludeDeleted ? repo.Query : repo.Query.Where(x => !x.IsDeleted);
+            var query = args.IncludeDeleted 
+                ? _repository.GetQuery<Category>() 
+                : _repository.GetQuery<Category>().Where(x => !x.IsDeleted);
+
             query = query.Where(x => x.OwnerId == ownerId);
             var totalCount = await query.CountAsync();
             var pagination = new PaginationInfo(args, totalCount);
@@ -102,8 +109,11 @@ namespace Monifier.BusinessLogic.Queries.Base
                         Name = x.Name,
                         ProductCount = x.Products.Count
                     }
-                ).ToListAsync();
-            return new CategoryList()
+                )
+                .ToListAsync()
+                .ConfigureAwait(false);
+
+            return new CategoryList
             {
                 List = models,
                 Pagination = pagination
@@ -112,8 +122,8 @@ namespace Monifier.BusinessLogic.Queries.Base
 
         private IQueryable<CategoryModel> CreateFlowCategoriesQuery(int flowId)
         {
-            var expenseCategoriesQuery = _unitOfWork.GetQueryRepository<ExpensesFlowProductCategory>().Query;
-            var catQuery = _unitOfWork.GetQueryRepository<Category>().Query;
+            var expenseCategoriesQuery = _repository.GetQuery<ExpensesFlowProductCategory>();
+            var catQuery = _repository.GetQuery<Category>();
             var query = from expenseCats in expenseCategoriesQuery
                 join cat in catQuery on expenseCats.CategoryId equals cat.Id
                 where expenseCats.ExpensesFlowId == flowId && !cat.IsDeleted
@@ -126,28 +136,28 @@ namespace Monifier.BusinessLogic.Queries.Base
             return query;
         }
 
-        public async Task<List<CategoryModel>> GetFlowCategories(int flowId)
+        public Task<List<CategoryModel>> GetFlowCategories(int flowId)
         {
-            return await CreateFlowCategoriesQuery(flowId).ToListAsync();
+            return CreateFlowCategoriesQuery(flowId).ToListAsync();
         }
 
-        public async Task<CategoryModel> GetFlowCategoryByName(int flowId, string category)
+        public Task<CategoryModel> GetFlowCategoryByName(int flowId, string category)
         {
             if (string.IsNullOrEmpty(category))
                 throw new ArgumentNullException(nameof(category));
             var query = CreateFlowCategoriesQuery(flowId);
-            return await query.Where(x => x.Name.ToLower() == category.ToLower()).FirstOrDefaultAsync();
+            return query.Where(x => x.Name.ToLower() == category.ToLower()).FirstOrDefaultAsync();
         }
 
-        public async Task<CategoryModel> GetFlowCategoryByProductName(int flowId, string product)
+        public Task<CategoryModel> GetFlowCategoryByProductName(int flowId, string product)
         {
-            var categoriesQuery = _unitOfWork.GetQueryRepository<Category>();
-            var flowCategoriesQuery = _unitOfWork.GetQueryRepository<ExpensesFlowProductCategory>();
-            var productsQuery = _unitOfWork.GetQueryRepository<Product>();
+            var categoriesQuery = _repository.GetQuery<Category>();
+            var flowCategoriesQuery = _repository.GetQuery<ExpensesFlowProductCategory>();
+            var productsQuery = _repository.GetQuery<Product>();
             var query =
-                from cat in categoriesQuery.Query
-                join catFlow in flowCategoriesQuery.Query on cat.Id equals catFlow.CategoryId
-                join prod in productsQuery.Query on catFlow.CategoryId equals prod.CategoryId
+                from cat in categoriesQuery
+                join catFlow in flowCategoriesQuery on cat.Id equals catFlow.CategoryId
+                join prod in productsQuery on catFlow.CategoryId equals prod.CategoryId
                 where catFlow.ExpensesFlowId == flowId
                       && string.Equals(prod.Name, product, StringComparison.CurrentCultureIgnoreCase)
                 select new CategoryModel
@@ -155,7 +165,7 @@ namespace Monifier.BusinessLogic.Queries.Base
                     Id = cat.Id,
                     Name = cat.Name
                 };
-            return await query.FirstOrDefaultAsync();
+            return query.FirstOrDefaultAsync();
         }
     }
 }

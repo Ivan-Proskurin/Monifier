@@ -13,17 +13,17 @@ namespace Monifier.BusinessLogic.Processing
 {
     public class CreditCardProcessing : ICreditCardProcessing
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEntityRepository _repository;
         private readonly ICurrentSession _currentSession;
         private readonly ITimeService _timeService;
         private readonly IExpensesBillCommands _expensesBillCommands;
 
-        public CreditCardProcessing(IUnitOfWork unitOfWork, 
+        public CreditCardProcessing(IEntityRepository repository, 
             ICurrentSession currentSession,
             ITimeService timeService,
             IExpensesBillCommands expensesBillCommands)
         {
-            _unitOfWork = unitOfWork;
+            _repository = repository;
             _currentSession = currentSession;
             _timeService = timeService;
             _expensesBillCommands = expensesBillCommands;
@@ -36,14 +36,8 @@ namespace Monifier.BusinessLogic.Processing
             if (account.AccountType != AccountType.CreditCard)
                 throw new InvalidOperationException("Счет должен быть кредитной картой");
 
-            var productCommands = _unitOfWork.GetCommandRepository<Product>();
-            var productQueries = _unitOfWork.GetNamedModelQueryRepository<Product>();
-            var categoriesCommands = _unitOfWork.GetCommandRepository<Category>();
-            var categoriesQueries = _unitOfWork.GetNamedModelQueryRepository<Category>();
-            var flowCommands = _unitOfWork.GetCommandRepository<ExpenseFlow>();
-            var flowQueries = _unitOfWork.GetNamedModelQueryRepository<ExpenseFlow>();
-
-            var category = await categoriesQueries.GetByName(_currentSession.UserId, "Кредиты");
+            var category = await _repository.FindByNameAsync<Category>(
+                _currentSession.UserId, "Кредиты").ConfigureAwait(false);
             if (category == null)
             {
                 category = new Category
@@ -51,12 +45,12 @@ namespace Monifier.BusinessLogic.Processing
                     OwnerId = _currentSession.UserId,
                     Name = "Кредиты",
                 };
-                categoriesCommands.Create(category);
-                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                _repository.Create(category);
+                await _repository.SaveChangesAsync().ConfigureAwait(false);
             }
 
             var mustSave = false;
-            var product = await productQueries.GetByName(_currentSession.UserId, account.Name);
+            var product = await _repository.FindByNameAsync<Product>(_currentSession.UserId, account.Name).ConfigureAwait(false);
             if (product == null)
             {
                 product = new Product
@@ -65,11 +59,11 @@ namespace Monifier.BusinessLogic.Processing
                     Name = account.Name,
                     CategoryId = category.Id
                 };
-                productCommands.Create(product);
+                _repository.Create(product);
                 mustSave = true;
             }
 
-            var flow = await flowQueries.GetByName(_currentSession.UserId, "Кредиты");
+            var flow = await _repository.FindByNameAsync<ExpenseFlow>(_currentSession.UserId, "Кредиты").ConfigureAwait(false);
             if (flow == null)
             {
                 flow = new ExpenseFlow
@@ -81,12 +75,12 @@ namespace Monifier.BusinessLogic.Processing
                     Number = 1,
                     Version = 1
                 };
-                flowCommands.Create(flow);
+                _repository.Create(flow);
                 mustSave = true;
             }
 
             if (mustSave)
-                await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _repository.SaveChangesAsync().ConfigureAwait(false);
 
             var bill = new ExpenseBillModel
             {

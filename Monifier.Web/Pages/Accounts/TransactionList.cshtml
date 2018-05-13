@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="~/css/transactions.css" />
 }
 
-<h4 class="form-caption-xs">История операций по счету <a asp-page="./EditAccount" asp-route-id="@Model.Account.Id">"@Model.Account.Name"</a></h4>
+<h4 class="form-caption-xs">История операций по счету "@Model.Account.Name"</h4>
 <form method="post" id="filterForm">
     <input asp-for="Filter.AccountId" hidden/>
     <input asp-for="Filter.PageNumber" hidden/>
@@ -23,7 +23,7 @@
             </button>
         </div>
         <div class="input-group-addon addon-button-container">
-            <a class="btn btn-outline-secondary cursor-pointer"
+            <a class="btn btn-outline-dark cursor-pointer"
                asp-page="./EditAccount" asp-route-id="@Model.Account.Id">
               Назад 
             </a>

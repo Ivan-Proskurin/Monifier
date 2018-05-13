@@ -8,11 +8,11 @@ namespace Monifier.BusinessLogic.Queries.Expenses
 {
     public class CreditCardBalancesUpdater : IBalancesUpdater
     {
-        private readonly IUnitOfWork _untOfWork;
+        private readonly IEntityRepository _repository;
 
-        public CreditCardBalancesUpdater(IUnitOfWork untOfWork)
+        public CreditCardBalancesUpdater(IEntityRepository repository)
         {
-            _untOfWork = untOfWork;
+            _repository = repository;
         }
 
         public Task Create(Account account, ExpenseBill bill)
@@ -20,21 +20,18 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             if (!bill.IsCorrection)
                 account.Balance -= bill.SumPrice;
             account.AvailBalance -= bill.SumPrice;
-            var accountCommands = _untOfWork.GetCommandRepository<Account>();
-            accountCommands.Update(account);
+            _repository.Update(account);
             return Task.CompletedTask;
         }
 
         public async Task Delete(ExpenseBill bill)
         {
             if (bill.AccountId == null) return;
-            var accountQueries = _untOfWork.GetQueryRepository<Account>();
-            var account = await accountQueries.GetById(bill.AccountId.Value);
+            var account = await _repository.LoadAsync<Account>(bill.AccountId.Value);
             if (!bill.IsCorrection)
                 account.Balance += bill.SumPrice;
             account.AvailBalance += bill.SumPrice;
-            var accountCommands = _untOfWork.GetCommandRepository<Account>();
-            accountCommands.Update(account);
+            _repository.Update(account);
         }
     }
 }

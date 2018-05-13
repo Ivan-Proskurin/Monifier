@@ -10,11 +10,11 @@ namespace Monifier.BusinessLogic.Auth
 {
     public class SessionCommands : ISessionCommands
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEntityRepository _repository;
 
-        public SessionCommands(IUnitOfWork unitOfWork)
+        public SessionCommands(IEntityRepository repository)
         {
-            _unitOfWork = unitOfWork;
+            _repository = repository;
         }
 
         public async Task<User> CheckUser(string login, string password)
@@ -24,8 +24,7 @@ namespace Monifier.BusinessLogic.Auth
             if (password.IsNullOrEmpty())
                 throw new ArgumentException("Password must be a non empty sttring", nameof(password));
 
-            var userQueries = _unitOfWork.GetQueryRepository<User>();
-            var user = await userQueries.GetByLogin(login);
+            var user = await _repository.GetQuery<User>().GetByLogin(login).ConfigureAwait(false);
             if (user == null)
                 throw new AuthException($"Неверный логин или пароль");
 
@@ -48,9 +47,9 @@ namespace Monifier.BusinessLogic.Auth
                 IsAdmin = user.IsAdmin
             };
             
-            _unitOfWork.GetCommandRepository<Session>().Create(session);
+            _repository.Create(session);
 
-            await _unitOfWork.SaveChangesAsync();
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
 
             session.User = user;
             return session;
@@ -58,8 +57,7 @@ namespace Monifier.BusinessLogic.Auth
 
         public async Task<bool> Authorize(Guid token, bool isAdmin)
         {
-            var sessionQueries = _unitOfWork.GetQueryRepository<Session>();
-            var session = await sessionQueries.GetByToken(token);
+            var session = await _repository.GetQuery<Session>().GetByToken(token).ConfigureAwait(false);
             return session != null && (isAdmin && session.IsAdmin || !isAdmin);
         }
     }

@@ -18,13 +18,16 @@ namespace Monifier.BusinessLogic.Queries.Expenses
 {
     public class ExpensesQueries : IExpensesQueries
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEntityRepository _repository;
         private readonly IUserSettings _userSettings;
         private readonly ICurrentSession _currentSession;
 
-        public ExpensesQueries(IUnitOfWork unitOfWork, IUserSettings userSettings, ICurrentSession currentSession)
+        public ExpensesQueries(
+            IEntityRepository repository, 
+            IUserSettings userSettings, 
+            ICurrentSession currentSession)
         {
-            _unitOfWork = unitOfWork;
+            _repository = repository;
             _userSettings = userSettings;
             _currentSession = currentSession;
         }
@@ -68,9 +71,9 @@ namespace Monifier.BusinessLogic.Queries.Expenses
         private async Task<BillGoodsGroupWithPagination> GetGoodsGroupsByDayAsync(
             int? flowId, DateTime dateFrom, DateTime dateTo, PaginationArgs paginationArgs)
         {
-            var expenseQueries = _unitOfWork.GetQueryRepository<ExpenseBill>();
+            var expenseQueries = _repository.GetQuery<ExpenseBill>();
             var ownerId = _currentSession.UserId;
-            var goodsGroupQuery = expenseQueries.Query
+            var goodsGroupQuery = expenseQueries
                 .Where(x => x.OwnerId == ownerId && (flowId == null || x.ExpenseFlowId == flowId)
                                                  && x.DateTime >= dateFrom && x.DateTime < dateTo)
                 .OrderBy(x => x.DateTime)
@@ -86,7 +89,8 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             var pagination = new PaginationInfo(paginationArgs, totalCount);
             var goodsGroups = await goodsGroupQuery
                 .Skip(pagination.Skipped).Take(pagination.Taken)
-                .ToListAsync();
+                .ToListAsync()
+                .ConfigureAwait(false);
             
             return new BillGoodsGroupWithPagination
             {
@@ -98,9 +102,9 @@ namespace Monifier.BusinessLogic.Queries.Expenses
         private async Task<BillGoodsGroupWithPagination> GetGoodsGroupsByMonthAsync(
             int? flowId, DateTime dateFrom, DateTime dateTo, PaginationArgs paginationArgs)
         {
-            var expenseQueries = _unitOfWork.GetQueryRepository<ExpenseBill>();
+            var expenseQueries = _repository.GetQuery<ExpenseBill>();
             var ownerId = _currentSession.UserId;
-            var goodsGroupQuery = expenseQueries.Query
+            var goodsGroupQuery = expenseQueries
                 .Where(x => x.OwnerId == ownerId && (flowId == null || x.ExpenseFlowId == flowId) 
                                                  && x.DateTime >= dateFrom && x.DateTime < dateTo)
                 .OrderBy(x => x.DateTime)
@@ -116,7 +120,8 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             var pagination = new PaginationInfo(paginationArgs, totalCount);
             var goodsGroups = await goodsGroupQuery
                 .Skip(pagination.Skipped).Take(pagination.Taken)
-                .ToListAsync();
+                .ToListAsync()
+                .ConfigureAwait(false);
             
             return new BillGoodsGroupWithPagination
             {
@@ -128,14 +133,14 @@ namespace Monifier.BusinessLogic.Queries.Expenses
         private async Task GroupAndSortBillsGoodsAsync(IReadOnlyCollection<BillGoodsGroup> goodsGroups)
         {
             // ищем категории, принадлежащие отобранным счетам и группируем их
-            var billItemsQuery = _unitOfWork.GetQueryRepository<ExpenseItem>();
-            var categoryQuery = _unitOfWork.GetQueryRepository<Category>();
+            var billItemsQuery = _repository.GetQuery<ExpenseItem>();
+            var categoryQuery = _repository.GetQuery<Category>();
             foreach (var goodGroup in goodsGroups)
             {
                 var billIds = goodGroup.BillIds;
                 var billCatsQuery = 
-                    from item in billItemsQuery.Query
-                    join cat in categoryQuery.Query on item.CategoryId equals cat.Id
+                    from item in billItemsQuery
+                    join cat in categoryQuery on item.CategoryId equals cat.Id
                     where billIds.Contains(item.BillId)
                     group item by cat.Name into itemGroup
                     select new BillGood
@@ -144,17 +149,17 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                         Name = itemGroup.Key,
                         IsCategory = true
                     };
-                goodGroup.Goods = await billCatsQuery.ToListAsync();
+                goodGroup.Goods = await billCatsQuery.ToListAsync().ConfigureAwait(false);
             }
             
             // ищем продукты, принадлежащие отобранным счетам и группируем их
-            var productQueries = _unitOfWork.GetQueryRepository<Product>();
+            var productQueries = _repository.GetQuery<Product>();
             foreach (var goodGroup in goodsGroups)
             {
                 var billIds = goodGroup.BillIds;
                 var billProdQuery =
-                    from item in billItemsQuery.Query
-                    join prod in productQueries.Query on item.ProductId equals prod.Id
+                    from item in billItemsQuery
+                    join prod in productQueries on item.ProductId equals prod.Id
                     where billIds.Contains(item.BillId)
                     group item by prod.Name into itemGroup
                     select new BillGood
@@ -223,39 +228,40 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                 Totals = new TotalsInfoModel
                 {
                     Caption = $"Итого за период с {dateFrom.ToStandardDateStr()} по {dateTo.ToStandardDateStr()}",
-                    Total = await _unitOfWork.GetQueryRepository<ExpenseBill>().Query
+                    Total = await _repository.GetQuery<ExpenseBill>()
                         .Where(x => x.OwnerId == userId && (flowId == null || x.ExpenseFlowId == flowId) 
                                                         && x.DateTime >= dateFrom && x.DateTime < dateTo)
                         .SumAsync(x => x.SumPrice)
+                        .ConfigureAwait(false)
                 }
             };
 
             return expenses;
         }
         
-        public async Task<ExpensesListModel> GetExpensesByDays(ExpensesFilter filter, PaginationArgs paginationArgs)
+        public Task<ExpensesListModel> GetExpensesByDays(ExpensesFilter filter, PaginationArgs paginationArgs)
         {
-            return await GetExpenses(filter, paginationArgs, false);
+            return GetExpenses(filter, paginationArgs, false);
         }
 
-        public async Task<ExpensesListModel> GetExpensesByMonth(ExpensesFilter filter, PaginationArgs paginationArgs)
+        public Task<ExpensesListModel> GetExpensesByMonth(ExpensesFilter filter, PaginationArgs paginationArgs)
         {
             filter.DateFrom = filter.DateFrom.StartOfTheMonth();
             filter.DateTo = filter.DateTo.EndOfTheMonth();
-            return await GetExpenses(filter, paginationArgs, true);
+            return GetExpenses(filter, paginationArgs, true);
         }
 
         public async Task<ExpensesListModel> GetExpensesForDay(ExpensesFilter filter)
         {
             // отбираем нужные счета          
-            var expensesQueries = _unitOfWork.GetQueryRepository<ExpenseBill>();
+            var expensesQueries = _repository.GetQuery<ExpenseBill>();
 
             var flowId = filter.FlowId;
             var today = filter.DateFrom.Date;
             var tomorrow = today.AddDays(1);
             var ownerId = _currentSession.UserId;
 
-            var goodsGroups = await expensesQueries.Query
+            var goodsGroups = await expensesQueries
                 .Where(x => x.OwnerId == ownerId && (flowId == null || x.ExpenseFlowId == flowId)
                                                  && x.DateTime >= today && x.DateTime < tomorrow)
                 .OrderBy(x => x.DateTime)
@@ -265,7 +271,9 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                     DateTime = x.DateTime,
                     Sum = x.SumPrice,
                     AccountName = x.Account.Name
-                }).ToListAsync();
+                })
+                .ToListAsync()
+                .ConfigureAwait(false);
 
             // группируем категории и товары с сортировкой
             await GroupAndSortBillsGoodsAsync(goodsGroups);
@@ -290,10 +298,11 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                 Totals = new TotalsInfoModel
                 {
                     Caption = $"Итого за день с {today.ToStandardDateStr()} по {tomorrow.ToStandardDateStr()}",
-                    Total = await _unitOfWork.GetQueryRepository<ExpenseBill>().Query
+                    Total = await _repository.GetQuery<ExpenseBill>()
                         .Where(x => x.OwnerId == ownerId && (flowId == null || x.ExpenseFlowId == flowId) 
                                                          && x.DateTime >= today && x.DateTime < tomorrow)
                         .SumAsync(x => x.SumPrice)
+                        .ConfigureAwait(false)
                 }
             };
 
@@ -303,11 +312,11 @@ namespace Monifier.BusinessLogic.Queries.Expenses
         public async Task<ExpensesByFlowsModel> GetExpensesByFlows(DateTime dateFrom, DateTime dateTo, PaginationArgs paginationArgs)
         {
             // отбираем нужные счета          
-            var expensesQueries = _unitOfWork.GetQueryRepository<ExpenseBill>();
+            var expensesQueries = _repository.GetQuery<ExpenseBill>();
 
             var ownerId = _currentSession.UserId;
 
-            var billByFlowsQuery = expensesQueries.Query
+            var billByFlowsQuery = expensesQueries
                 .Where(x => x.OwnerId == ownerId && x.DateTime >= dateFrom && x.DateTime < dateTo)
                 .GroupBy(x => x.ExpenseFlowId)
                 .Select(x => new ExpenseByFlowsItemModel
@@ -320,7 +329,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                 })
                 .OrderByDescending(x => x.Total);
 
-            var totalCount = await billByFlowsQuery.CountAsync();
+            var totalCount = await billByFlowsQuery.CountAsync().ConfigureAwait(false);
             var pagination = new PaginationInfo(paginationArgs, totalCount);
 
             // финальное преобразование из внутренних моделей
@@ -329,15 +338,17 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                 Items = await billByFlowsQuery
                     .Skip(pagination.Skipped)
                     .Take(pagination.Taken)
-                    .ToListAsync(),
+                    .ToListAsync()
+                    .ConfigureAwait(false),
 
                 // считаем тоталы
                 Totals = new TotalsInfoModel
                 {
                     Caption = $"Итого за период с {dateFrom.ToStandardString()} по {dateTo.ToStandardString()}",
-                    Total = await expensesQueries.Query
+                    Total = await expensesQueries
                         .Where(x => x.OwnerId == ownerId && x.DateTime >= dateFrom && x.DateTime < dateTo)
                         .SumAsync(x => x.SumPrice)
+                        .ConfigureAwait(false)
                 },
 
                 Pagination = pagination

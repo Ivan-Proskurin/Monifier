@@ -1,8 +1,6 @@
 ﻿using FluentAssertions;
 using Monifier.BusinessLogic.Model.Expenses;
 using Monifier.BusinessLogic.Model.Pagination;
-using Monifier.BusinessLogic.Queries.Expenses;
-using Monifier.BusinessLogic.Queries.Settings;
 using Monifier.IntegrationTests.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -35,7 +33,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 await session.CreateExpenseBill(ids.CashAccountId, ids.TechExpenseFlowId, date2, session.Tv, 20000);
                 await session.CreateExpenseBill(ids.DebitCardAccountId, ids.TechExpenseFlowId, date3, session.Tv, 10000);
 
-                var queries = new ExpensesQueries(session.UnitOfWork, new UserSettings(), session.UserSession);
+                var queries = session.CreateExpensesQueries();
                 var report = await queries.GetExpensesByFlows(new DateTime(2017, 12, 30), date3, new PaginationArgs
                 {
                     PageNumber = 1,
@@ -82,7 +80,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 var bill3 = await session.CreateExpenseBill(ids.CashAccountId, ids.TechExpenseFlowId, date2, session.Tv, 20000);
                 await session.CreateExpenseBill(ids.DebitCardAccountId, ids.TechExpenseFlowId, date3, session.Tv, 10000);
 
-                var queries = new ExpensesQueries(session.UnitOfWork, new UserSettings(), session.UserSession);
+                var queries = session.CreateExpensesQueries();
                 var report = await queries.GetExpensesByDays(new ExpensesFilter
                 {
                     DateFrom = new DateTime(2017, 12, 30),
@@ -149,7 +147,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 var bill3 = await session.CreateExpenseBill(ids.CashAccountId, ids.TechExpenseFlowId, date2, session.Tv, 20000);
                 var bill4 = await session.CreateExpenseBill(ids.DebitCardAccountId, ids.TechExpenseFlowId, date3, session.Tv, 10000);
 
-                var queries = new ExpensesQueries(session.UnitOfWork, new UserSettings(), session.UserSession);
+                var queries = session.CreateExpensesQueries();
                 var report = await queries.GetExpensesByMonth(new ExpensesFilter
                 {
                     DateFrom = new DateTime(2017, 12, 30),
@@ -216,7 +214,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 var bill3 = await session.CreateExpenseBill(ids.CashAccountId, ids.TechExpenseFlowId, date2, session.Tv, 20000);
                 await session.CreateExpenseBill(ids.DebitCardAccountId, ids.TechExpenseFlowId, date3, session.Tv, 10000);
 
-                var queries = new ExpensesQueries(session.UnitOfWork, new UserSettings(), session.UserSession);
+                var queries = session.CreateExpensesQueries();
                 var report = await queries.GetExpensesForDay(new ExpensesFilter
                 {
                     DateFrom = date2,

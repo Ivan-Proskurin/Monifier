@@ -22,8 +22,8 @@ namespace Monifier.BusinessLogic.Queries.Inventorization
         
         public async Task<BalanceState> GetBalanceState()
         {
-            var accounts = await _accountQueries.GetAll();
-            var flows = await _flowQueries.GetAll();
+            var accounts = await _accountQueries.GetAll().ConfigureAwait(false);
+            var flows = await _flowQueries.GetAll().ConfigureAwait(false);
             var balance = accounts.Sum(x => x.Balance) - accounts.Sum(x => x.AvailBalance) - flows.Sum(x => x.Balance);
             return new BalanceState
             {

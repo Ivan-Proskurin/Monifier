@@ -23,29 +23,30 @@ namespace Monifier.BusinessLogic.Distribution
         public bool Distributed { get; set; }
         public decimal BaseAmount { get; set; }
 
-        public async Task Load(IUnitOfWork unitOfWork, int userId)
+        public async Task Load(IEntityRepository repository, int userId)
         {
-            Accounts = await GetAccounts(unitOfWork, userId);
-            ExpenseFlows = await GetFlows(unitOfWork, userId);
+            Accounts = await GetAccounts(repository, userId);
+            ExpenseFlows = await GetFlows(repository, userId);
             Distributed = false;
             BaseAmount = Accounts.Sum(x => x.Balance);
         }
         
-        private static async Task<List<DistributionSource>> GetAccounts(IUnitOfWork unitOfWork, int userId)
+        private static async Task<List<DistributionSource>> GetAccounts(IEntityRepository repository, int userId)
         {
-            var accountQueries = unitOfWork.GetQueryRepository<Account>();
-            var settingsQueries = unitOfWork.GetQueryRepository<AccountFlowSettings>();
+            var accountQueries = repository.GetQuery<Account>();
+            var settingsQueries = repository.GetQuery<AccountFlowSettings>();
             
-            var accounts = await accountQueries.Query
+            var accounts = await accountQueries
                 .Where(x => x.OwnerId == userId && !x.IsDeleted && x.AvailBalance > 0 
                             && x.AccountType != AccountType.CreditCard)
                 .OrderBy(x => x.Number)
                 .ToListAsync();
 
             var ids = accounts.Select(x => x.Id).ToList();
-            var flowSettings = await settingsQueries.Query
+            var flowSettings = await settingsQueries
                 .Where(x => ids.Contains(x.AccountId))
-                .ToListAsync();
+                .ToListAsync()
+                .ConfigureAwait(false);
                 
             return accounts.Select(x =>
             {
@@ -60,19 +61,20 @@ namespace Monifier.BusinessLogic.Distribution
             }).ToList();
         }
 
-        private static async Task<List<DistributionRecipient>> GetFlows(IUnitOfWork unitOfWork, int userId)
+        private static async Task<List<DistributionRecipient>> GetFlows(IEntityRepository repository, int userId)
         {
-            var flowQueries = unitOfWork.GetQueryRepository<ExpenseFlow>();
-            var settingsQueries = unitOfWork.GetQueryRepository<ExpenseFlowSettings>();
+            var flowQueries = repository.GetQuery<ExpenseFlow>();
+            var settingsQueries = repository.GetQuery<ExpenseFlowSettings>();
 
-            var flows = await flowQueries.Query
+            var flows = await flowQueries
                 .Where(x => x.OwnerId == userId && !x.IsDeleted)
                 .OrderByDescending(x => x.Version)
                 .ThenBy(x => x.Id)
-                .ToListAsync();
+                .ToListAsync()
+                .ConfigureAwait(false);
 
             var ids = flows.Select(x => x.Id).ToList();
-            var flowSettings = settingsQueries.Query
+            var flowSettings = settingsQueries
                 .Where(x => ids.Contains(x.ExpenseFlowId))
                 .ToList();
             
@@ -91,15 +93,16 @@ namespace Monifier.BusinessLogic.Distribution
             }).ToList();
         }
 
-        public async Task Distribute(IUnitOfWork unitOfWork, IFlowDistributor distributor)
+        public async Task Distribute(IEntityRepository repository, IFlowDistributor distributor)
         {
             var accountIds = Accounts.Select(x => x.Id).ToList();
             
-            var accountsQueries = unitOfWork.GetQueryRepository<Account>();
-            var accounts = await accountsQueries.Query
+            var accountsQueries = repository.GetQuery<Account>();
+            var accounts = await accountsQueries
                 .Where(x => accountIds.Contains(x.Id))
                 .Select(x => x.ToModel())
-                .ToListAsync();
+                .ToListAsync()
+                .ConfigureAwait(false);
             
             accounts.ForEach(x =>
             {
@@ -114,11 +117,12 @@ namespace Monifier.BusinessLogic.Distribution
 
             var flowIds = ExpenseFlows.Select(x => x.Id).ToList();
             
-            var flowQueries = unitOfWork.GetQueryRepository<ExpenseFlow>();
-            var flows = await flowQueries.Query
+            var flowQueries = repository.GetQuery<ExpenseFlow>();
+            var flows = await flowQueries
                 .Where(x => flowIds.Contains(x.Id))
                 .Select(x => x.ToModel())
-                .ToListAsync();
+                .ToListAsync()
+                .ConfigureAwait(false);
             
             flows.ForEach(x =>
             {
@@ -167,15 +171,15 @@ namespace Monifier.BusinessLogic.Distribution
             });
         }
 
-        public async Task Save(IUnitOfWork unitOfWork, DateTime dateTime)
+        public async Task Save(IEntityRepository repository, DateTime dateTime)
         {
-            var accountSettingsQueries = unitOfWork.GetQueryRepository<AccountFlowSettings>();
-            var accountSettingsCommands = unitOfWork.GetCommandRepository<AccountFlowSettings>();
+            var accountSettingsQueries = repository.GetQuery<AccountFlowSettings>();
             
             var accountIds = Accounts.Select(x => x.Id).ToList();
-            var accountSettings = await accountSettingsQueries.Query
+            var accountSettings = await accountSettingsQueries
                 .Where(x => accountIds.Contains(x.AccountId))
-                .ToListAsync();
+                .ToListAsync()
+                .ConfigureAwait(false);
             
             Accounts.ForEach(x =>
             {
@@ -187,22 +191,22 @@ namespace Monifier.BusinessLogic.Distribution
                         AccountId = x.Id,
                         CanFlow = x.CanFlow
                     };
-                    accountSettingsCommands.Create(settings);
+                    repository.Create(settings);
                 }
                 else
                 {
                     settings.CanFlow = x.CanFlow;
-                    accountSettingsCommands.Update(settings);
+                    repository.Update(settings);
                 }
             });
 
-            var flowSettingsQueries = unitOfWork.GetQueryRepository<ExpenseFlowSettings>();
-            var flowSettingsCommands = unitOfWork.GetCommandRepository<ExpenseFlowSettings>();
+            var flowSettingsQueries = repository.GetQuery<ExpenseFlowSettings>();
 
             var flowIds = ExpenseFlows.Select(x => x.Id).ToList();
-            var flowSettings = await flowSettingsQueries.Query
+            var flowSettings = await flowSettingsQueries
                 .Where(x => flowIds.Contains(x.ExpenseFlowId))
-                .ToListAsync();
+                .ToListAsync()
+                .ConfigureAwait(false);
             
             ExpenseFlows.ForEach(x =>
             {
@@ -216,14 +220,14 @@ namespace Monifier.BusinessLogic.Distribution
                         Rule = x.Rule,
                         Amount = x.Amount
                     };
-                    flowSettingsCommands.Create(settings);
+                    repository.Create(settings);
                 }
                 else
                 {
                     settings.CanFlow = x.CanFlow;
                     settings.Rule = x.Rule;
                     settings.Amount = x.Amount;
-                    flowSettingsCommands.Update(settings);
+                    repository.Update(settings);
                 }
             });
 
@@ -232,20 +236,19 @@ namespace Monifier.BusinessLogic.Distribution
                 DateTime = dateTime,
                 SumFlow = DistributionFlows.Sum(x => x.Amount)
             };
-            unitOfWork.GetCommandRepository<DataAccess.Model.Distribution.Distribution>().Create(distribution);
+            repository.Create(distribution);
 
-            var flowsCommands = unitOfWork.GetCommandRepository<Flow>();
-            var accountQueries = unitOfWork.GetQueryRepository<Account>();
-            var accountCommands = unitOfWork.GetCommandRepository<Account>();
-            var flowQueries = unitOfWork.GetQueryRepository<ExpenseFlow>();
-            var expenseFlowCommands = unitOfWork.GetCommandRepository<ExpenseFlow>();
+            var accountQueries = repository.GetQuery<Account>();
+            var flowQueries = repository.GetQuery<ExpenseFlow>();
             
-            var accounts = await accountQueries.Query
+            var accounts = await accountQueries
                 .Where(x => accountIds.Contains(x.Id))
-                .ToListAsync();
-            var expenseFlows = await flowQueries.Query
+                .ToListAsync()
+                .ConfigureAwait(false);
+            var expenseFlows = await flowQueries
                 .Where(x => flowIds.Contains(x.Id))
-                .ToListAsync();
+                .ToListAsync()
+                .ConfigureAwait(false);
             
             DistributionFlows.ForEach(x =>
             {
@@ -256,18 +259,18 @@ namespace Monifier.BusinessLogic.Distribution
                     RecipientId = x.RecipientId,
                     Amount = x.Amount
                 };
-                flowsCommands.Create(flow);
+                repository.Create(flow);
 
                 var account = accounts.First(a => a.Id == x.SourceId);
                 var expenseFlow = expenseFlows.First(f => f.Id == x.RecipientId);
 
                 account.AvailBalance -= x.Amount;
-                accountCommands.Update(account);
+                repository.Update(account);
                 expenseFlow.Balance += x.Amount;
-                expenseFlowCommands.Update(expenseFlow);
+                repository.Update(expenseFlow);
             });
             
-            await unitOfWork.SaveChangesAsync();
+            await repository.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }

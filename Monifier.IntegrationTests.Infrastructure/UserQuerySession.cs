@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Monifier.BusinessLogic.Auth;
 using Monifier.BusinessLogic.Contract.Auth;
 using Monifier.BusinessLogic.Contract.Base;
+using Monifier.BusinessLogic.Contract.Distribution;
 using Monifier.BusinessLogic.Contract.Expenses;
 using Monifier.BusinessLogic.Contract.Incomes;
 using Monifier.BusinessLogic.Contract.Processing;
@@ -13,8 +14,10 @@ using Monifier.BusinessLogic.Contract.Transactions;
 using Monifier.BusinessLogic.Model.Expenses;
 using Monifier.BusinessLogic.Processing;
 using Monifier.BusinessLogic.Queries.Base;
+using Monifier.BusinessLogic.Queries.Distribution;
 using Monifier.BusinessLogic.Queries.Expenses;
 using Monifier.BusinessLogic.Queries.Incomes;
+using Monifier.BusinessLogic.Queries.Settings;
 using Monifier.BusinessLogic.Queries.Transactions;
 using Monifier.BusinessLogic.Support;
 using Monifier.Common.Extensions;
@@ -34,12 +37,14 @@ namespace Monifier.IntegrationTests.Infrastructure
         #region Fields and constructor
 
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IEntityRepository _repository;
 
         public UserQuerySession(string databaseName, User user)
         {
             if (databaseName.IsNullOrEmpty())
                 throw new ArgumentNullException(nameof(databaseName));
             _unitOfWork = CreateUnitOfWork(databaseName);
+            _repository = new EntityRepository(_unitOfWork);
             if (user == null) return;
             User = user;
             UserSession = new CurrentSessionImpl(user);
@@ -98,7 +103,7 @@ namespace Monifier.IntegrationTests.Infrastructure
 
         public User CreateUser(string name, string login, string password, bool isAdmin)
         {
-            var authCommands = new AuthCommands(_unitOfWork);
+            var authCommands = new AuthCommands(_repository);
             var userId = authCommands.CreateUser(name, login, password, isAdmin).Result;
             var userQueries = _unitOfWork.GetQueryRepository<User>();
             return userQueries.GetById(userId).Result;
@@ -287,16 +292,14 @@ namespace Monifier.IntegrationTests.Infrastructure
             };
         }
 
-        public async Task<T> LoadEntity<T>(int id) where T : class, IHasId
+        public Task<T> LoadEntity<T>(int id) where T : class, IHasId
         {
-            var queries = _unitOfWork.GetQueryRepository<T>();
-            return await queries.GetById(id);
+            return _repository.LoadAsync<T>(id);
         }
 
-        public async Task<List<T>> LoadEntities<T>() where T : class, IHasId
+        public Task<List<T>> LoadEntities<T>() where T : class, IHasId
         {
-            var queries = _unitOfWork.GetQueryRepository<T>();
-            return await queries.Query.ToListAsync();
+            return _repository.GetQuery<T>().ToListAsync();
         }
 
         public async Task LoadDefaultEntities(EntityIdSet idSet)
@@ -317,11 +320,10 @@ namespace Monifier.IntegrationTests.Infrastructure
             Incomes = (await LoadEntities<IncomeItem>()).OrderBy(x => x.DateTime).ToList();
         }
 
-        public async Task UpdateEntity<T>(T entity) where T : class, IHasId
+        public Task UpdateEntity<T>(T entity) where T : class, IHasId
         {
-            var commands = _unitOfWork.GetCommandRepository<T>();
-            commands.Update(entity);
-            await _unitOfWork.SaveChangesAsync();
+            _repository.Update(entity);
+            return _unitOfWork.SaveChangesAsync();
         }
 
         public IncomeType SalaryIncome { get; private set; }
@@ -347,42 +349,72 @@ namespace Monifier.IntegrationTests.Infrastructure
 
         #region Commands & Queries factories
 
+        public IAuthCommands CreateAuthCommands()
+        {
+            return new AuthCommands(_repository);
+        }
+
+        public ISessionCommands CreateSessionCommands()
+        {
+            return new SessionCommands(_repository);
+        }
+
         public IIncomeItemCommands CreateIncomeCommands()
         {
-            return new IncomeItemCommands(UnitOfWork, UserSession, CreateTransactionBuilder());
+            return new IncomeItemCommands(_repository, UserSession, CreateTransactionBuilder());
+        }
+
+        public IIncomesQueries CreateIncomesQueries()
+        {
+            return new IncomesQueries(_repository, UserSession);
         }
 
         public ITransactionBuilder CreateTransactionBuilder()
         {
-            return new TransactionBuilder(UnitOfWork, CreateTransactionQueries());
+            return new TransactionBuilder(_repository, CreateTransactionQueries());
         }
 
         public IAccountCommands CreateAccountCommands()
         {
-            return new AccountCommands(UnitOfWork, UserSession, 
+            return new AccountCommands(_repository, UserSession, 
                 CreateIncomeCommands(), new TimeService(UserSession), CreateTransactionBuilder());
+        }
+
+        public IAccountQueries CreateAccountQueries()
+        {
+            return new AccountQueries(_repository, UserSession);
         }
 
         public ITransactionQueries CreateTransactionQueries()
         {
-            return new TransactionQueries(UnitOfWork, UserSession);
+            return new TransactionQueries(_repository, UserSession);
         }
 
         public IExpensesBillCommands CreateExpensesBillCommands()
         {
-            return new ExpensesBillCommands(UnitOfWork, UserSession, new BalancesUpdaterFactory(UnitOfWork),
-                new TransitionBalancesUpdater(UnitOfWork), CreateTransactionBuilder());
+            return new ExpensesBillCommands(_repository, UserSession, new BalancesUpdaterFactory(_repository),
+                new TransitionBalancesUpdater(_repository), CreateTransactionBuilder());
         }
 
         public IExpenseFlowCommands CreateExpenseFlowCommands()
         {
-            return new ExpenseFlowCommands(UnitOfWork, UserSession, CreateExpensesBillCommands());
+            return new ExpenseFlowCommands(_repository, UserSession, CreateExpensesBillCommands());
         }
 
         public ICreditCardProcessing CreateCreditCardProcessing()
         {
-            return new CreditCardProcessing(UnitOfWork, UserSession, new TimeService(UserSession), 
+            return new CreditCardProcessing(_repository, UserSession, new TimeService(UserSession), 
                 CreateExpensesBillCommands());
+        }
+
+        public IDistributionQueries CreateDistributionQueries()
+        {
+            return new DistributionQueries(_repository, UserSession);
+        }
+
+        public IExpensesQueries CreateExpensesQueries()
+        {
+            return new ExpensesQueries(_repository, new UserSettings(), UserSession);
         }
 
         #endregion

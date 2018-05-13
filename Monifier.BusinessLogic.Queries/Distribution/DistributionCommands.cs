@@ -10,34 +10,34 @@ namespace Monifier.BusinessLogic.Queries.Distribution
 {
     public class DistributionCommands : IDistributionCommands
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEntityRepository _repository;
         private readonly IFlowDistributor _distributor;
         private readonly ITimeService _timeService;
 
         public DistributionCommands(
-            IUnitOfWork unitOfWork,
+            IEntityRepository repository,
             IFlowDistributor distributor,
             ITimeService timeService)
         {
-            _unitOfWork = unitOfWork;
+            _repository = repository;
             _distributor = distributor;
             _timeService = timeService;
         }
         
-        public async Task Distribute(DistributionBoard board)
+        public Task Distribute(DistributionBoard board)
         {
             if (board == null)
                 throw new ArgumentNullException(nameof(board));
             
-            await board.Distribute(_unitOfWork, _distributor);
+            return board.Distribute(_repository, _distributor);
         }
 
-        public async Task Save(DistributionBoard board)
+        public Task Save(DistributionBoard board)
         {
             if (board == null)
                 throw new ArgumentNullException(nameof(board));
 
-            await board.Save(_unitOfWork, _timeService.ClientLocalNow);
+            return board.Save(_repository, _timeService.ClientLocalNow);
         }
     }
 }

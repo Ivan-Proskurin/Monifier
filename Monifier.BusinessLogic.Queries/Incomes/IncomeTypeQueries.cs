@@ -13,20 +13,20 @@ namespace Monifier.BusinessLogic.Queries.Incomes
 {
     public class IncomeTypeQueries : IIncomeTypeQueries
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEntityRepository _repository;
         private readonly ICurrentSession _currentSession;
 
-        public IncomeTypeQueries(IUnitOfWork unitOfWork, ICurrentSession currentSession)
+        public IncomeTypeQueries(IEntityRepository repository, ICurrentSession currentSession)
         {
-            _unitOfWork = unitOfWork;
+            _repository = repository;
             _currentSession = currentSession;
         }
 
-        public async Task<List<IncomeTypeModel>> GetAll(bool includeDeleted = false)
+        public Task<List<IncomeTypeModel>> GetAll(bool includeDeleted = false)
         {
-            var typesRepo = _unitOfWork.GetQueryRepository<IncomeType>();
+            var typesRepo = _repository.GetQuery<IncomeType>();
             var ownerId = _currentSession.UserId;
-            var items = await typesRepo.Query
+            return typesRepo
                 .Where(x => x.OwnerId == ownerId)
                 .Select(x => new IncomeTypeModel
                 {
@@ -34,12 +34,11 @@ namespace Monifier.BusinessLogic.Queries.Incomes
                     Name = x.Name
                 })
                 .ToListAsync();
-            return items;
         }
 
         public async Task<IncomeTypeModel> GetById(int id)
         {
-            var type = await _unitOfWork.GetQueryRepository<IncomeType>().GetById(id);
+            var type = await _repository.LoadAsync<IncomeType>(id).ConfigureAwait(false);
             if (type == null) return null;
             return new IncomeTypeModel
             {
@@ -50,8 +49,7 @@ namespace Monifier.BusinessLogic.Queries.Incomes
 
         public async Task<IncomeTypeModel> GetByName(string name, bool includeDeleted = false)
         {
-            var typesRepo = _unitOfWork.GetNamedModelQueryRepository<IncomeType>();
-            var type = await typesRepo.GetByName(_currentSession.UserId, name);
+            var type = await _repository.FindByNameAsync<IncomeType>(_currentSession.UserId, name).ConfigureAwait(false);
             if (type == null) return null;
             return new IncomeTypeModel
             {
@@ -60,13 +58,13 @@ namespace Monifier.BusinessLogic.Queries.Incomes
             };
         }
 
-        public async Task<List<IncomeTypeModel>> GetFiltered(DateTime dateFrom, DateTime dateTo)
+        public Task<List<IncomeTypeModel>> GetFiltered(DateTime dateFrom, DateTime dateTo)
         {
-            var typesRepo = _unitOfWork.GetQueryRepository<IncomeType>();
-            var itemsRepo = _unitOfWork.GetQueryRepository<IncomeItem>();
+            var typesQuery = _repository.GetQuery<IncomeType>();
+            var itemsQuery = _repository.GetQuery<IncomeItem>();
             var ownerId = _currentSession.UserId;
-            var query = from t in typesRepo.Query
-                        join i in itemsRepo.Query on t.Id equals i.IncomeTypeId into typeItemsJoin
+            var query = from t in typesQuery
+                        join i in itemsQuery on t.Id equals i.IncomeTypeId into typeItemsJoin
                         from ti in typeItemsJoin.DefaultIfEmpty()
                         where ti.OwnerId == ownerId && ti.DateTime >= dateFrom && ti.DateTime < dateTo
                         group new { ti.IncomeType, ti.Total } by ti.IncomeTypeId into tiGroup
@@ -76,8 +74,7 @@ namespace Monifier.BusinessLogic.Queries.Incomes
                             Name = tiGroup.FirstOrDefault().IncomeType.Name,
                             SumTotal = tiGroup.Sum(x => x.Total)
                         };
-            var items = await query.ToListAsync();
-            return items;
+            return query.ToListAsync();
         }
     }
 }

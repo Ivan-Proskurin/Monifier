@@ -9,22 +9,17 @@ namespace Monifier.BusinessLogic.Queries.Expenses
 {
     public class TransitionBalancesUpdater : ITransitionBalanceUpdater
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEntityRepository _repository;
 
-        public TransitionBalancesUpdater(IUnitOfWork unitOfWork)
+        public TransitionBalancesUpdater(IEntityRepository repository)
         {
-            _unitOfWork = unitOfWork;
+            _repository = repository;
         }
 
         public async Task<decimal> Update(ExpenseBill bill, decimal oldSum, int? oldAccountId)
         {
-            var flowQueries = _unitOfWork.GetQueryRepository<ExpenseFlow>();
-            var flowCommands = _unitOfWork.GetCommandRepository<ExpenseFlow>();
-            var accountQueries = _unitOfWork.GetQueryRepository<Account>();
-            var accountCommands = _unitOfWork.GetCommandRepository<Account>();
-
-            var flow = await flowQueries.GetById(bill.ExpenseFlowId);
-            var newAccount = bill.AccountId != null ? await accountQueries.GetById(bill.AccountId.Value) : null;
+            var flow = await _repository.LoadAsync<ExpenseFlow>(bill.ExpenseFlowId);
+            var newAccount = bill.AccountId != null ? await _repository.LoadAsync<Account>(bill.AccountId.Value) : null;
             flow.Balance = flow.Balance + oldSum;
             var lack = bill.SumPrice - Math.Max(flow.Balance, 0);
             var withdrawTotal = bill.SumPrice;
@@ -36,7 +31,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             }
             flow.Balance -= withdrawTotal;
             flow.Version++;
-            flowCommands.Update(flow);
+            _repository.Update(flow);
 
             if (!bill.IsCorrection)
             {
@@ -44,27 +39,27 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                 {
                     if (oldAccountId != null)
                     {
-                        var oldAccount = await accountQueries.GetById(oldAccountId.Value);
+                        var oldAccount = await _repository.LoadAsync<Account>(oldAccountId.Value);
                         oldAccount.Balance += oldSum;
-                        accountCommands.Update(oldAccount);
+                        _repository.Update(oldAccount);
                     }
 
                     if (newAccount != null)
                     {
                         newAccount.Balance -= bill.SumPrice;
                         newAccount.LastWithdraw = DateTime.Now;
-                        accountCommands.Update(newAccount);
+                        _repository.Update(newAccount);
                     }
                 }
                 else if (newAccount != null)
                 {
                     newAccount.Balance += oldSum - bill.SumPrice;
-                    accountCommands.Update(newAccount);
+                    _repository.Update(newAccount);
                 }
             }
             else if (newAccount != null)
             {
-                accountCommands.Update(newAccount);
+                _repository.Update(newAccount);
             }
 
             return newAccount?.Balance ?? 0;

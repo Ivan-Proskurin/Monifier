@@ -5,6 +5,7 @@ using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Model.Base;
 using Monifier.BusinessLogic.Queries.Base;
 using Monifier.DataAccess.Contract;
+using Monifier.DataAccess.EntityFramework;
 using Monifier.DataAccess.Model.Base;
 using Moq;
 using Xunit;
@@ -19,6 +20,7 @@ namespace Monifier.BusinessLogic.Queries.Tests
         private readonly Mock<IProductCommands> _productCommandsMock;
         private readonly Mock<IUnitOfWork> _uowMock;
         private readonly Mock<ICurrentSession> _currentSessionMock;
+        private readonly IEntityRepository _repository;
 
         public CategoriesCommandsTests()
         {
@@ -36,6 +38,7 @@ namespace Monifier.BusinessLogic.Queries.Tests
             _uowMock.Setup(m => m.GetCommandRepository<Category>()).Returns(_commandsMock.Object);
             _uowMock.Setup(m => m.GetNamedModelQueryRepository<Category>()).Returns(_queriesMock.Object);
             _uowMock.Setup(m => m.SaveChangesAsync()).Returns(Task.Run(() => { }));
+            _repository = new EntityRepository(_uowMock.Object);
         }
 
         [Fact]
@@ -43,7 +46,7 @@ namespace Monifier.BusinessLogic.Queries.Tests
         {
 
             var categoriesCommands = new CategoriesCommands(
-                _uowMock.Object, _productCommandsMock.Object, _productQueriesMock.Object, _currentSessionMock.Object);
+                _repository, _productCommandsMock.Object, _productQueriesMock.Object, _currentSessionMock.Object);
             var model = new CategoryModel { Id = -1, Name = "New category" };
             var t = categoriesCommands.Update(model);
             t.Wait();
@@ -59,7 +62,7 @@ namespace Monifier.BusinessLogic.Queries.Tests
                 (id, s) => Task.FromResult(new Category { Id = 1, Name = "New category"}));
 
             var categoriesCommands = new CategoriesCommands(
-                _uowMock.Object, _productCommandsMock.Object, _productQueriesMock.Object, _currentSessionMock.Object);
+                _repository, _productCommandsMock.Object, _productQueriesMock.Object, _currentSessionMock.Object);
             var model = new CategoryModel { Name = "New category" };
             await Assert.ThrowsAsync<ArgumentException>(async () => await categoriesCommands.Update(model));
         }

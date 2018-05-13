@@ -14,29 +14,28 @@ namespace Monifier.BusinessLogic.Queries.Expenses
 {
     public class ExpenseFlowCommands : IExpenseFlowCommands
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEntityRepository _repository;
         private readonly ICurrentSession _currentSession;
         private readonly IExpensesBillCommands _expensesBillCommands;
 
-        public ExpenseFlowCommands(IUnitOfWork unitOfWork, ICurrentSession currentSession,
+        public ExpenseFlowCommands(
+            IEntityRepository repository, 
+            ICurrentSession currentSession,
             IExpensesBillCommands expensesBillCommands)
         {
-            _unitOfWork = unitOfWork;
+            _repository = repository;
             _currentSession = currentSession;
             _expensesBillCommands = expensesBillCommands;
         }
         
         public async Task<ExpenseFlowModel> Update(ExpenseFlowModel model)
         {
-            var queries = _unitOfWork.GetNamedModelQueryRepository<ExpenseFlow>();
-            var commands = _unitOfWork.GetCommandRepository<ExpenseFlow>();
-
-            var other = await queries.GetByName(_currentSession.UserId, model.Name);
+            var other = await _repository.FindByNameAsync<ExpenseFlow>(_currentSession.UserId, model.Name);
             if (other != null)
                 if (other.Id != model.Id)
                     throw new ArgumentException("Категория расходов с таким названием уже есть");
                 else
-                    commands.Detach(other);
+                    _repository.Detach(other);
 
             var flow = new ExpenseFlow
             {
@@ -50,18 +49,18 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             if (model.Id < 0)
             {
                 flow.Version = 1;
-                commands.Create(flow);
+                _repository.Create(flow);
             }
             else
             {
                 flow.Id = model.Id;
                 flow.Version = model.Version + 1;
-                commands.Update(flow);
+                _repository.Update(flow);
                 if (model.Categories != null)
                     UpdateFlowCategories(flow.Id, model.Categories);
             }
             
-            await _unitOfWork.SaveChangesAsync();
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
 
             model.Id = flow.Id;
             model.Version = flow.Version;
@@ -70,11 +69,10 @@ namespace Monifier.BusinessLogic.Queries.Expenses
 
         private void UpdateFlowCategories(int flowId, IEnumerable<int> categoriesId)
         {
-            var flowcatsQueries = _unitOfWork.GetQueryRepository<ExpensesFlowProductCategory>();
-            var flowcatsCommands = _unitOfWork.GetCommandRepository<ExpensesFlowProductCategory>();
-            foreach (var flowcat in flowcatsQueries.Query.Where(x => x.ExpensesFlowId == flowId))
+            foreach (var flowcat in _repository.GetQuery<ExpensesFlowProductCategory>()
+                .Where(x => x.ExpensesFlowId == flowId))
             {
-                flowcatsCommands.Delete(flowcat);
+                _repository.Delete(flowcat);
             }
             foreach (var catId in categoriesId)
             {
@@ -83,14 +81,13 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                     ExpensesFlowId = flowId,
                     CategoryId = catId
                 };
-                flowcatsCommands.Create(flowcat);
+                _repository.Create(flowcat);
             }
         } 
 
         public async Task Delete(int id, bool onlyMark = true)
         {
-            var expenseRepo = _unitOfWork.GetQueryRepository<ExpenseFlow>();
-            var flow = await expenseRepo.GetById(id);
+            var flow = await _repository.LoadAsync<ExpenseFlow>(id).ConfigureAwait(false);
             if (flow == null)
                 throw new ArgumentException($"Нет счета с Id = {id}");
             
@@ -100,10 +97,9 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             }
             else
             {
-                var flowCommands = _unitOfWork.GetCommandRepository<ExpenseFlow>();
-                flowCommands.Delete(flow);
+                _repository.Delete(flow);
             }
-            await _unitOfWork.SaveChangesAsync();
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task AddExpense(ExpenseFlowExpense expense)
@@ -111,12 +107,11 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             if (expense.Account.IsNullOrEmpty())
                 throw new ArgumentException("Необходимо указать счет");
             
-            var account = await _unitOfWork.GetNamedModelQueryRepository<Account>().GetByName(
-                _currentSession.UserId, expense.Account);
+            var account = await _repository.FindByNameAsync<Account>(_currentSession.UserId, expense.Account);
             if (account == null)
                 throw new ArgumentException($"Нет счета с именем \"{expense.Account}\"");
             
-            var flow = await _unitOfWork.GetQueryRepository<ExpenseFlow>().GetById(expense.ExpenseFlowId);
+            var flow = await _repository.LoadAsync<ExpenseFlow>(expense.ExpenseFlowId);
             if (flow == null)
                 throw new ArgumentException($"Нет статьи расходов с идентификатором Id = {expense.ExpenseFlowId}");
             
@@ -126,8 +121,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             Category category = null;
             if (!string.IsNullOrEmpty(expense.Category))
             {
-                var repo = _unitOfWork.GetNamedModelQueryRepository<Category>();
-                category = await repo.GetByName(_currentSession.UserId, expense.Category);
+                category = await _repository.FindByNameAsync<Category>(_currentSession.UserId, expense.Category);
                 if (category == null)
                     throw new ArgumentException($"Нет категории продуктов с именем \"{expense.Category}\"");
             }
@@ -135,8 +129,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             Product product = null;
             if (!string.IsNullOrEmpty(expense.Product))
             {
-                product = await _unitOfWork.GetNamedModelQueryRepository<Product>().GetByName(
-                    _currentSession.UserId, expense.Product);
+                product = await _repository.FindByNameAsync<Product>(_currentSession.UserId, expense.Product);
                 if (product == null)
                     throw new ArgumentException($"Нет товара с именем \"{expense.Product}\"");
             }
@@ -164,7 +157,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                 }
             };
 
-            await _expensesBillCommands.Create(billModel, expense.Correcting);
+            await _expensesBillCommands.Create(billModel, expense.Correcting).ConfigureAwait(false);
         }
     }
 }

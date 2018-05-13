@@ -14,7 +14,7 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
         {
             using (var session = CreateUnauthorizedSession())
             {
-                var commands = new AuthCommands(session.UnitOfWork);
+                var commands = session.CreateAuthCommands();
                 await Assert.ThrowsAsync<ArgumentException>(
                     async () => await commands.CreateUser(null, "login", "pass", false));
             }
@@ -25,7 +25,7 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
         {
             using (var session = CreateUnauthorizedSession())
             {
-                var commands = new AuthCommands(session.UnitOfWork);
+                var commands = session.CreateAuthCommands();
                 await Assert.ThrowsAsync<ArgumentException>(
                     async () => await commands.CreateUser("user", "login", string.Empty, false));
             }
@@ -36,7 +36,7 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
         {
             using (var session = CreateUnauthorizedSession())
             {
-                var commands = new AuthCommands(session.UnitOfWork);
+                var commands = session.CreateAuthCommands();
                 await Assert.ThrowsAsync<ArgumentException>(
                     async () => await commands.CreateUser("user", string.Empty, "pass", false));
             }
@@ -52,7 +52,7 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
 
             using (var session = CreateUnauthorizedSession())
             {
-                var commands = new AuthCommands(session.UnitOfWork);
+                var commands = session.CreateAuthCommands();
                 userId = await commands.CreateUser(name, login, pass, false);
             }
             
@@ -78,13 +78,13 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
         {
             using (var session = CreateUnauthorizedSession())
             {
-                var commands = new AuthCommands(session.UnitOfWork);
+                var commands = session.CreateAuthCommands();
                 await commands.CreateUser("user", "login", "pass", false);
             }
 
             using (var session = CreateUnauthorizedSession())
             {
-                var commands = new AuthCommands(session.UnitOfWork);
+                var commands = session.CreateAuthCommands();
                 await Assert.ThrowsAsync<AuthException>(
                     async () => await commands.CreateUser("new user", "login", "new pass", true));
             }
@@ -96,13 +96,13 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
             int userId;
             using (var session = CreateUnauthorizedSession())
             {
-                var commands = new AuthCommands(session.UnitOfWork);
+                var commands = session.CreateAuthCommands();
                 userId = await commands.CreateUser("user", "login", "pass", false);
             }
 
             using (var session = CreateUnauthorizedSession())
             {
-                var commands = new AuthCommands(session.UnitOfWork);
+                var commands = session.CreateAuthCommands();
                 var newUserId = await commands.CreateUser("user", "new login", "new pass", true);
                 userId.Should().NotBe(newUserId);
             }
@@ -120,7 +120,7 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
 
             using (var session = CreateUnauthorizedSession())
             {
-                var commands = new AuthCommands(session.UnitOfWork);
+                var commands = session.CreateAuthCommands();
                 userId = await commands.CreateUser(name, login, pass, false);
                 var user = await session.LoadEntity<User>(userId);
                 salt = user.Salt;
@@ -128,7 +128,7 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
 
             using (var session = CreateUnauthorizedSession())
             {
-                var commands = new AuthCommands(session.UnitOfWork);
+                var commands = session.CreateAuthCommands();
                 await commands.UpdateUser(userId, null, newpass);
                 var user = await session.LoadEntity<User>(userId);
                 user.Name.ShouldBeEquivalentTo(name);
@@ -150,7 +150,7 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
 
             using (var session = CreateUnauthorizedSession())
             {
-                var commands = new AuthCommands(session.UnitOfWork);
+                var commands = session.CreateAuthCommands();
                 userId = await commands.CreateUser(name, login, pass, false);
                 var user = await session.LoadEntity<User>(userId);
                 salt = user.Salt;
@@ -159,7 +159,7 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
 
             using (var session = CreateUnauthorizedSession())
             {
-                var commands = new AuthCommands(session.UnitOfWork);
+                var commands = session.CreateAuthCommands();
                 await commands.UpdateUser(userId, newName, null);
                 var user = await session.LoadEntity<User>(userId);
                 user.Name.ShouldBeEquivalentTo(newName);
@@ -173,7 +173,7 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
         {
             using (var session = CreateUnauthorizedSession())
             {
-                var commands = new AuthCommands(session.UnitOfWork);
+                var commands = session.CreateAuthCommands();
                 await Assert.ThrowsAsync<ArgumentException>(async () => await commands.UpdateUser(3, "new name", null));
             }
         }
@@ -188,13 +188,13 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
 
             using (var session = CreateUnauthorizedSession())
             {
-                var commands = new AuthCommands(session.UnitOfWork);
+                var commands = session.CreateAuthCommands();
                 userId = await commands.CreateUser(name, login, pass, false);
             }
 
             using (var session = CreateUnauthorizedSession())
             {
-                var commands = new AuthCommands(session.UnitOfWork);
+                var commands = session.CreateAuthCommands();
                 await Assert.ThrowsAsync<ArgumentException>(async () => await commands.UpdateUser(userId, null, null));
             }
         }

@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using FluentAssertions;
 using Monifier.BusinessLogic.Model.Pagination;
-using Monifier.BusinessLogic.Queries.Incomes;
 using Monifier.Common.Extensions;
 using Monifier.IntegrationTests.Infrastructure;
 using Xunit;
@@ -16,7 +15,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
             using (var session = await CreateDefaultSession())
             {
                 session.CreateDefaultEntities();
-                var queries = new IncomesQueries(session.UnitOfWork, session.UserSession);
+                var queries = session.CreateIncomesQueries();
                 var from = session.Incomes.First().DateTime.AddMilliseconds(-1);
                 var to = session.Incomes.Last().DateTime.AddMilliseconds(1);
                 var list = await queries.GetIncomesList(from, to, new PaginationArgs
@@ -34,7 +33,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
             using (var session = await CreateDefaultSession())
             {
                 session.CreateDefaultEntities();
-                var queries = new IncomesQueries(session.UnitOfWork, session.UserSession);
+                var queries = session.CreateIncomesQueries();
                 var from = session.Incomes.First().DateTime.StartOfTheMonth();
                 var to = session.Incomes.Last().DateTime.EndOfTheMonth();
                 var list = await queries.GetIncomesByMonth(from, to, new PaginationArgs

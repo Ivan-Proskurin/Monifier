@@ -17,12 +17,12 @@ namespace Monifier.BusinessLogic.Queries.Incomes
 {
     public class IncomesQueries : IIncomesQueries
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEntityRepository _repository;
         private readonly ICurrentSession _currentSession;
 
-        public IncomesQueries(IUnitOfWork unitOfWork, ICurrentSession currentSession)
+        public IncomesQueries(IEntityRepository repository, ICurrentSession currentSession)
         {
-            _unitOfWork = unitOfWork;
+            _repository = repository;
             _currentSession = currentSession;
         }
 
@@ -40,13 +40,13 @@ namespace Monifier.BusinessLogic.Queries.Incomes
             dateFrom = dateFrom.StartOfTheMonth();
             dateTo = dateTo.EndOfTheMonth();
             
-            var incomesQueries = _unitOfWork.GetQueryRepository<IncomeItem>();
-            var typesQueries = _unitOfWork.GetQueryRepository<IncomeType>();
+            var incomesQueries = _repository.GetQuery<IncomeItem>();
+            var typesQueries = _repository.GetQuery<IncomeType>();
             var ownerId = _currentSession.UserId;
 
             var incomesQuery =
-                from income in incomesQueries.Query
-                join itype in typesQueries.Query on income.IncomeTypeId equals itype.Id
+                from income in incomesQueries
+                join itype in typesQueries on income.IncomeTypeId equals itype.Id
                 where income.OwnerId == ownerId && income.DateTime >= dateFrom && income.DateTime < dateTo
                 orderby income.Total descending 
                 group new {income, itype} by new {income.DateTime.Year, income.DateTime.Month}
@@ -59,17 +59,19 @@ namespace Monifier.BusinessLogic.Queries.Incomes
                     Month = new DateTime(incomeGroups.Key.Year, incomeGroups.Key.Month, 1)
                 };
 
-            var incomesCount = await incomesQuery.CountAsync();
+            var incomesCount = await incomesQuery.CountAsync().ConfigureAwait(false);
             var pagination = new PaginationInfo(paginationArgs, incomesCount);
 
             var incomes = await incomesQuery
                 .Skip(pagination.Skipped)
                 .Take(pagination.Taken)
-                .ToListAsync();
+                .ToListAsync()
+                .ConfigureAwait(false);
 
-            var totals = await incomesQueries.Query
+            var totals = await incomesQueries
                 .Where(x => x.OwnerId == ownerId && x.DateTime >= dateFrom && x.DateTime < dateTo)
-                .SumAsync(x => x.Total);
+                .SumAsync(x => x.Total)
+                .ConfigureAwait(false);
 
             return new IncomesListModel
             {
@@ -95,15 +97,15 @@ namespace Monifier.BusinessLogic.Queries.Incomes
         public async Task<IncomesListModel> GetIncomesList(DateTime dateFrom, DateTime dateTo,
             PaginationArgs paginationArgs)
         {
-            var incomesQueries = _unitOfWork.GetQueryRepository<IncomeItem>();
-            var typeQueries = _unitOfWork.GetQueryRepository<IncomeType>();
-            var accountQueries = _unitOfWork.GetQueryRepository<Account>();
+            var incomesQueries = _repository.GetQuery<IncomeItem>();
+            var typeQueries = _repository.GetQuery<IncomeType>();
+            var accountQueries = _repository.GetQuery<Account>();
             var ownerId = _currentSession.UserId;
 
             var incomesQuery =
-                from income in incomesQueries.Query
-                join itype in typeQueries.Query on income.IncomeTypeId equals itype.Id
-                join account in accountQueries.Query on income.AccountId equals account.Id
+                from income in incomesQueries
+                join itype in typeQueries on income.IncomeTypeId equals itype.Id
+                join account in accountQueries on income.AccountId equals account.Id
                 where income.OwnerId == ownerId && income.DateTime >= dateFrom && income.DateTime < dateTo
                 orderby income.DateTime
                 select new
@@ -113,17 +115,19 @@ namespace Monifier.BusinessLogic.Queries.Incomes
                     Account = account.Name
                 };
 
-            var incomesCount = await incomesQuery.CountAsync();
+            var incomesCount = await incomesQuery.CountAsync().ConfigureAwait(false);
             var pagination = new PaginationInfo(paginationArgs, incomesCount);
 
             var incomes = await incomesQuery
                 .Skip(pagination.Skipped)
                 .Take(pagination.Taken)
-                .ToListAsync();
+                .ToListAsync()
+                .ConfigureAwait(false);
 
-            var totals = await incomesQueries.Query
+            var totals = await incomesQueries
                 .Where(x => x.OwnerId == ownerId && x.DateTime >= dateFrom && x.DateTime < dateTo)
-                .SumAsync(x => x.Total);
+                .SumAsync(x => x.Total)
+                .ConfigureAwait(false);
 
             var result = new IncomesListModel
             {
@@ -159,9 +163,9 @@ namespace Monifier.BusinessLogic.Queries.Incomes
             throw new NotImplementedException();
         }
 
-        public async Task<IncomeItem> GetById(int id)
+        public Task<IncomeItem> GetById(int id)
         {
-            return await _unitOfWork.LoadEntity<IncomeItem>(id).ConfigureAwait(false);
+            return _repository.LoadAsync<IncomeItem>(id);
         }
 
         public Task<IncomeItem> GetByName(string name, bool includeDeleted = false)

@@ -1,16 +1,16 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Monifier.DataAccess.Contract;
 using Monifier.DataAccess.Model.Auth;
 
 namespace Monifier.BusinessLogic.Auth
 {
     public static class SessionQueriesExtensions
     {
-        public static async Task<Session> GetByToken(this IQueryRepository<Session> queries, Guid token)
+        public static Task<Session> GetByToken(this IQueryable<Session> query, Guid token)
         {
-            return await queries.Query.FirstOrDefaultAsync(x => x.Token == token);
+            return query.FirstOrDefaultAsync(x => x.Token == token);
         }
     }
 }

@@ -14,14 +14,14 @@ namespace Monifier.Web.Pages.Auth
 {
     public class UserModel : PageModel
     {
+        private readonly IEntityRepository _repository;
         private readonly ICurrentSession _currentSession;
-        private readonly IUnitOfWork _unitOfWork;
         private readonly IAuthCommands _authCommands;
 
-        public UserModel(ICurrentSession currentSession, IUnitOfWork unitOfWork, IAuthCommands authCommands)
+        public UserModel(IEntityRepository repository, ICurrentSession currentSession, IAuthCommands authCommands)
         {
+            _repository = repository;
             _currentSession = currentSession;
-            _unitOfWork = unitOfWork;
             _authCommands = authCommands;
         }
 
@@ -29,7 +29,7 @@ namespace Monifier.Web.Pages.Auth
         {
             if (!_currentSession.IsAuthenticated)
                 throw new AuthenticationException("User is not authenticated");
-            var user = await _unitOfWork.GetQueryRepository<User>().GetById(_currentSession.UserId);
+            var user = await _repository.LoadAsync<User>(_currentSession.UserId);
             User = user.ToViewModel();
         }
 
@@ -38,7 +38,7 @@ namespace Monifier.Web.Pages.Auth
             return await User.ProcessAsync(ModelState, nameof(User),
                 async () =>
                 {
-                    var user = await _unitOfWork.GetQueryRepository<User>().GetById(_currentSession.UserId);
+                    var user = await _repository.LoadAsync<User>(_currentSession.UserId);
                     var newName = user.Name != User.Name ? User.Name : null;
                     if (newName != null || !User.Password.IsNullOrEmpty())
                     {

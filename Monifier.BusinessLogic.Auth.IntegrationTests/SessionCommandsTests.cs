@@ -15,7 +15,7 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
         
         private async Task<int> CreateUser(UserQuerySession session, string login, string password, bool isAdmin = false)
         {
-            var commands = new AuthCommands(session.UnitOfWork);
+            var commands = session.CreateAuthCommands();
             return await commands.CreateUser(login, login, password, isAdmin);
         }
 
@@ -27,14 +27,14 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
         private async Task<Session> CreateSession(UserQuerySession session, bool isAdmin)
         {
             await CreateUser(session, Login, Pass, isAdmin);
-            var sessionCommands = new SessionCommands(session.UnitOfWork);
+            var sessionCommands = session.CreateSessionCommands();
             return await sessionCommands.CreateSession(Login, Pass);
         }
         
         private async Task<Session> CreateSession(UserQuerySession session, string login, bool isAdmin)
         {
             await CreateUser(session, login, login, isAdmin);
-            var sessionCommands = new SessionCommands(session.UnitOfWork);
+            var sessionCommands = session.CreateSessionCommands();
             return await sessionCommands.CreateSession(login, login);
         }
 
@@ -43,7 +43,7 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
         {
             using (var session = CreateUnauthorizedSession())
             {
-                var commands = new SessionCommands(session.UnitOfWork);
+                var commands = session.CreateSessionCommands();
                 await Assert.ThrowsAsync<ArgumentException>(async () => await commands.CreateSession(string.Empty, "pass"));
             }
         }
@@ -53,7 +53,7 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
         {
             using (var session = CreateUnauthorizedSession())
             {
-                var commands = new SessionCommands(session.UnitOfWork);
+                var commands = session.CreateSessionCommands();
                 await Assert.ThrowsAsync<ArgumentException>(async () => await commands.CreateSession("login", string.Empty));
             }
         }
@@ -67,9 +67,9 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
                 userId = await CreateUser(session);
             }
 
-            using (var s = CreateUnauthorizedSession())
+            using (var session2 = CreateUnauthorizedSession())
             {
-                var commands = new SessionCommands(s.UnitOfWork);
+                var commands = session2.CreateSessionCommands();
                 var session = await commands.CreateSession(Login, Pass);
                 session.Should().NotBeNull();
                 session.Token.Should().NotBeEmpty();
@@ -89,7 +89,7 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
 
             using (var session = CreateUnauthorizedSession())
             {
-                var commands = new SessionCommands(session.UnitOfWork);
+                var commands = session.CreateSessionCommands();
                 await Assert.ThrowsAsync<AuthException>(async () => await commands.CreateSession("user", "pass"));
             }
         }
@@ -104,7 +104,7 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
 
             using (var session = CreateUnauthorizedSession())
             {
-                var commands = new SessionCommands(session.UnitOfWork);
+                var commands = session.CreateSessionCommands();
                 await Assert.ThrowsAsync<AuthException>(async () => await commands.CreateSession("exosyphen", "pass"));
             }
         }
@@ -119,7 +119,7 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
 
             using (var session = CreateUnauthorizedSession())
             {
-                var commands = new SessionCommands(session.UnitOfWork);
+                var commands = session.CreateSessionCommands();
                 var result = await commands.Authorize(Guid.NewGuid(), false);
                 result.Should().BeFalse();
             }
@@ -136,7 +136,7 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
 
             using (var session = CreateUnauthorizedSession())
             {
-                var commands = new SessionCommands(session.UnitOfWork);
+                var commands = session.CreateSessionCommands();
                 var result = await commands.Authorize(s.Token, true);
                 result.Should().BeFalse();
             }
@@ -153,7 +153,7 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
 
             using (var session = CreateUnauthorizedSession())
             {
-                var commands = new SessionCommands(session.UnitOfWork);
+                var commands = session.CreateSessionCommands();
                 var result = await commands.Authorize(session1.Token, false);
                 result.Should().BeTrue();
             }
@@ -166,7 +166,7 @@ namespace Monifier.BusinessLogic.Auth.IntegrationTests
 
             using (var session = CreateUnauthorizedSession())
             {
-                var commands = new SessionCommands(session.UnitOfWork);
+                var commands = session.CreateSessionCommands();
                 var result = await commands.Authorize(session2.Token, true);
                 result.Should().BeTrue();
                 result = await commands.Authorize(session2.Token, false);

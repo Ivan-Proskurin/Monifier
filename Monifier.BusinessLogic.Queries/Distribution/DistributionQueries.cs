@@ -8,19 +8,19 @@ namespace Monifier.BusinessLogic.Queries.Distribution
 {
     public class DistributionQueries : IDistributionQueries
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEntityRepository _repository;
         private readonly ICurrentSession _currentSession;
 
-        public DistributionQueries(IUnitOfWork unitOfWork, ICurrentSession currentSession)
+        public DistributionQueries(IEntityRepository repository, ICurrentSession currentSession)
         {
-            _unitOfWork = unitOfWork;
+            _repository = repository;
             _currentSession = currentSession;
         }
         
         public async Task<DistributionBoard> GetDistributionBoard()
         {
             var board = new DistributionBoard();
-            await board.Load(_unitOfWork, _currentSession.UserId);
+            await board.Load(_repository, _currentSession.UserId);
             return board;
         }
     }

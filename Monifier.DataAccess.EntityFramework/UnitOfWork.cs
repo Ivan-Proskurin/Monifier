@@ -118,11 +118,5 @@ namespace Monifier.DataAccess.EntityFramework
             }
             return null;
         }
-
-        public async Task<T> LoadEntity<T>(int id) where T : class, IHasId
-        {
-            var queries = GetQueryRepository<T>();
-            return await queries.GetById(id);
-        }
     }
 }

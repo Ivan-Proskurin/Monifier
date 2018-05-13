@@ -19,29 +19,28 @@ namespace Monifier.BusinessLogic.Queries.Transactions
 {
     public class TransactionQueries : ITransactionQueries
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEntityRepository _repository;
         private readonly ICurrentSession _currentSession;
 
-        public TransactionQueries(IUnitOfWork unitOfWork, ICurrentSession currentSession)
+        public TransactionQueries(IEntityRepository repository, ICurrentSession currentSession)
         {
-            _unitOfWork = unitOfWork;
+            _repository = repository;
             _currentSession = currentSession;
         }
 
-        public async Task<List<TransactionModel>> GetAll(bool includeDeleted = false)
+        public Task<List<TransactionModel>> GetAll(bool includeDeleted = false)
         {
-            var queries = _unitOfWork.GetQueryRepository<Transaction>();
+            var queries = _repository.GetQuery<Transaction>();
             var ownerId = _currentSession.UserId;
-            return await queries.Query
+            return queries
                 .Where(x => x.OwnerId == ownerId && (!includeDeleted || x.IsDeleted == false))
                 .Select(x => x.ToModel())
-                .ToListAsync()
-                .ConfigureAwait(false);
+                .ToListAsync();
         }
 
         public async Task<TransactionModel> GetById(int id)
         {
-            var entity = await _unitOfWork.LoadEntity<Transaction>(id).ConfigureAwait(false);
+            var entity = await _repository.LoadAsync<Transaction>(id).ConfigureAwait(false);
             return entity?.ToModel();
         }
 
@@ -50,50 +49,46 @@ namespace Monifier.BusinessLogic.Queries.Transactions
             throw new NotImplementedException();
         }
 
-        public async Task<List<TransactionModel>> GetInitiatorTransactions(int initiatorId)
+        public Task<List<TransactionModel>> GetInitiatorTransactions(int initiatorId)
         {
-            var queries = _unitOfWork.GetQueryRepository<Transaction>();
+            var queries = _repository.GetQuery<Transaction>();
             var ownerId = _currentSession.UserId;
-            return await queries.Query
+            return queries
                 .Where(x => x.OwnerId == ownerId && x.InitiatorId == initiatorId && !x.IsDeleted)
                 .Select(x => x.ToModel())
-                .ToListAsync()
-                .ConfigureAwait(false);
+                .ToListAsync();
         }
 
-        public async Task<TransactionModel> GetBillTransaction(int initiatorId, int billId)
+        public Task<TransactionModel> GetBillTransaction(int initiatorId, int billId)
         {
-            var queries = _unitOfWork.GetQueryRepository<Transaction>();
+            var queries = _repository.GetQuery<Transaction>();
             var ownerId = _currentSession.UserId;
-            return await queries.Query
+            return queries
                 .Where(x => x.OwnerId == ownerId && x.InitiatorId == initiatorId && x.BillId == billId && !x.IsDeleted)
                 .Select(x => x.ToModel())
-                .SingleOrDefaultAsync()
-                .ConfigureAwait(false);
+                .SingleOrDefaultAsync();
         }
 
-        public async Task<TransactionModel> GetIncomeTransaction(int initiatorId, int incomeId)
+        public Task<TransactionModel> GetIncomeTransaction(int initiatorId, int incomeId)
         {
-            var queries = _unitOfWork.GetQueryRepository<Transaction>();
+            var queries = _repository.GetQuery<Transaction>();
             var ownerId = _currentSession.UserId;
-            return await queries.Query
+            return queries
                 .Where(x => x.OwnerId == ownerId && x.InitiatorId == initiatorId && x.IncomeId == incomeId &&
                             !x.IsDeleted)
                 .Select(x => x.ToModel())
-                .SingleOrDefaultAsync()
-                .ConfigureAwait(false);
+                .SingleOrDefaultAsync();
         }
 
-        public async Task<TransactionModel> GetTransferTransaction(int initiatorId, int participantId)
+        public Task<TransactionModel> GetTransferTransaction(int initiatorId, int participantId)
         {
-            var queries = _unitOfWork.GetQueryRepository<Transaction>();
+            var queries = _repository.GetQuery<Transaction>();
             var ownerId = _currentSession.UserId;
-            return await queries.Query
+            return queries
                 .Where(x => x.OwnerId == ownerId && x.InitiatorId == initiatorId && x.ParticipantId == participantId &&
                             !x.IsDeleted)
                 .Select(x => x.ToModel())
-                .SingleOrDefaultAsync()
-                .ConfigureAwait(false);
+                .SingleOrDefaultAsync();
         }
 
         public async Task<List<TransactionViewModel>> GetLastTransactions(int initiatorId, int limit = 5)
@@ -115,9 +110,9 @@ namespace Monifier.BusinessLogic.Queries.Transactions
         public async Task<TransactionPaginatedList> GetAllTransactions(TransactionFilter filter, PaginationArgs paginationArgs)
         {
             var initiatorId = filter.AccountId;
-            var queries = _unitOfWork.GetQueryRepository<Transaction>();
+            var queries = _repository.GetQuery<Transaction>();
             var ownerId = _currentSession.UserId;
-            var itemsQuery = queries.Query
+            var itemsQuery = queries
                 .Where(x => x.OwnerId == ownerId && x.InitiatorId == initiatorId && !x.IsDeleted)
                 .OrderByDescending(x => x.DateTime)
                 .Select(x => new
@@ -185,21 +180,21 @@ namespace Monifier.BusinessLogic.Queries.Transactions
         {
             if (transaction.BillId != null)
             {
-                var bill = await _unitOfWork.LoadEntity<ExpenseBill>(transaction.BillId.Value).ConfigureAwait(false);
-                var flow = await _unitOfWork.LoadEntity<ExpenseFlow>(bill.ExpenseFlowId).ConfigureAwait(false);
+                var bill = await _repository.LoadAsync<ExpenseBill>(transaction.BillId.Value).ConfigureAwait(false);
+                var flow = await _repository.LoadAsync<ExpenseFlow>(bill.ExpenseFlowId).ConfigureAwait(false);
                 return flow.Name;
             }
 
             if (transaction.IncomeId != null)
             {
-                var income = await _unitOfWork.LoadEntity<IncomeItem>(transaction.IncomeId.Value).ConfigureAwait(false);
-                var incomeType = await _unitOfWork.LoadEntity<IncomeType>(income.IncomeTypeId).ConfigureAwait(false);
+                var income = await _repository.LoadAsync<IncomeItem>(transaction.IncomeId.Value).ConfigureAwait(false);
+                var incomeType = await _repository.LoadAsync<IncomeType>(income.IncomeTypeId).ConfigureAwait(false);
                 return incomeType.Name;
             }
 
             if (transaction.ParticipantId != null)
             {
-                var account = await _unitOfWork.LoadEntity<Account>(transaction.ParticipantId.Value);
+                var account = await _repository.LoadAsync<Account>(transaction.ParticipantId.Value);
                 return account.Name;
             }
             return "Неизвестный тип назначения";

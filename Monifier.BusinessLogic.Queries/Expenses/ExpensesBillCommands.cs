@@ -12,20 +12,20 @@ namespace Monifier.BusinessLogic.Queries.Expenses
 {
     public class ExpensesBillCommands : IExpensesBillCommands
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEntityRepository _repository;
         private readonly ICurrentSession _currentSession;
         private readonly IBalancesUpdaterFactory _balancesUpdaterFactory;
         private readonly ITransitionBalanceUpdater _transitionBalanceUpdater;
         private readonly ITransactionBuilder _transactionBuilder;
 
         public ExpensesBillCommands(
-            IUnitOfWork unitOfWork, 
+            IEntityRepository repository, 
             ICurrentSession currentSession,
             IBalancesUpdaterFactory balancesUpdaterFactory,
             ITransitionBalanceUpdater transitionBalanceUpdater,
             ITransactionBuilder transactionBuilder)
         {
-            _unitOfWork = unitOfWork;
+            _repository = repository;
             _currentSession = currentSession;
             _balancesUpdaterFactory = balancesUpdaterFactory;
             _transitionBalanceUpdater = transitionBalanceUpdater;
@@ -37,13 +37,11 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             if (onlyMark)
                 throw new NotSupportedException("Операция не поддерживается");
 
-            var billQueries = _unitOfWork.GetQueryRepository<ExpenseBill>();
-            var bill = await billQueries.GetById(id);
+            var bill = await _repository.LoadAsync<ExpenseBill>(id);
             if (bill == null)
                 throw new ArgumentException($"Нет чека с Id = {id}");
 
-            var accountQueries = _unitOfWork.GetQueryRepository<Account>();
-            var account = bill.AccountId != null ? await accountQueries.GetById(bill.AccountId.Value) : null;
+            var account = bill.AccountId != null ? await _repository.LoadAsync<Account>(bill.AccountId.Value) : null;
             if (account != null)
             {
                 var balanceUpdater = _balancesUpdaterFactory.Create(account.AccountType);
@@ -52,10 +50,9 @@ namespace Monifier.BusinessLogic.Queries.Expenses
 
             await _transactionBuilder.DeleteExpense(bill).ConfigureAwait(false);
 
-            var billCommands = _unitOfWork.GetCommandRepository<ExpenseBill>();
-            billCommands.Delete(bill);
+            _repository.Delete(bill);
 
-            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task<int> Create(ExpenseBillModel model, bool correction = false)
@@ -64,8 +61,6 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                 throw new ArgumentNullException(nameof(model));
 
             model.Validate();
-
-            var billCommands = _unitOfWork.GetCommandRepository<ExpenseBill>();
 
             var bill = new ExpenseBill
             {
@@ -78,13 +73,11 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             };
             model.IsCorection = correction;
 
-            billCommands.Create(bill);
-
-            var itemsCommands = _unitOfWork.GetCommandRepository<ExpenseItem>();
+            _repository.Create(bill);
 
             foreach (var item in model.Items)
             {
-                itemsCommands.Create(new ExpenseItem
+                _repository.Create(new ExpenseItem
                 {
                     Bill = bill,
                     CategoryId = item.CategoryId,
@@ -98,8 +91,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             Account account = null;
             if (model.AccountId != null)
             {
-                var accountQueries = _unitOfWork.GetQueryRepository<Account>();
-                account = await accountQueries.GetById(model.AccountId.Value);
+                account = await _repository.LoadAsync<Account>(model.AccountId.Value);
             }
 
             if (account != null)
@@ -109,7 +101,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                 _transactionBuilder.CreateExpense(bill, account.Balance);
             }
 
-            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
 
             model.Id = bill.Id;
             return model.Id;
@@ -122,10 +114,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
 
             model.Validate();
 
-            var billQueries = _unitOfWork.GetQueryRepository<ExpenseBill>();
-            var billCommands = _unitOfWork.GetCommandRepository<ExpenseBill>();
-
-            var bill = await billQueries.GetById(model.Id);
+            var bill = await _repository.LoadAsync<ExpenseBill>(model.Id);
             if (bill == null)
                 throw new ArgumentException($"Нет счета с Id = {model.Id}");
 
@@ -136,8 +125,6 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             bill.ExpenseFlowId = model.ExpenseFlowId;
             bill.AccountId = model.AccountId;
 
-            var itemQueries = _unitOfWork.GetQueryRepository<ExpenseItem>();
-            var itemCommands = _unitOfWork.GetCommandRepository<ExpenseItem>();
             foreach (var item in model.Items)
             {
                 if (item.Id > 0 && !item.IsModified && !item.IsDeleted) continue;
@@ -153,39 +140,39 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                         Comment = item.Comment
                     };
                     if (item.Id <= 0)
-                        itemCommands.Create(itemModel);
+                        _repository.Create(itemModel);
                     else
                     {
                         itemModel.Id = item.Id;
-                        itemCommands.Update(itemModel);
+                        _repository.Update(itemModel);
                     }
                 }
                 else if (item.IsDeleted)
                 {
-                    var itemModel = await itemQueries.GetById(item.Id);
+                    var itemModel = await _repository.LoadAsync<ExpenseItem>(item.Id);
                     if (itemModel == null) continue;
-                    itemCommands.Delete(itemModel);
+                    _repository.Delete(itemModel);
                 }
             }
 
-            billCommands.Update(bill);
+            _repository.Update(bill);
 
             var balance = await _transitionBalanceUpdater.Update(bill, oldsum, oldAccountId);
 
             await _transactionBuilder.UpdateExpense(bill, oldAccountId, balance);
 
-            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
             return model;
         }
 
-        public async Task Save(ExpenseBillModel model)
+        public Task Save(ExpenseBillModel model)
         {
             if (model == null)
                 throw new ArgumentNullException(nameof(model));
             if (model.IsNew)
-                await Create(model);
+                return Create(model);
             else
-                await Update(model);
+                return Update(model);
         }
     }
 }

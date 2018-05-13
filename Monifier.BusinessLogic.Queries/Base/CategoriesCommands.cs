@@ -12,17 +12,17 @@ namespace Monifier.BusinessLogic.Queries.Base
 {
     public class CategoriesCommands : ICategoriesCommands
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEntityRepository _repository;
         private readonly IProductCommands _productCommands;
         private readonly IProductQueries _productQueries;
         private readonly ICurrentSession _currentSession;
 
-        public CategoriesCommands(IUnitOfWork unitOfWork, 
+        public CategoriesCommands(IEntityRepository repository, 
             IProductCommands productCommands, 
             IProductQueries productQueries,
             ICurrentSession currentSession)
         {
-            _unitOfWork = unitOfWork;
+            _repository = repository;
             _productCommands = productCommands;
             _productQueries = productQueries;
             _currentSession = currentSession;
@@ -30,9 +30,7 @@ namespace Monifier.BusinessLogic.Queries.Base
 
         public async Task Delete(int id, bool onlyMark = true)
         {
-            var categoriesCommands = _unitOfWork.GetCommandRepository<Category>();
-            var categoriesQueries = _unitOfWork.GetQueryRepository<Category>();
-            var category = await categoriesQueries.GetById(id);
+            var category = await _repository.LoadAsync<Category>(id);
             if (category == null)
                 throw new ArgumentException($"Нет категории с идентификатором {id}");
             var products = await _productQueries.GetCategoryProducts(category.Id, true);
@@ -40,45 +38,43 @@ namespace Monifier.BusinessLogic.Queries.Base
             {
                 await _productCommands.GroupDeletion(products.Select(x => x.Id).ToArray());
                 category.IsDeleted = true;
-                categoriesCommands.Update(category);
+                _repository.Update(category);
             }
             else
             {
                 await _productCommands.GroupDeletion(products.Select(x => x.Id).ToArray(), false);
-                categoriesCommands.Delete(category);
+                _repository.Delete(category);
             }
-            await _unitOfWork.SaveChangesAsync();
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task<CategoryModel> Update(CategoryModel model)
         {
-            var categoryCommands = _unitOfWork.GetCommandRepository<Category>();
             var category = new Category
             {
                 Name = model.Name,
                 OwnerId = _currentSession.UserId
             };
-            var categoriesQueries = _unitOfWork.GetNamedModelQueryRepository<Category>();
-            var other = await categoriesQueries.GetByName(_currentSession.UserId, model.Name);
+            var other = await _repository.FindByNameAsync<Category>(_currentSession.UserId, model.Name);
             if (other != null)
             {
                 if (other.Id != category.Id)
                     throw new ArgumentException("Категория товаров с таким именем уже существует");
                 else
-                    categoryCommands.Detach(other);
+                    _repository.Detach(other);
             }
 
             if (model.Id > 0)
             {
                 category.Id = model.Id;
-                categoryCommands.Update(category);
+                _repository.Update(category);
             }
             else
             {
-                categoryCommands.Create(category);
+                _repository.Create(category);
             }
             
-            await _unitOfWork.SaveChangesAsync();
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
 
             model.Id = category.Id;
             return model;
@@ -86,10 +82,7 @@ namespace Monifier.BusinessLogic.Queries.Base
 
         public async Task<CategoryModel> CreateNewOrBind(int flowId, string categoryName)
         {
-            var categoryQueries = _unitOfWork.GetNamedModelQueryRepository<Category>();
-            var categoryCommands = _unitOfWork.GetCommandRepository<Category>();
-            
-            var category = await categoryQueries.GetByName(_currentSession.UserId, categoryName);
+            var category = await _repository.FindByNameAsync<Category>(_currentSession.UserId, categoryName);
             if (category == null)
             {
                 category = new Category
@@ -97,17 +90,16 @@ namespace Monifier.BusinessLogic.Queries.Base
                     Name = categoryName,
                     OwnerId = _currentSession.UserId
                 };
-                categoryCommands.Create(category);
-                await _unitOfWork.SaveChangesAsync();
+                _repository.Create(category);
+                await _repository.SaveChangesAsync().ConfigureAwait(false);
             }
 
-            var catFlowsCommands = _unitOfWork.GetCommandRepository<ExpensesFlowProductCategory>();
-            catFlowsCommands.Create(new ExpensesFlowProductCategory
+            _repository.Create(new ExpensesFlowProductCategory
             {
                 CategoryId = category.Id,
                 ExpensesFlowId = flowId
             });
-            await _unitOfWork.SaveChangesAsync();
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
             
             return new CategoryModel
             {

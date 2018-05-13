@@ -18,20 +18,20 @@ namespace Monifier.Web.Pages.Accounts
     [Authorize]
     public class EditAccountModel : PageModel
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEntityRepository _repository;
         private readonly IAccountQueries _accountQueries;
         private readonly IAccountCommands _accountCommands;
         private readonly ITransactionQueries _transactionQueries;
         private readonly ICreditCardProcessing _creditCardProcessing;
 
         public EditAccountModel(
-            IUnitOfWork unitOfWork,
+            IEntityRepository repository,
             IAccountQueries accountQueries, 
             IAccountCommands accountCommands,
             ITransactionQueries transactionQueries,
             ICreditCardProcessing creditCardProcessing)
         {
-            _unitOfWork = unitOfWork;
+            _repository = repository;
             _accountQueries = accountQueries;
             _accountCommands = accountCommands;
             _transactionQueries = transactionQueries;
@@ -69,7 +69,7 @@ namespace Monifier.Web.Pages.Accounts
                     await _accountCommands.Update(model);
                     if (model.Balance < oldBalance && model.AccountType == AccountType.CreditCard)
                     {
-                        var account = await _unitOfWork.GetQueryRepository<Account>().GetById(model.Id);
+                        var account = await _repository.LoadAsync<Account>(model.Id);
                         await _creditCardProcessing.ProcessReducingBalanceAsCreditFees(account, oldBalance - model.Balance);
                     }
                     return RedirectToPage("./AccountsList");

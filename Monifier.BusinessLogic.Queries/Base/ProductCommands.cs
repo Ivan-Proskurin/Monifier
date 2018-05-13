@@ -11,59 +11,56 @@ namespace Monifier.BusinessLogic.Queries.Base
 {
     public class ProductCommands : IProductCommands
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEntityRepository _repository;
         private readonly ICurrentSession _currentSession;
 
-        public ProductCommands(IUnitOfWork unitOfWork, ICurrentSession currentSession)
+        public ProductCommands(IEntityRepository repository, ICurrentSession currentSession)
         {
-            _unitOfWork = unitOfWork;
+            _repository = repository;
             _currentSession = currentSession;
         }
 
         public async Task<ProductModel> Update(ProductModel model)
         {
-            var commands = _unitOfWork.GetCommandRepository<Product>();
-            var queries = _unitOfWork.GetQueryRepository<Product>();
-            var product = await queries.GetById(model.Id);
+            var product = await _repository.LoadAsync<Product>(model.Id);
             if (product == null)
                 throw new ArgumentException($"Нет продукта с идентификатором {model.Id}");
             product.Name = model.Name;
             product.CategoryId = model.CategoryId;
-            commands.Update(product);
-            await _unitOfWork.SaveChangesAsync();
+            _repository.Update(product);
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
             return model;
         }
 
         public async Task Delete(int id, bool onlyMark = true)
         {
-            var product = await _unitOfWork.GetQueryRepository<Product>().GetById(id);
+            var product = await _repository.LoadAsync<Product>(id);
             if (product == null)
                 throw new ArgumentException($"Нет товара с идентификтором Id = {id}");
 
-            var productCommands = _unitOfWork.GetCommandRepository<Product>();
             if (onlyMark)
             {
                 product.IsDeleted = true;
-                productCommands.Update(product);
+                _repository.Update(product);
             }
             else
             {
-                productCommands.Delete(product);
+                // todo: удалить все операции по продукту
+                _repository.Delete(product);
             }
-            await _unitOfWork.SaveChangesAsync();
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task<ProductModel> AddProductToCategory(int categoryId, string productName)
         {
-            var commands = _unitOfWork.GetCommandRepository<Product>();
             var model = new Product
             {
                 CategoryId = categoryId,
                 Name = productName,
                 OwnerId = _currentSession.UserId
             };
-            commands.Create(model);
-            await _unitOfWork.SaveChangesAsync();
+            _repository.Create(model);
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
             return new ProductModel
             {
                 Id = model.Id,
@@ -75,25 +72,23 @@ namespace Monifier.BusinessLogic.Queries.Base
         public async Task<List<int>> GroupDeletion(int[] ids, bool onlyMark = true)
         {
             var deletedList = new List<int>();
-            var queries = _unitOfWork.GetQueryRepository<Product>();
-            var commands = _unitOfWork.GetCommandRepository<Product>();
             foreach (var id in ids)
             {
-                var model = await queries.GetById(id);
+                var model = await _repository.LoadAsync<Product>(id).ConfigureAwait(false);
                 if (model == null) continue;
                 if (onlyMark)
                 {
                     model.IsDeleted = true;
-                    commands.Update(model);
+                    _repository.Update(model);
                 }
                 else
                 {
                     // todo: удалить все операции по продукту
-                    commands.Delete(model);
+                    _repository.Delete(model);
                 }
                 deletedList.Add(id);
             }
-            await _unitOfWork.SaveChangesAsync();
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
             return deletedList;
         }
     }

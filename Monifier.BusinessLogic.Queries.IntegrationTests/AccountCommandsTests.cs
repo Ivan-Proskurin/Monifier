@@ -3,7 +3,6 @@ using System.Linq;
 using FluentAssertions;
 using Monifier.BusinessLogic.Model.Accounts;
 using Monifier.BusinessLogic.Model.Base;
-using Monifier.BusinessLogic.Queries.Base;
 using Monifier.BusinessLogic.Queries.Transactions;
 using Monifier.DataAccess.Model.Base;
 using Monifier.DataAccess.Model.Expenses;
@@ -219,7 +218,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 var commands = session.CreateAccountCommands();
                 model = await commands.Update(model);
 
-                var queries = new AccountQueries(session.UnitOfWork, session.UserSession);
+                var queries = session.CreateAccountQueries();
                 var accounts = await queries.GetAll();
 
                 var expected = accounts.FirstOrDefault(x => x.Id == model.Id);
@@ -247,7 +246,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 var commands = session.CreateAccountCommands();
                 var income = await commands.Topup(model);
 
-                var transactoionQueries = new TransactionQueries(session.UnitOfWork, session.UserSession);
+                var transactoionQueries = session.CreateTransactionQueries();
                 var transaction = await transactoionQueries.GetIncomeTransaction(session.DebitCardAccount.Id, income.Id);
                 transaction.ShouldBeEquivalentTo(new TransactionModel
                 {
@@ -274,7 +273,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 var commands = session.CreateAccountCommands();
                 var transferTime = await commands.Transfer(session.DebitCardAccount.Id, session.CashAccount.Id, transferAmount);
 
-                var transactionQueries = new TransactionQueries(session.UnitOfWork, session.UserSession);
+                var transactionQueries = session.CreateTransactionQueries();
                 var transaction = await transactionQueries.GetTransferTransaction(ids.DebitCardAccountId, ids.CashAccountId);
                 transaction.ShouldBeEquivalentTo(new TransactionModel
                     {

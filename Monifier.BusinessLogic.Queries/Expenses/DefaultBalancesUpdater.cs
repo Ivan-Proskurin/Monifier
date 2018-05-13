@@ -9,18 +9,16 @@ namespace Monifier.BusinessLogic.Queries.Expenses
 {
     public class DefaultBalancesUpdater : IBalancesUpdater
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEntityRepository _repository;
 
-        public DefaultBalancesUpdater(IUnitOfWork unitOfWork)
+        public DefaultBalancesUpdater(IEntityRepository repository)
         {
-            _unitOfWork = unitOfWork;
+            _repository = repository;
         }
 
         public async Task Create(Account account, ExpenseBill bill)
         {
-            var flowQieries = _unitOfWork.GetQueryRepository<ExpenseFlow>();
-            var flowCommands = _unitOfWork.GetCommandRepository<ExpenseFlow>();
-            var flow = await flowQieries.GetById(bill.ExpenseFlowId);
+            var flow = await _repository.LoadAsync<ExpenseFlow>(bill.ExpenseFlowId).ConfigureAwait(false);
             if (flow == null)
                 throw new InvalidOperationException($"Can't find expense flow with id {bill.ExpenseFlowId}");
             var lack = bill.SumPrice - Math.Max(flow.Balance, 0);
@@ -33,33 +31,27 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             }
             flow.Balance -= withdrawTotal;
             flow.Version++;
-            flowCommands.Update(flow);
+            _repository.Update(flow);
 
             if (account != null && !bill.IsCorrection)
             {
-                var accountCommands = _unitOfWork.GetCommandRepository<Account>();
                 account.Balance -= bill.SumPrice;
                 account.LastWithdraw = DateTime.Now;
-                accountCommands.Update(account);
+                _repository.Update(account);
             }
         }
 
         public async Task Delete(ExpenseBill bill)
         {
-            var flowQueries = _unitOfWork.GetQueryRepository<ExpenseFlow>();
-            var flowCommands = _unitOfWork.GetCommandRepository<ExpenseFlow>();
-
-            var flow = await flowQueries.GetById(bill.ExpenseFlowId);
+            var flow = await _repository.LoadAsync<ExpenseFlow>(bill.ExpenseFlowId).ConfigureAwait(false);
             flow.Balance += bill.SumPrice;
-            flowCommands.Update(flow);
+            _repository.Update(flow);
 
             if (bill.AccountId != null && !bill.IsCorrection)
             {
-                var accountQueries = _unitOfWork.GetQueryRepository<Account>();
-                var accountCommands = _unitOfWork.GetCommandRepository<Account>();
-                var account = await accountQueries.GetById(bill.AccountId.Value);
+                var account = await _repository.LoadAsync<Account>(bill.AccountId.Value);
                 account.Balance += bill.SumPrice;
-                accountCommands.Update(account);
+                _repository.Update(account);
             }
         }
     }

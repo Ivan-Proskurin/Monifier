@@ -13,12 +13,12 @@ namespace Monifier.BusinessLogic.Queries.Transactions
 {
     public class TransactionBuilder : ITransactionBuilder
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEntityRepository _repository;
         private readonly ITransactionQueries _transactionQueries;
 
-        public TransactionBuilder(IUnitOfWork unitOfWork, ITransactionQueries transactionQueries)
+        public TransactionBuilder(IEntityRepository repository, ITransactionQueries transactionQueries)
         {
-            _unitOfWork = unitOfWork;
+            _repository = repository;
             _transactionQueries = transactionQueries;
         }
 
@@ -34,32 +34,33 @@ namespace Monifier.BusinessLogic.Queries.Transactions
                 Total = bill.SumPrice,
                 Balance = balance
             };
-            var transactionCommands = _unitOfWork.GetCommandRepository<Transaction>();
-            transactionCommands.Create(transation);
+            _repository.Create(transation);
         }
 
         public async Task UpdateExpense(ExpenseBill bill, int? oldAccountId, decimal balance)
         {
-            var transactionCommands = _unitOfWork.GetCommandRepository<Transaction>();
-            var transactionQueries = _unitOfWork.GetQueryRepository<Transaction>();
+            var transactionQueries = _repository.GetQuery<Transaction>();
             if (oldAccountId == bill.AccountId)
             {
-                var transaction = await transactionQueries.Query
+                var transaction = await transactionQueries
                     .SingleOrDefaultAsync(x => x.OwnerId == bill.OwnerId
-                                               && x.InitiatorId == bill.AccountId && x.BillId == bill.Id);
+                                               && x.InitiatorId == bill.AccountId && x.BillId == bill.Id)
+                    .ConfigureAwait(false);
                 if (transaction != null)
                 {
                     transaction.DateTime = bill.DateTime;
                     transaction.Total = bill.SumPrice;
                     transaction.Balance = balance;
-                    transactionCommands.Update(transaction);
+                    _repository.Update(transaction);
                 }
             }
             else if (bill.AccountId != null)
             {
-                var transaction = await transactionQueries.Query
+                var transaction = await transactionQueries
                     .SingleOrDefaultAsync(x => x.OwnerId == bill.OwnerId
-                                               && x.InitiatorId == oldAccountId && x.BillId == bill.Id);
+                                               && x.InitiatorId == oldAccountId && x.BillId == bill.Id)
+                    .ConfigureAwait(false);
+
                 if (transaction == null)
                 {
                     transaction = new Transaction
@@ -71,31 +72,30 @@ namespace Monifier.BusinessLogic.Queries.Transactions
                         Total = bill.SumPrice,
                         Balance = balance
                     };
-                    transactionCommands.Create(transaction);
+                    _repository.Create(transaction);
                 }
                 else
                 {
                     transaction.InitiatorId = bill.AccountId.Value;
                     transaction.Total = bill.SumPrice;
                     transaction.Balance = balance;
-                    transactionCommands.Update(transaction);
+                    _repository.Update(transaction);
                 }
             }
         }
 
         public async Task DeleteExpense(ExpenseBill bill)
         {
-            var commands = _unitOfWork.GetCommandRepository<Transaction>();
-            var queries = _unitOfWork.GetQueryRepository<Transaction>();
-            var transaction = await queries.Query.SingleOrDefaultAsync(
-                x => x.InitiatorId == bill.AccountId && x.BillId == bill.Id);
+            var queries = _repository.GetQuery<Transaction>();
+            var transaction = await queries.SingleOrDefaultAsync(
+                    x => x.InitiatorId == bill.AccountId && x.BillId == bill.Id)
+                .ConfigureAwait(false);
             if (transaction == null) return;
-            commands.Delete(transaction);
+            _repository.Delete(transaction);
         }
 
         public void CreateIncome(IncomeItem income, decimal balance)
         {
-            var commands = _unitOfWork.GetCommandRepository<Transaction>();
             var transaction = new Transaction
             {
                 OwnerId = income.OwnerId,
@@ -105,19 +105,18 @@ namespace Monifier.BusinessLogic.Queries.Transactions
                 Total = income.Total,
                 Balance = balance
             };
-            commands.Create(transaction);
+            _repository.Create(transaction);
         }
 
         public async Task UpdateIncome(int accountId, IncomeItem income, decimal balance)
         {
-            var commands = _unitOfWork.GetCommandRepository<Transaction>();
             var transaction =
                 await _transactionQueries.GetIncomeTransaction(accountId, income.Id).ConfigureAwait(false);
             if (transaction == null) return;
             transaction.InitiatorId = income.AccountId;
             transaction.Total = income.Total;
             transaction.Balance = balance;
-            commands.Update(transaction.ToEntity());
+            _repository.Update(transaction.ToEntity());
         }
 
         public void CreateTransfer(Account accountFrom, Account accountTo, DateTime transferTime, decimal amount)
@@ -125,7 +124,6 @@ namespace Monifier.BusinessLogic.Queries.Transactions
             if (accountFrom.Id == accountTo.Id)
                 throw new InvalidOperationException("Cannot process transfer between same participants");
 
-            var commands = _unitOfWork.GetCommandRepository<Transaction>();
             var transaction1 = new Transaction
             {
                 OwnerId = accountFrom.OwnerId,
@@ -144,8 +142,8 @@ namespace Monifier.BusinessLogic.Queries.Transactions
                 Total = amount,
                 Balance = accountTo.Balance
             };
-            commands.Create(transaction1);
-            commands.Create(transaction2);
+            _repository.Create(transaction1);
+            _repository.Create(transaction2);
         }
     }
 }

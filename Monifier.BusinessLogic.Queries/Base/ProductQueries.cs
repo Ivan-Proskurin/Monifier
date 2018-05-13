@@ -15,22 +15,12 @@ namespace Monifier.BusinessLogic.Queries.Base
 {
     public class ProductQueries : IProductQueries
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEntityRepository _repository;
         private readonly ICurrentSession _currentSession;
 
-        private static ProductModel ToModel(Product product)
+        public ProductQueries(IEntityRepository repository, ICurrentSession currentSession)
         {
-            return new ProductModel
-            {
-                Id = product.Id,
-                CategoryId = product.CategoryId,
-                Name = product.Name
-            };
-        }
-
-        public ProductQueries(IUnitOfWork unitOfWork, ICurrentSession currentSession)
-        {
-            _unitOfWork = unitOfWork;
+            _repository = repository;
             _currentSession = currentSession;
         }
 
@@ -41,8 +31,7 @@ namespace Monifier.BusinessLogic.Queries.Base
 
         public async Task<ProductModel> GetById(int id)
         {
-            var prodRepo = _unitOfWork.GetQueryRepository<Product>();
-            var product = await prodRepo.GetById(id);
+            var product = await _repository.LoadAsync<Product>(id);
             if (product == null)
                 throw new ArgumentException($"Нет продукта с идентификатором {id}");
             return ToModel(product);
@@ -50,25 +39,25 @@ namespace Monifier.BusinessLogic.Queries.Base
 
         public async Task<ProductModel> GetByName(string name, bool includeDeleted = false)
         {
-            var productRepo = _unitOfWork.GetNamedModelQueryRepository<Product>();
-            var product = await productRepo.GetByName(_currentSession.UserId, name);
+            var product = await _repository.FindByNameAsync<Product>(_currentSession.UserId, name);
             if (product == null || product.IsDeleted && !includeDeleted) return null;
             return ToModel(product);
         }
 
-        public async Task<List<ProductModel>> GetCategoryProducts(int categoryId, bool includeDeleted = false)
+        public Task<List<ProductModel>> GetCategoryProducts(int categoryId, bool includeDeleted = false)
         {
-            var productRepo = _unitOfWork.GetQueryRepository<Product>();
-            var query = includeDeleted ? productRepo.Query : productRepo.Query.Where(x => !x.IsDeleted);
-            return await query
+            var query = includeDeleted 
+                ? _repository.GetQuery<Product>() 
+                : _repository.GetQuery<Product>().Where(x => !x.IsDeleted);
+
+            return query
                 .Where(x => x.CategoryId == categoryId)
                 .Select(x => ToModel(x)).ToListAsync();
         }
 
         public async Task<ProductList> GetList(int categoryId, PaginationArgs args)
         {
-            var productRepo = _unitOfWork.GetQueryRepository<Product>();
-            var query = productRepo.Query.Where(x => !x.IsDeleted)
+            var query = _repository.GetQuery<Product>().Where(x => !x.IsDeleted)
                 .Where(x => x.CategoryId == categoryId);
             var totalCount = await query.CountAsync();
             var pagination = new PaginationInfo(args, totalCount);
@@ -76,7 +65,9 @@ namespace Monifier.BusinessLogic.Queries.Base
                 .OrderBy(x => x.Id)
                 .Skip(pagination.Skipped).Take(pagination.Taken)
                 .Select(x => ToModel(x))
-                .ToListAsync();
+                .ToListAsync()
+                .ConfigureAwait(false);
+
             return new ProductList
             {
                 Products = models,
@@ -86,10 +77,10 @@ namespace Monifier.BusinessLogic.Queries.Base
 
         private IQueryable<ProductModel> CreateFlowProductsQuery(int flowId, bool includeDeleted = false)
         {
-            var expensesFlowsQuery = _unitOfWork.GetQueryRepository<ExpenseFlow>().Query;
-            var expensesCategoriesQuery = _unitOfWork.GetQueryRepository<ExpensesFlowProductCategory>().Query;
-            var categoriesQuery = _unitOfWork.GetQueryRepository<Category>().Query;
-            var productQuery = _unitOfWork.GetQueryRepository<Product>().Query;
+            var expensesFlowsQuery = _repository.GetQuery<ExpenseFlow>();
+            var expensesCategoriesQuery = _repository.GetQuery<ExpensesFlowProductCategory>();
+            var categoriesQuery = _repository.GetQuery<Category>();
+            var productQuery = _repository.GetQuery<Product>();
             var query = from expense in expensesFlowsQuery
                 join expcat in expensesCategoriesQuery on expense.Id equals expcat.ExpensesFlowId
                 join cat in categoriesQuery on expcat.CategoryId equals cat.Id
@@ -99,18 +90,28 @@ namespace Monifier.BusinessLogic.Queries.Base
             return query;
         }
 
-        public async Task<List<ProductModel>> GetExpensesFlowProducts(int expenseFlowId, bool includeDeleted = false)
+        public Task<List<ProductModel>> GetExpensesFlowProducts(int expenseFlowId, bool includeDeleted = false)
         {
-            return await CreateFlowProductsQuery(expenseFlowId, includeDeleted).ToListAsync();
+            return CreateFlowProductsQuery(expenseFlowId, includeDeleted).ToListAsync();
         }
 
-        public async Task<ProductModel> GetFlowProductByName(int flowId, string product)
+        public Task<ProductModel> GetFlowProductByName(int flowId, string product)
         {
             if (string.IsNullOrEmpty(product))
                 throw new ArgumentNullException(nameof(product));
             
             var query = CreateFlowProductsQuery(flowId);
-            return await query.Where(x => x.Name.ToLower() == product.ToLower()).FirstOrDefaultAsync();
+            return query.Where(x => x.Name.ToLower() == product.ToLower()).FirstOrDefaultAsync();
+        }
+
+        private static ProductModel ToModel(Product product)
+        {
+            return new ProductModel
+            {
+                Id = product.Id,
+                CategoryId = product.CategoryId,
+                Name = product.Name
+            };
         }
     }
 }

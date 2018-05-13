@@ -18,19 +18,19 @@ namespace Monifier.BusinessLogic.Queries.Base
 {
     public class AccountCommands : IAccountCommands
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEntityRepository _repository;
         private readonly ICurrentSession _currentSession;
         private readonly IIncomeItemCommands _incomeItemCommands;
         private readonly ITimeService _timeService;
         private readonly ITransactionBuilder _transactionBuilder;
 
-        public AccountCommands(IUnitOfWork unitOfWork, 
+        public AccountCommands(IEntityRepository repository, 
             ICurrentSession currentSession,
             IIncomeItemCommands incomeItemCommands,
             ITimeService timeService,
             ITransactionBuilder transactionBuilder)
         {
-            _unitOfWork = unitOfWork;
+            _repository = repository;
             _currentSession = currentSession;
             _incomeItemCommands = incomeItemCommands;
             _timeService = timeService;
@@ -39,15 +39,12 @@ namespace Monifier.BusinessLogic.Queries.Base
 
         public async Task<AccountModel> Update(AccountModel model)
         {
-            var queries = _unitOfWork.GetNamedModelQueryRepository<Account>();
-            var commands = _unitOfWork.GetCommandRepository<Account>();
-
-            var other = await queries.GetByName(_currentSession.UserId, model.Name);
+            var other = await _repository.FindByNameAsync<Account>(_currentSession.UserId, model.Name).ConfigureAwait(false);
             if (other != null)
                 if (other.Id != model.Id)
                     throw new ArgumentException("Счет с таким названием уже есть");
                 else
-                    commands.Detach(other);
+                    _repository.Detach(other);
 
             var account = new Account
             {
@@ -64,26 +61,26 @@ namespace Monifier.BusinessLogic.Queries.Base
 
             if (account.IsDefault)
             {
-                var all = await queries.Query.ToListAsync();
+                var all = await _repository.GetQuery<Account>().ToListAsync().ConfigureAwait(false);
                 all.ForEach(x =>
                 {
                     x.IsDefault = false;
-                    commands.Update(x);
+                    _repository.Update(x);
                 });
             }
 
             if (model.Id < 0)
             {
                 account.AvailBalance = model.Balance;
-                commands.Create(account);
+                _repository.Create(account);
             }
             else
             {
                 account.Id = model.Id;
-                commands.Update(account);
+                _repository.Update(account);
             }
 
-            await _unitOfWork.SaveChangesAsync();
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
 
             model.Id = account.Id;
             return model;
@@ -91,8 +88,7 @@ namespace Monifier.BusinessLogic.Queries.Base
 
         public async Task Delete(int id, bool onlyMark = true)
         {
-            var accountRepo = _unitOfWork.GetQueryRepository<Account>();
-            var account = await accountRepo.GetById(id);
+            var account = await _repository.LoadAsync<Account>(id).ConfigureAwait(false);
             if (account == null)
                 throw new ArgumentException($"Нет счета с Id = {id}");
             
@@ -102,27 +98,24 @@ namespace Monifier.BusinessLogic.Queries.Base
             }
             else
             {
-                var accountCommands = _unitOfWork.GetCommandRepository<Account>();
-                accountCommands.Delete(account);
+                _repository.Delete(account);
             }
-            await _unitOfWork.SaveChangesAsync();
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task<IncomeItemModel> Topup(TopupAccountModel topup)
         {
-            var accountQueries = _unitOfWork.GetQueryRepository<Account>();
-            var account = await accountQueries.GetById(topup.AccountId);
+            var account = await _repository.LoadAsync<Account>(topup.AccountId).ConfigureAwait(false);
             var incomeTypeId = topup.IncomeTypeId;
             if (incomeTypeId == null)
             {
-                var incomeTypeCommands = _unitOfWork.GetCommandRepository<IncomeType>();
                 var incomeType = new IncomeType
                 {
                     Name = topup.AddIncomeTypeName,
                     OwnerId = _currentSession.UserId
                 };
-                incomeTypeCommands.Create(incomeType);
-                await _unitOfWork.SaveChangesAsync();
+                _repository.Create(incomeType);
+                await _repository.SaveChangesAsync().ConfigureAwait(false);
                 incomeTypeId = incomeType.Id;
             }
 
@@ -137,7 +130,7 @@ namespace Monifier.BusinessLogic.Queries.Base
 
             await _incomeItemCommands.Update(income).ConfigureAwait(false);
 
-            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
             return income;
         }
 
@@ -146,12 +139,10 @@ namespace Monifier.BusinessLogic.Queries.Base
             if (amount < 0)
                 throw new ArgumentException("Сумма перевода не должна быть меньше нуля", nameof(amount));
             
-            var accountQueries = _unitOfWork.GetQueryRepository<Account>();
-            var accountCommands = _unitOfWork.GetCommandRepository<Account>();
-            var accountFrom = await accountQueries.GetById(accountFromId);
+            var accountFrom = await _repository.LoadAsync<Account>(accountFromId);
             if (accountFrom == null)
                 throw new ArgumentException($"Нет счета с Id = {accountFromId}");
-            var accountTo = await accountQueries.GetById(accountToId);
+            var accountTo = await _repository.LoadAsync<Account>(accountToId);
             if (accountTo == null)
                 throw new ArgumentException($"Нет счета с Id = {accountToId}");
             
@@ -167,10 +158,10 @@ namespace Monifier.BusinessLogic.Queries.Base
             accountFrom.AvailBalance -= amount;
             accountTo.Balance += amount;
             accountTo.AvailBalance += amount;
-            accountCommands.Update(accountFrom);
-            accountCommands.Update(accountTo);
+            _repository.Update(accountFrom);
+            _repository.Update(accountTo);
             _transactionBuilder.CreateTransfer(accountFrom, accountTo, transferTime, amount);
-            await _unitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
 
             return transferTime;
         }
@@ -180,13 +171,11 @@ namespace Monifier.BusinessLogic.Queries.Base
             if (amount < 0)
                 throw new ArgumentException("Сумма перевода не должна быть меньше нуля", nameof(amount));
             
-            var flowQueries = _unitOfWork.GetQueryRepository<ExpenseFlow>();
-            var flow = await flowQueries.GetById(flowId);
+            var flow = await _repository.LoadAsync<ExpenseFlow>(flowId);
             if (flow == null)
                 throw new ArgumentException($"Нет категории расходов с Id = {flowId}", nameof(flowId));
 
-            var accountQueries = _unitOfWork.GetQueryRepository<Account>();
-            var account = await accountQueries.GetById(fromAccountId);
+            var account = await _repository.LoadAsync<Account>(fromAccountId);
             if (account == null)
                 throw new ArgumentException($"Нет такого счета с Id = {fromAccountId}", nameof(fromAccountId));
             
@@ -194,16 +183,13 @@ namespace Monifier.BusinessLogic.Queries.Base
                 throw new InvalidOperationException(
                     $"Невозможно перевести сумму {amount} со счета \"{account.Name}\", так как на его доступном балансе не хватает средств");
 
-            var accountCommands = _unitOfWork.GetCommandRepository<Account>();
-            var flowCommands = _unitOfWork.GetCommandRepository<ExpenseFlow>();
-            
             account.AvailBalance -= amount;
             flow.Balance += amount;
             
-            accountCommands.Update(account);
-            flowCommands.Update(flow);
+            _repository.Update(account);
+            _repository.Update(flow);
 
-            await _unitOfWork.SaveChangesAsync();
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }

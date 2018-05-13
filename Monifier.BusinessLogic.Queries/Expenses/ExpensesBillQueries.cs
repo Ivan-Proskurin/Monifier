@@ -13,11 +13,11 @@ namespace Monifier.BusinessLogic.Queries.Expenses
 {
     public class ExpensesBillQueries : IExpensesBillQueries
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEntityRepository _repository;
 
-        public ExpensesBillQueries(IUnitOfWork unitOfWork)
+        public ExpensesBillQueries(IEntityRepository repository)
         {
-            _unitOfWork = unitOfWork;
+            _repository = repository;
         }
 
         public Task<List<ExpenseBillModel>> GetAll(bool includeDeleted = false)
@@ -27,8 +27,8 @@ namespace Monifier.BusinessLogic.Queries.Expenses
 
         public async Task<ExpenseBillModel> GetById(int id)
         {
-            var repo = _unitOfWork.GetQueryRepository<ExpenseBill>();
-            var bill = await repo.Query.Include(x => x.Items).FirstOrDefaultAsync(x => x.Id == id);
+            var query = _repository.GetQuery<ExpenseBill>();
+            var bill = await query.Include(x => x.Items).FirstOrDefaultAsync(x => x.Id == id);
             var model = new ExpenseBillModel
             {
                 Id = bill.Id,
@@ -48,24 +48,22 @@ namespace Monifier.BusinessLogic.Queries.Expenses
                     Quantity = x.Quantity
                 }).ToList()
             };
-            await FullfillItemsFields(model);
+            await FullfillItemsFields(model).ConfigureAwait(false);
             return model;
         }
 
         private async Task FullfillItemsFields(ExpenseBillModel bill)
         {
-            var catRepo = _unitOfWork.GetQueryRepository<Category>();
-            var prodRepo = _unitOfWork.GetQueryRepository<Product>();
             foreach (var item in bill.Items)
             {
                 if (item.ProductId != null)
                 {
-                    var product = await prodRepo.GetById(item.ProductId.Value);
+                    var product = await _repository.LoadAsync<Product>(item.ProductId.Value);
                     item.Product = product.Name;
                 }
                 if (item.CategoryId != null)
                 {
-                    var category = await catRepo.GetById(item.CategoryId.Value);
+                    var category = await _repository.LoadAsync<Category>(item.CategoryId.Value);
                     item.Category = category.Name;
                 }
             }
