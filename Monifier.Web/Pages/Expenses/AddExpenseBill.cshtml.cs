@@ -58,7 +58,7 @@ namespace Monifier.Web.Pages.Expenses
         private async Task PrepareModelsAsync(int flowId)
         {
             Accounts = await _accountQueries.GetAll();
-            Flows = await _expenseFlowQueries.GetAll();
+            Flows = await _expenseFlowQueries.GetAll(true);
             if (flowId != 0)
             {
                 Categories = await _categoriesQueries.GetFlowCategories(flowId);
