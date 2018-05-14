@@ -242,7 +242,9 @@ namespace Monifier.Web.Pages.Expenses
                 Good.Bill = JsonConvert.SerializeObject(Bill);
                 ModelState.Clear();
             }
-            await PrepareModelsAsync(Good.FlowId);
+            var flowId = await _expenseFlowQueries.GetIdByName(Good.FlowName);
+            await PrepareModelsAsync(flowId.Value);
+            Good.FlowId = flowId.Value;
             return Page();
         }
         
