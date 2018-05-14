@@ -22,14 +22,14 @@ namespace Monifier.BusinessLogic.Queries.Base
             _currentSession = currentSession;
         }
 
-        public Task<List<AccountModel>> GetAll(bool includeDeleted = false)
+        public Task<List<AccountModel>> GetAll(bool sortByName = false, bool includeDeleted = false)
         {
             var ownerId = _currentSession.UserId;
-            return _repository.GetQuery<Account>()
+            var query = _repository.GetQuery<Account>()
                 .Where(x => (!x.IsDeleted || includeDeleted) && x.OwnerId == ownerId)
-                .Select(x => x.ToModel())
-                .OrderBy(x => x.Number)
-                .ToListAsync();
+                .Select(x => x.ToModel());
+            var sortedQuery = sortByName ? query.OrderBy(x => x.Name) : query.OrderBy(x => x.Number);
+            return sortedQuery.ToListAsync();
         }
 
         public async Task<AccountList> GetList()

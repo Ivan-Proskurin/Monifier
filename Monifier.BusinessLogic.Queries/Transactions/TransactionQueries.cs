@@ -28,7 +28,7 @@ namespace Monifier.BusinessLogic.Queries.Transactions
             _currentSession = currentSession;
         }
 
-        public Task<List<TransactionModel>> GetAll(bool includeDeleted = false)
+        public Task<List<TransactionModel>> GetAll(bool sortByName = false, bool includeDeleted = false)
         {
             var queries = _repository.GetQuery<Transaction>();
             var ownerId = _currentSession.UserId;

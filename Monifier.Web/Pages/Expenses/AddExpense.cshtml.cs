@@ -70,7 +70,7 @@ namespace Monifier.Web.Pages.Expenses
                 Products = new List<ProductModel>();
             }
 
-            Flows = await _expenseFlowQueries.GetAll();
+            Flows = await _expenseFlowQueries.GetAll(true);
         }
         
         [BindProperty]

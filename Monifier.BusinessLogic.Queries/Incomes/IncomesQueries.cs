@@ -158,7 +158,7 @@ namespace Monifier.BusinessLogic.Queries.Incomes
             return result;
         }
 
-        public Task<List<IncomeItem>> GetAll(bool includeDeleted = false)
+        public Task<List<IncomeItem>> GetAll(bool sortByName = false, bool includeDeleted = false)
         {
             throw new NotImplementedException();
         }

@@ -24,14 +24,14 @@ namespace Monifier.BusinessLogic.Queries.Base
             _currentSession = currentSession;
         }
 
-        public Task<List<CategoryModel>> GetAll(bool includeDeleted = false)
+        public Task<List<CategoryModel>> GetAll(bool sortByName = false, bool includeDeleted = false)
         {
             var query = includeDeleted 
                 ? _repository.GetQuery<Category>() 
                 : _repository.GetQuery<Category>().Where(x => !x.IsDeleted);
 
             var ownerId = _currentSession.UserId;
-            return query
+            var modelQuery = query
                 .Where(x => x.OwnerId == ownerId)
                 .Select(x => new CategoryModel
                     {
@@ -39,8 +39,9 @@ namespace Monifier.BusinessLogic.Queries.Base
                         Name = x.Name,
                         ProductCount = x.Products.Count
                     }
-                )
-                .ToListAsync();
+                );
+            var sortedQuery = sortByName ? modelQuery.OrderBy(x => x.Name) : modelQuery.OrderBy(x => x.Id);
+            return sortedQuery.ToListAsync();
         }
 
         public Task<CategoryModel> GetById(int id)

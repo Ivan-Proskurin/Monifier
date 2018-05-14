@@ -22,18 +22,18 @@ namespace Monifier.BusinessLogic.Queries.Incomes
             _currentSession = currentSession;
         }
 
-        public Task<List<IncomeTypeModel>> GetAll(bool includeDeleted = false)
+        public Task<List<IncomeTypeModel>> GetAll(bool sortByName = false, bool includeDeleted = false)
         {
-            var typesRepo = _repository.GetQuery<IncomeType>();
             var ownerId = _currentSession.UserId;
-            return typesRepo
+            var query = _repository.GetQuery<IncomeType>()
                 .Where(x => x.OwnerId == ownerId)
                 .Select(x => new IncomeTypeModel
                 {
                     Id = x.Id,
                     Name = x.Name
-                })
-                .ToListAsync();
+                });
+            var sortedQuery = sortByName ? query.OrderBy(x => x.Name) : query.OrderBy(x => x.Id);
+            return sortedQuery.ToListAsync();
         }
 
         public async Task<IncomeTypeModel> GetById(int id)

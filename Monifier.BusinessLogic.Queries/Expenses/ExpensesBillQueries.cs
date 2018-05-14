@@ -20,7 +20,7 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             _repository = repository;
         }
 
-        public Task<List<ExpenseBillModel>> GetAll(bool includeDeleted = false)
+        public Task<List<ExpenseBillModel>> GetAll(bool sortByName = false, bool includeDeleted = false)
         {
             throw new NotSupportedException();
         }

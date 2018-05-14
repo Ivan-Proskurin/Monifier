@@ -24,7 +24,7 @@ namespace Monifier.BusinessLogic.Queries.Base
             _currentSession = currentSession;
         }
 
-        public Task<List<ProductModel>> GetAll(bool includeDeleted = false)
+        public Task<List<ProductModel>> GetAll(bool sortByName = false, bool includeDeleted = false)
         {
             throw new NotImplementedException();
         }

@@ -25,15 +25,14 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             _currentSession = currentSession;
         }
 
-        public Task<List<ExpenseFlowModel>> GetAll(bool includeDeleted = false)
+        public Task<List<ExpenseFlowModel>> GetAll(bool sortByName = false, bool includeDeleted = false)
         {
-            var queries = _repository.GetQuery<ExpenseFlow>();
             var ownerId = _currentSession.UserId;
-            return queries
+            var query = _repository.GetQuery<ExpenseFlow>()
                 .Where(x => (!x.IsDeleted || includeDeleted) && x.OwnerId == ownerId)
-                .Select(x => x.ToModel())
-                .OrderBy(x => x.Number)
-                .ToListAsync();
+                .Select(x => x.ToModel());
+            var sortedQuery = sortByName ? query.OrderBy(x => x.Name) : query.OrderBy(x => x.Number);
+            return sortedQuery.ToListAsync();
         }
 
         public async Task<ExpenseFlowList> GetList(PaginationArgs args)
