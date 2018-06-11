@@ -67,6 +67,23 @@ namespace Monifier.BusinessLogic.Model.Base
                 AccountType = account.AccountType
             };
         }
+
+        public static Account ToEntity(this AccountModel model, int ownerId)
+        {
+            return new Account
+            {
+                Id = model.Id,
+                Number = model.Number,
+                DateCreated = model.DateCreated,
+                Name = model.Name,
+                Balance = model.Balance,
+                AvailBalance = model.AvailBalance,
+                LastWithdraw = model.LastWithdraw,
+                IsDefault = model.IsDefault,
+                AccountType = model.AccountType,
+                OwnerId = ownerId
+            };
+        }
         
         public static AccountModel GetDefaultAccount(this IEnumerable<AccountModel> accounts)
         {

@@ -56,5 +56,19 @@ namespace Monifier.BusinessLogic.Model.Expenses
                 Version = entity.Version,
             };
         }
+
+        public static ExpenseFlow ToEntity(this ExpenseFlowModel model, int ownerId)
+        {
+            return new ExpenseFlow
+            {
+                Id = model.Id,
+                Number = model.Number,
+                Name = model.Name,
+                DateCreated = model.DateCreated,
+                Balance = model.Balance,
+                Version = model.Version,
+                OwnerId = ownerId,
+            };
+        }
     }
 }

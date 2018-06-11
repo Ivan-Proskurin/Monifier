@@ -46,6 +46,7 @@
     <ProjectReference Include="..\Monifier.DataAccess.EntityFramework\Monifier.DataAccess.EntityFramework.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Models\Distribution\" />
     <Folder Include="wwwroot\lib" />
   </ItemGroup>
 </Project>

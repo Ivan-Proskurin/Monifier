@@ -11,6 +11,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Monifier.BusinessLogic.Distribution\Monifier.BusinessLogic.Distribution.csproj" />
     <ProjectReference Include="..\Monifier.BusinessLogic.Model\Monifier.BusinessLogic.Model.csproj" />
   </ItemGroup>
 </Project>

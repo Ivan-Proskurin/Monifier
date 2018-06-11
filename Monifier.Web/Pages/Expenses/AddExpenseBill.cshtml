@@ -192,12 +192,13 @@
     <script>
         var flowId = "@Model.Good.FlowId";
         var billId = "@Model.Bill.Id";
+        var flowsCount = "@flows.Count()";
         var urlPrefix = "/Expenses/AddExpenseBill/" + flowId;
         if (billId !== "0") urlPrefix += "/" + billId;
         
         activateLink("#expensesLink");
         makeInputAutocomplete("Good.Account");
-        makeInputAutocomplete("Good.FlowName", null, updateCategoriesList, 16);
+        makeInputAutocomplete("Good.FlowName", null, updateCategoriesList, flowsCount);
         var categoryAutocomplete = makeInputAutocomplete("Good.Category", null, updateProductsList);
         var productsAutocomplete = makeInputAutocomplete("Good.Product", null, selectCategoryByProduct);
         makeInputNumeric("Good.Price", false);

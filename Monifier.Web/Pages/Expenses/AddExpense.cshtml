@@ -76,12 +76,13 @@
 @section Scripts {
     <script type="text/javascript">
         var flowId = "@Model.Expense.FlowId";
+        var flowsCount = "@flows.Count()";
         var urlPrefix = "/Expenses/AddExpense/" + flowId;
         var correcting = "@Model.Expense.Correction" === "True"; 
         
         activateLink("#expensesLink");
 
-        makeInputAutocomplete("Expense.FlowName", null, updateCategoriesList, 16);
+        makeInputAutocomplete("Expense.FlowName", null, updateCategoriesList, flowsCount);
         makeInputAutocomplete("Expense.Account");
         var categoryAutocomplete = makeInputAutocomplete("Expense.Category", null, updateProductsList);
         var productsAutocomplete = makeInputAutocomplete("Expense.Product", null, selectCategoryByProduct);

@@ -20,6 +20,7 @@ namespace Monifier.DataAccess.Model.Distribution
         public ExpenseFlow ExpenseFlow { get; set; }
         public bool CanFlow { get; set; }
         public FlowRule Rule { get; set; }
+        public bool IsRegularExpenses { get; set; }
         public decimal Amount { get; set; }
     }
 }

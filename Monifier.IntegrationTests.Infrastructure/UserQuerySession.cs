@@ -9,14 +9,17 @@ using Monifier.BusinessLogic.Contract.Base;
 using Monifier.BusinessLogic.Contract.Distribution;
 using Monifier.BusinessLogic.Contract.Expenses;
 using Monifier.BusinessLogic.Contract.Incomes;
+using Monifier.BusinessLogic.Contract.Inventorization;
 using Monifier.BusinessLogic.Contract.Processing;
 using Monifier.BusinessLogic.Contract.Transactions;
+using Monifier.BusinessLogic.Distribution;
 using Monifier.BusinessLogic.Model.Expenses;
 using Monifier.BusinessLogic.Processing;
 using Monifier.BusinessLogic.Queries.Base;
 using Monifier.BusinessLogic.Queries.Distribution;
 using Monifier.BusinessLogic.Queries.Expenses;
 using Monifier.BusinessLogic.Queries.Incomes;
+using Monifier.BusinessLogic.Queries.Inventorization;
 using Monifier.BusinessLogic.Queries.Settings;
 using Monifier.BusinessLogic.Queries.Transactions;
 using Monifier.BusinessLogic.Support;
@@ -68,6 +71,8 @@ namespace Monifier.IntegrationTests.Infrastructure
         public User User { get; }
 
         public ICurrentSession UserSession { get; }
+
+        public IEntityRepository Repository => _repository;
 
         #endregion
 
@@ -216,7 +221,7 @@ namespace Monifier.IntegrationTests.Infrastructure
             return bill;
         }
 
-        public AccountFlowSettings CreateAccountFlowSettinsg(int accountId, bool canFlow)
+        public AccountFlowSettings CreateAccountFlowSettings(int accountId, bool canFlow)
         {
             var commands = _unitOfWork.GetCommandRepository<AccountFlowSettings>();
             var entity = new AccountFlowSettings
@@ -228,7 +233,8 @@ namespace Monifier.IntegrationTests.Infrastructure
             return entity;
         }
 
-        public ExpenseFlowSettings CreateExpenseFlowSettings(int flowId, bool canFlow, FlowRule rule, decimal amount)
+        public ExpenseFlowSettings CreateExpenseFlowSettings(int flowId, bool canFlow, FlowRule rule, 
+            bool isRegularExpenses, decimal amount)
         {
             var commands = _unitOfWork.GetCommandRepository<ExpenseFlowSettings>();
             var entity = new ExpenseFlowSettings
@@ -236,6 +242,7 @@ namespace Monifier.IntegrationTests.Infrastructure
                 ExpenseFlowId = flowId,
                 CanFlow = canFlow,
                 Rule = rule,
+                IsRegularExpenses = isRegularExpenses,
                 Amount = amount
             };
             commands.Create(entity);
@@ -261,7 +268,7 @@ namespace Monifier.IntegrationTests.Infrastructure
             FoodExpenseFlow = CreateExpenseFlow("Продукты питания", 1000, DateTime.Today, 1);
             TechExpenseFlow = CreateExpenseFlow("Техника", 30000, DateTime.Today, 2);
 
-            DebitCardAccount = CreateAccount("Дебетовая карта", 15000, DateTime.Today, AccountType.DebitCard);
+            DebitCardAccount = CreateAccount("Дебетовая карта", 15000, DateTime.Today, AccountType.DebitCard, true);
             CashAccount = CreateAccount("Наличные", 30000, DateTime.Today, AccountType.Cash);
             CreditCardAccount = CreateAccount("Кредитка", 10000, DateTime.Today, AccountType.CreditCard);
 
@@ -396,6 +403,11 @@ namespace Monifier.IntegrationTests.Infrastructure
                 new TransitionBalancesUpdater(_repository), CreateTransactionBuilder());
         }
 
+        public IExpenseFlowQueries CreateFlowQueries()
+        {
+            return new ExpenseFlowQueries(_repository, UserSession);
+        }
+
         public IExpenseFlowCommands CreateExpenseFlowCommands()
         {
             return new ExpenseFlowCommands(_repository, UserSession, CreateExpensesBillCommands());
@@ -412,9 +424,20 @@ namespace Monifier.IntegrationTests.Infrastructure
             return new DistributionQueries(_repository, UserSession);
         }
 
+        public IDistributionCommands CreateDistributionCommands()
+        {
+            return new DistributionCommands(_repository, new DefaultFlowDistributor(), new TimeService(UserSession),
+                UserSession);
+        }
+
         public IExpensesQueries CreateExpensesQueries()
         {
             return new ExpensesQueries(_repository, new UserSettings(), UserSession);
+        }
+
+        public IInventorizationQueries CreateInventorizationQueries()
+        {
+            return new InventorizationQueries(CreateAccountQueries(), CreateFlowQueries());
         }
 
         #endregion

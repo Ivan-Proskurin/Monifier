@@ -216,7 +216,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
         }
 
         [Fact]
-        public async void Create_GreaterThenFlowBalance_AccountAvailNotEnough_FlowBalanceBecomeNegative()
+        public async void Create_GreaterThenFlowBalance_AccountAvailNotEnough_FlowBalanceBecomesZero()
         {
             EntityIdSet ids;
             using (var session = await CreateDefaultSession())
@@ -235,9 +235,9 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 var commands = session.CreateExpensesBillCommands();
                 await commands.Create(bill);
                 var flow = await session.LoadEntity<ExpenseFlow>(session.FoodExpenseFlow.Id);
-                flow.Balance.ShouldBeEquivalentTo(-100);
+                flow.Balance.ShouldBeEquivalentTo(0);
                 var account = await session.LoadEntity<Account>(session.DebitCardAccount.Id);
-                account.AvailBalance.ShouldBeEquivalentTo(0);
+                account.AvailBalance.ShouldBeEquivalentTo(-100);
             }
         }
 
@@ -249,6 +249,32 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
             {
                 ids = session.CreateDefaultEntities();
                 session.FoodExpenseFlow.Balance = -100;
+                await session.UpdateEntity(session.FoodExpenseFlow);
+            }
+
+            using (var session = await CreateDefaultSession(ids))
+            {
+                var bill = CreateBill(session);
+                var commands = session.CreateExpensesBillCommands();
+                await commands.Create(bill);
+                var flow = await session.LoadEntity<ExpenseFlow>(session.FoodExpenseFlow.Id);
+                flow.Balance.ShouldBeEquivalentTo(session.FoodExpenseFlow.Balance);
+
+                var account = await session.LoadEntity<Account>(session.DebitCardAccount.Id);
+                account.AvailBalance.ShouldBeEquivalentTo(session.DebitCardAccount.AvailBalance - bill.Cost);
+            }
+        }
+
+        [Fact]
+        public async void Create_AccountAndFlowBalancesAreZero_AccountAvailIsUsed()
+        {
+            EntityIdSet ids;
+            using (var session = await CreateDefaultSession())
+            {
+                ids = session.CreateDefaultEntities();
+                session.DebitCardAccount.AvailBalance = 0;
+                session.FoodExpenseFlow.Balance = 0;
+                await session.UpdateEntity(session.DebitCardAccount);
                 await session.UpdateEntity(session.FoodExpenseFlow);
             }
 
@@ -283,11 +309,12 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 var commands = session.CreateExpensesBillCommands();
                 await commands.Create(bill, correction: true);
                 var flow = await session.LoadEntity<ExpenseFlow>(session.FoodExpenseFlow.Id);
-                flow.Balance.ShouldBeEquivalentTo(session.FoodExpenseFlow.Balance - bill.Cost);
+                flow.Balance.ShouldBeEquivalentTo(0);
 
                 var account = await session.LoadEntity<Account>(session.DebitCardAccount.Id);
                 account.Balance.ShouldBeEquivalentTo(session.DebitCardAccount.Balance);
-                account.AvailBalance.ShouldBeEquivalentTo(session.DebitCardAccount.AvailBalance);
+                account.AvailBalance.ShouldBeEquivalentTo(
+                    session.DebitCardAccount.AvailBalance - bill.Cost + session.FoodExpenseFlow.Balance);
             }
         }
 
@@ -353,7 +380,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 var commands = session.CreateExpensesBillCommands();
                 await commands.Create(bill, correction: true);
                 var flow = await session.LoadEntity<ExpenseFlow>(session.FoodExpenseFlow.Id);
-                flow.Balance.ShouldBeEquivalentTo(session.FoodExpenseFlow.Balance - bill.Cost);
+                flow.Balance.ShouldBeEquivalentTo(0);
             }
 
             using (var session = await CreateDefaultSession(ids))
@@ -361,7 +388,7 @@ namespace Monifier.BusinessLogic.Queries.IntegrationTests
                 var commands = session.CreateExpensesBillCommands();
                 await commands.Delete(bill.Id, false);
                 var flow = await session.LoadEntity<ExpenseFlow>(session.FoodExpenseFlow.Id);
-                flow.Balance.ShouldBeEquivalentTo(flowBalance);
+                flow.Balance.ShouldBeEquivalentTo(bill.Cost);
 
                 var account = await session.LoadEntity<Account>(session.DebitCardAccount.Id);
                 account.Balance.ShouldBeEquivalentTo(session.DebitCardAccount.Balance);

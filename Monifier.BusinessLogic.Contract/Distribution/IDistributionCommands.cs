@@ -7,5 +7,6 @@ namespace Monifier.BusinessLogic.Contract.Distribution
     {
         Task Distribute(DistributionBoard board);
         Task Save(DistributionBoard board);
+        Task Distribute(DistributionModel distribution);
     }
 }

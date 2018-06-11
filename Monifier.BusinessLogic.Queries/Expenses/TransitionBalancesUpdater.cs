@@ -22,13 +22,15 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             var newAccount = bill.AccountId != null ? await _repository.LoadAsync<Account>(bill.AccountId.Value) : null;
             flow.Balance = flow.Balance + oldSum;
             var lack = bill.SumPrice - Math.Max(flow.Balance, 0);
-            var withdrawTotal = bill.SumPrice;
+            decimal withdrawTotal = 0m;
             if (lack > 0 && newAccount != null)
             {
-                var compensation = Math.Min(Math.Max(newAccount.AvailBalance, 0), lack);
-                withdrawTotal -= compensation;
-                newAccount.AvailBalance -= compensation;
+                withdrawTotal = bill.SumPrice - lack;
+                newAccount.AvailBalance -= lack;
             }
+            else
+                withdrawTotal = bill.SumPrice;
+
             flow.Balance -= withdrawTotal;
             flow.Version++;
             _repository.Update(flow);

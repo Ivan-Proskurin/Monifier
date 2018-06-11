@@ -191,7 +191,6 @@
                 function(response) {
                     if (!preprocessResponse(response)) return;
                     board = JSON.parse(response.result);
-                    console.log(board);
                     board.accounts.forEach(function(item) {
                         $("#accountDist_" + item.id).html(item.withdrawTotal ? item.withdrawTotal : "&mdash;");
                         $("#accountResult_" + item.id).html(item.result ? item.result : "&mdash;");

@@ -22,13 +22,17 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             if (flow == null)
                 throw new InvalidOperationException($"Can't find expense flow with id {bill.ExpenseFlowId}");
             var lack = bill.SumPrice - Math.Max(flow.Balance, 0);
-            var withdrawTotal = bill.SumPrice;
-            if (lack > 0 && account != null && !bill.IsCorrection)
+            var withdrawTotal = 0m;
+            var needUpdateAccount = false;
+            if (lack > 0 && account != null)
             {
-                var compensation = Math.Min(Math.Max(account.AvailBalance, 0), lack);
-                withdrawTotal -= compensation;
-                account.AvailBalance -= compensation;
+                withdrawTotal = bill.SumPrice - lack;
+                account.AvailBalance -= lack;
+                needUpdateAccount = true;
             }
+            else
+                withdrawTotal = bill.SumPrice;
+
             flow.Balance -= withdrawTotal;
             flow.Version++;
             _repository.Update(flow);
@@ -37,8 +41,11 @@ namespace Monifier.BusinessLogic.Queries.Expenses
             {
                 account.Balance -= bill.SumPrice;
                 account.LastWithdraw = DateTime.Now;
-                _repository.Update(account);
+                needUpdateAccount = true;
             }
+
+            if (needUpdateAccount)
+                _repository.Update(account);
         }
 
         public async Task Delete(ExpenseBill bill)

@@ -6,5 +6,6 @@ namespace Monifier.BusinessLogic.Contract.Distribution
     public interface IDistributionQueries
     {
         Task<DistributionBoard> GetDistributionBoard();
+        Task<DistributionModel> Load();
     }
 }
